@@ -1,0 +1,15 @@
+{
+    "name": "admin/permission",
+    "authors": [
+        {
+            "name": "root",
+            "email": "qwf@missapp.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Qz\\Admin\\Permission": "src/"
+        }
+    }
+}
