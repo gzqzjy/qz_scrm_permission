@@ -1,9 +1,9 @@
 <?php
 
-namespace Qz\Admin\Access\Cores\AdminPage;
+namespace Qz\Admin\Permission\Cores\AdminPage;
 
-use Qz\Admin\Access\Cores\Core;
-use App\Models\AdminPage;
+use Qz\Admin\Permission\Cores\Core;
+use Qz\Admin\Permission\Models\AdminPage;
 
 class AdminPageDelete extends Core
 {

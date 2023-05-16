@@ -1,14 +1,23 @@
 <?php
 
-namespace Qz\Admin\Access\Cores\AdminPage;
+namespace Qz\Admin\Permission\Cores\AdminPage;
 
-use Qz\Admin\Access\Cores\Core;
-use App\Models\AdminPage;
+use Qz\Admin\Permission\Cores\Core;
+use Qz\Admin\Permission\Models\AdminPage;
 
 class AdminPageIdGet extends Core
 {
     protected function execute()
     {
+        if (!empty($code) && !empty($this->getSubsystemId())) {
+            $model = AdminPage::query()
+                ->where('code', $code)
+                ->where('subsystem_id', $this->getSubsystemId())
+                ->first();
+            if (!empty($model)) {
+                $this->setId($model->getKey());
+            }
+        }
     }
 
     protected $code;
@@ -28,14 +37,7 @@ class AdminPageIdGet extends Core
     public function setCode($code)
     {
         $this->code = $code;
-        if (!empty($code)) {
-            $model = AdminPage::query()
-                ->where('code', 'admin')
-                ->first();
-            if (!empty($model)) {
-                $this->setId($model->getKey());
-            }
-        }
+
         return $this;
     }
 
@@ -55,5 +57,23 @@ class AdminPageIdGet extends Core
     public function setId($id)
     {
         $this->id = $id;
+    }
+
+    protected $subsystemId;
+
+    /**
+     * @return mixed
+     */
+    public function getSubsystemId()
+    {
+        return $this->subsystemId;
+    }
+
+    /**
+     * @param mixed $subsystemId
+     */
+    public function setSubsystemId($subsystemId)
+    {
+        $this->subsystemId = $subsystemId;
     }
 }

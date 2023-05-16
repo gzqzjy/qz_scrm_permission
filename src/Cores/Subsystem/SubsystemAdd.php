@@ -1,11 +1,11 @@
 <?php
 
-namespace Qz\Admin\Access\Cores\Subsystem;
+namespace Qz\Admin\Permission\Cores\Subsystem;
 
-use Qz\Admin\Access\Cores\Core;
-use App\Models\Subsystem;
+use Qz\Admin\Permission\Cores\Core;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Models\Subsystem;
 
 class SubsystemAdd extends Core
 {

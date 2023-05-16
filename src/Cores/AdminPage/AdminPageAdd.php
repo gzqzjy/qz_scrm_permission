@@ -1,11 +1,11 @@
 <?php
 
-namespace Qz\Admin\Access\Cores\AdminPage;
+namespace Qz\Admin\Permission\Cores\AdminPage;
 
-use Qz\Admin\Access\Cores\Core;
-use App\Models\AdminPage;
+use Qz\Admin\Permission\Cores\Core;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Models\AdminPage;
 
 class AdminPageAdd extends Core
 {
@@ -14,6 +14,7 @@ class AdminPageAdd extends Core
         $model = AdminPage::withTrashed()
             ->firstOrCreate(Arr::whereNotNull([
                 'code' => $this->getCode(),
+                'subsystem_id' => $this->getSubsystemId(),
             ]), Arr::whereNotNull([
                 'name' => $this->getName(),
             ]));
@@ -96,5 +97,23 @@ class AdminPageAdd extends Core
     {
         $this->code = $code;
         return $this;
+    }
+
+    protected $subsystemId;
+
+    /**
+     * @return mixed
+     */
+    public function getSubsystemId()
+    {
+        return $this->subsystemId;
+    }
+
+    /**
+     * @param mixed $subsystemId
+     */
+    public function setSubsystemId($subsystemId)
+    {
+        $this->subsystemId = $subsystemId;
     }
 }

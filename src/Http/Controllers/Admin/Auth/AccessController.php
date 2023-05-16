@@ -1,20 +1,53 @@
 <?php
 
-namespace Qz\Admin\Access\Http\Controllers\Admin;
+namespace Qz\Admin\Permission\Http\Controllers\Admin\Auth;
 
-use  Qz\Admin\Access\Cores\AdminPage\AdminPageAdd;
-use  Qz\Admin\Access\Cores\AdminPage\AdminPageIdGet;
-use  Qz\Admin\Access\Cores\AdminPageColumn\AdminPageColumnAdd;
-use  Qz\Admin\Access\Cores\AdminPageOption\AdminPageOptionAdd;
-use  Qz\Admin\Access\Facades\Access;
-use  Qz\Admin\Access\Models\AdminPageColumn;
-use  Qz\Admin\Access\Models\AdminUserCustomerSubsystemPageOption;
+use  Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
+use  Qz\Admin\Permission\Cores\AdminPage\AdminPageIdGet;
+use  Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
+use  Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
+use Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
+use  Qz\Admin\Permission\Facades\Access;
+use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
+use  Qz\Admin\Permission\Models\AdminPageColumn;
+use Qz\Admin\Permission\Models\AdminUser;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
+use  Qz\Admin\Permission\Models\AdminUserCustomerSubsystemPageOption;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 
 class AccessController extends AdminController
 {
+    public function login()
+    {
+        $status = 'error';
+        $type = 'mobile';
+        $mobile = $this->getParam('mobile');
+        $token = '';
+        $model = AdminUser::query()
+            ->where('mobile', $mobile)
+            ->where('status', AdminUser::STATUS_NORMAL)
+            ->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
+                $builder->where('status', AdminUserCustomerSubsystem::STATUS_NORMAL)
+                    ->where('subsystem_id', SubsystemIdGet::init()
+                        ->run()
+                        ->getId());
+            })
+            ->first();
+        if (empty($model)) {
+            return $this->response(compact('token', 'status', 'type'));
+        }
+        if ($model instanceof AdminUser) {
+            $model->tokens()->delete();
+            $token = $model->createToken('admin_user')->plainTextToken;
+            if ($token) {
+                $status = 'ok';
+            }
+        }
+        return $this->response(compact('token', 'status', 'type'));
+    }
+
     public function addPage()
     {
         $pageId = AdminPageAdd::init()
@@ -71,11 +104,6 @@ class AccessController extends AdminController
             ->whereIn('admin_page_option_id', $pageOptionId)
             ->exists();
         return $this->response(compact('access'));
-    }
-
-    public function login()
-    {
-
     }
 
     public function layout()

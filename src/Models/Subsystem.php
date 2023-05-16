@@ -1,6 +1,6 @@
 <?php
 
-namespace Qz\Admin\Access\Models;
+namespace Qz\Admin\Permission\Models;
 
 class Subsystem extends Model
 {

@@ -1,14 +1,14 @@
 <?php
 
-namespace Qz\Admin\Access\Http\Middleware;
+namespace Qz\Admin\Permission\Http\Middleware;
 
-use App\Cores\Subsystem\SubsystemIdGet;
-use App\Facades\Access;
-use App\Models\AdminUserCustomerSubsystem;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
+use Qz\Admin\Permission\Facades\Access;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
 
 class AccessMiddleware
 {

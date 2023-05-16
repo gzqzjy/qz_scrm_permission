@@ -1,6 +1,6 @@
 <?php
 
-namespace Qz\Admin\Access\Models;
+namespace Qz\Admin\Permission\Models;
 
 class AdminUser extends Model
 {
@@ -9,4 +9,11 @@ class AdminUser extends Model
         'mobile',
         'status',
     ];
+
+    const STATUS_NORMAL = 'normal';
+
+    public function adminUserCustomerSubsystem()
+    {
+        return $this->hasOne(AdminUserCustomerSubsystem::class);
+    }
 }

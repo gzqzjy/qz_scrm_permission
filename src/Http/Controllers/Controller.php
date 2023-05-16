@@ -1,9 +1,8 @@
 <?php
 
-namespace Qz\Admin\Access\Http\Controllers;
+namespace Qz\Admin\Permission\Http\Controllers;
 
-use App\Models\Model;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -69,22 +68,6 @@ class Controller extends BaseController
     final protected function success($data = [], $message = 'success')
     {
         return $this->json(compact('data', 'message'));
-    }
-
-    final protected function page(LengthAwarePaginator $paginator)
-    {
-        $data = [
-            'data' => $paginator->items(),
-            'total' => $paginator->total(),
-            'pageSize' => $paginator->perPage(),
-            'current' => $paginator->currentPage(),
-        ];
-        return $this->success($data);
-    }
-
-    final protected function getPageSize()
-    {
-        return min(1000, max(1, (int) $this->getParam('page_size')));
     }
 
     final protected function camel($array)

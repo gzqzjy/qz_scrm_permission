@@ -1,11 +1,11 @@
 <?php
 
-namespace Qz\Admin\Access\Cores\AdminPageColumn;
+namespace Qz\Admin\Permission\Cores\AdminPageColumn;
 
-use Qz\Admin\Access\Cores\Core;
-use App\Models\AdminPageColumn;
+use Qz\Admin\Permission\Cores\Core;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Models\AdminPageColumn;
 
 class AdminPageColumnUpdate extends Core
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Qz\Admin\Access\Cores;
+namespace Qz\Admin\Permission\Cores;
 
 use Exception;
 use Illuminate\Support\Facades\DB;

@@ -1,12 +1,12 @@
 <?php
-namespace Qz\Admin\Access\Facades;
+namespace Qz\Admin\Permission\Facades;
 
-use Qz\Admin\Access\Facades\Logic\AccessLogic;
+use Qz\Admin\Permission\Facades\Logic\AccessLogic;
 use Illuminate\Support\Facades\Facade;
 
 /**
  * Class Access
- * @package Qz\Admin\Access\Facades
+ * @package Qz\Admin\Permission\Facades
  * @method static void setSubsystemId($id)
  * @method static int getSubsystemId()
  * @method static void setCustomerId($id)

@@ -1,30 +1,13 @@
 <?php
 
-namespace Qz\Admin\Access\Models;
+namespace Qz\Admin\Permission\Models;
 
 class AdminUserCustomerSubsystemMenu extends Model
 {
     protected $fillable = [
-        'admin_user_id',
-        'customer_id',
-        'subsystem_id',
+        'admin_user_custom_subsystem_id',
         'admin_menu_id'
     ];
-
-    public function adminUser()
-    {
-        return $this->belongsTo(AdminUser::class);
-    }
-
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
-    public function subsystem()
-    {
-        return $this->belongsTo(Subsystem::class);
-    }
 
     public function adminMenu()
     {

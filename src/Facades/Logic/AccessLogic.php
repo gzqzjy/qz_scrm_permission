@@ -1,6 +1,6 @@
 <?php
 
-namespace Qz\Admin\Access\Facades\Logic;
+namespace Qz\Admin\Permission\Facades\Logic;
 
 class AccessLogic
 {

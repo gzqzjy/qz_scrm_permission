@@ -1,11 +1,11 @@
 <?php
 
-namespace Qz\Admin\Access\Cores\AdminPageOption;
+namespace Qz\Admin\Permission\Cores\AdminPageOption;
 
-use Qz\Admin\Access\Cores\Core;
-use App\Models\AdminPageOption;
+use Qz\Admin\Permission\Cores\Core;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Models\AdminPageOption;
 
 class AdminPageOptionAdd extends Core
 {

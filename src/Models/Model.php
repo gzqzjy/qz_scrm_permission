@@ -1,6 +1,6 @@
 <?php
 
-namespace Qz\Admin\Access\Models;
+namespace Qz\Admin\Permission\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;

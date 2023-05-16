@@ -1,7 +1,7 @@
 <?php
-namespace Qz\Admin\Access\Cores\Subsystem;
+namespace Qz\Admin\Permission\Cores\Subsystem;
 
-use Qz\Admin\Access\Cores\Core;
+use Qz\Admin\Permission\Cores\Core;
 
 class SubsystemIdGet extends Core
 {

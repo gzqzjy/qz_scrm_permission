@@ -13,5 +13,17 @@
         "psr-4": {
             "Qz\\Admin\\Permission\\": "src/"
         }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.x-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Qz\\Admin\\Permission\\AdminPermissionServiceProvider"
+            ]
+        },
+        "aliases": {
+        }
     }
 }
