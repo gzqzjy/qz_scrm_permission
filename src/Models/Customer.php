@@ -2,10 +2,9 @@
 
 namespace Qz\Admin\Access\Models;
 
-class AdminPage extends Model
+class Customer extends Model
 {
     protected $fillable = [
-        'name',
-        'code',
+        'name'
     ];
 }

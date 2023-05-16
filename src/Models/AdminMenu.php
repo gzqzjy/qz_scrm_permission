@@ -1,11 +1,19 @@
 <?php
 
-namespace Qz\Admin\Permission\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+namespace Qz\Admin\Access\Models;
 
 class AdminMenu extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'name',
+        'path',
+        'parent_id',
+        'sort',
+        'admin_page_id',
+        'config',
+    ];
+
+    protected $casts = [
+        'config' => 'array',
+    ];
 }

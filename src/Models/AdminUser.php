@@ -1,11 +1,12 @@
 <?php
 
-namespace Qz\Admin\Permission\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+namespace Qz\Admin\Access\Models;
 
 class AdminUser extends Model
 {
-    use HasFactory;
+    protected $fillable = [
+        'name',
+        'mobile',
+        'status',
+    ];
 }

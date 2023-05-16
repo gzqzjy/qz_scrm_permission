@@ -2,11 +2,10 @@
 
 namespace Qz\Admin\Access\Models;
 
-class AdminPageOption extends Model
+class Subsystem extends Model
 {
     protected $fillable = [
-        'admin_page_id',
         'name',
-        'code',
+        'app_key',
     ];
 }
