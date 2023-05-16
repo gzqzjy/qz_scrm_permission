@@ -2,14 +2,19 @@
     "name": "qzqzjy/sass_crm_admin_permission",
     "authors": [
         {
-            "name": "root",
-            "email": "qwf@missapp.com"
+            "name": "qz",
+            "email": "xcx@qzyyds.com"
         }
     ],
-    "require": {},
+    "require": {
+    },
+    "require-dev": {
+    },
     "autoload": {
         "psr-4": {
             "Qz\\Admin\\Permission": "src/"
         }
+    },
+    "autoload-dev": {
     }
 }
