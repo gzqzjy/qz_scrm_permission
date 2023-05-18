@@ -24,10 +24,10 @@ class Controller extends BaseController
         }
     }
 
-    final protected function getParam($key = '')
+    final protected function getParam($key = '', $default = null)
     {
         if ($key) {
-            return Arr::get($this->param, $key);
+            return Arr::get($this->param, $key, $default);
         }
         return $this->param;
     }

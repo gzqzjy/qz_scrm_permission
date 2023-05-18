@@ -9,9 +9,9 @@ class AdminPageIdGet extends Core
 {
     protected function execute()
     {
-        if (!empty($code) && !empty($this->getSubsystemId())) {
+        if (!empty($this->getCode()) && !empty($this->getSubsystemId())) {
             $model = AdminPage::query()
-                ->where('code', $code)
+                ->where('code', $this->getCode())
                 ->where('subsystem_id', $this->getSubsystemId())
                 ->first();
             if (!empty($model)) {
@@ -37,7 +37,6 @@ class AdminPageIdGet extends Core
     public function setCode($code)
     {
         $this->code = $code;
-
         return $this;
     }
 
@@ -70,10 +69,12 @@ class AdminPageIdGet extends Core
     }
 
     /**
-     * @param mixed $subsystemId
+     * @param $subsystemId
+     * @return $this
      */
     public function setSubsystemId($subsystemId)
     {
         $this->subsystemId = $subsystemId;
+        return $this;
     }
 }

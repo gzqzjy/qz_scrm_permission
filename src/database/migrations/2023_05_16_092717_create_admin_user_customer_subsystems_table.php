@@ -19,6 +19,8 @@ class CreateAdminUserCustomerSubsystemsTable extends Migration
             $table->id();
             $table->foreignId('admin_user_id')->default(0)->comment('管理员ID');
             $table->foreignId('customer_subsystem_id')->default(0)->comment('客户系统ID');
+            $table->string('status')->default('')->comment('状态');
+            $table->boolean('administrator')->default(false)->comment('是否超级管理员');
             $table->timestamps();
             $table->softDeletes();
         });

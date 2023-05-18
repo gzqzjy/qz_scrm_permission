@@ -39,4 +39,44 @@ class AccessLogic
     {
         $this->customerId = $customerId;
     }
+
+    protected $administrator;
+
+    /**
+     * @return mixed
+     */
+    public function getAdministrator()
+    {
+        return $this->administrator;
+    }
+
+    /**
+     * @param mixed $administrator
+     * @return AccessLogic
+     */
+    public function setAdministrator($administrator)
+    {
+        $this->administrator = $administrator;
+        return $this;
+    }
+
+    protected $adminUserCustomerSubsystemIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminUserCustomerSubsystemIds()
+    {
+        return $this->adminUserCustomerSubsystemIds;
+    }
+
+    /**
+     * @param mixed $adminUserCustomerSubsystemIds
+     * @return AccessLogic
+     */
+    public function setAdminUserCustomerSubsystemIds($adminUserCustomerSubsystemIds)
+    {
+        $this->adminUserCustomerSubsystemIds = $adminUserCustomerSubsystemIds;
+        return $this;
+    }
 }

@@ -8,4 +8,19 @@ class CustomerSubsystem extends Model
         'customer_id',
         'subsystem_id',
     ];
+
+    public function adminUserCustomerSubsystems()
+    {
+        return $this->hasMany(AdminUserCustomerSubsystem::class);
+    }
+    
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function subsystem()
+    {
+        return $this->belongsTo(Subsystem::class);
+    }
 }

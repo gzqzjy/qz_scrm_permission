@@ -4,7 +4,9 @@ namespace Qz\Admin\Permission\Http\Controllers\Admin;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Qz\Admin\Permission\Cores\Common\Filter;
+use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Controller;
 
 class AdminController extends Controller
@@ -22,7 +24,7 @@ class AdminController extends Controller
 
     final protected function getPageSize()
     {
-        return min(1000, max(1, (int) $this->getParam('page_size')));
+        return min(1000, max(1, (int) $this->getParam('page_size', 20)));
     }
 
     protected function filter(Builder $model)
@@ -43,5 +45,15 @@ class AdminController extends Controller
             }
         }
         return $model;
+    }
+
+    protected function isAdministrator()
+    {
+        return Access::getAdministrator();
+    }
+
+    protected function getLoginAdminUserId()
+    {
+        return Auth::guard('admin')->id();
     }
 }

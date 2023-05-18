@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAdminUserPageColumnTable extends Migration
+class CreateAdminUserCustomerSubsystemPageOptionsTable extends Migration
 {
     protected $connection = 'common';
 
@@ -15,10 +15,10 @@ class CreateAdminUserPageColumnTable extends Migration
      */
     public function up()
     {
-        Schema::create('admin_user_page_column', function (Blueprint $table) {
+        Schema::create('admin_user_customer_subsystem_page_options', function (Blueprint $table) {
             $table->id();
             $table->foreignId('admin_user_customer_subsystem_id')->default(0)->comment('客户系统管理员ID');
-            $table->foreignId('admin_column_id')->default(0)->comment('页面列ID');
+            $table->foreignId('admin_page_option_id')->default(0)->comment('页面操作ID');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -31,6 +31,6 @@ class CreateAdminUserPageColumnTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('admin_user_page_column');
+        Schema::dropIfExists('admin_user_customer_subsystem_page_options');
     }
 }

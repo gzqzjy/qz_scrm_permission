@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAdminUserMenuTable extends Migration
+class CreateCustomersTable extends Migration
 {
     protected $connection = 'common';
 
@@ -15,10 +15,9 @@ class CreateAdminUserMenuTable extends Migration
      */
     public function up()
     {
-        Schema::create('admin_user_menu', function (Blueprint $table) {
+        Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_user_customer_subsystem_id')->default(0)->comment('客户系统管理员ID');
-            $table->foreignId('admin_menu_id')->default(0)->comment('菜单ID');
+            $table->string('name')->default('')->comment('客户名');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -31,6 +30,6 @@ class CreateAdminUserMenuTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('admin_user_menu');
+        Schema::dropIfExists('customers');
     }
 }

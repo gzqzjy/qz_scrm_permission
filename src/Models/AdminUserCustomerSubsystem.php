@@ -6,8 +6,20 @@ class AdminUserCustomerSubsystem extends Model
 {
     protected $fillable = [
         'admin_user_id',
-        'custom_subsystem_id',
+        'customer_subsystem_id',
+        'status',
+        'administrator',
     ];
 
     const STATUS_NORMAL = 'normal';
+
+    public function customerSubsystem()
+    {
+        return $this->belongsTo(CustomerSubsystem::class);
+    }
+
+    public function adminUser()
+    {
+        return $this->belongsTo(AdminUser::class);
+    }
 }

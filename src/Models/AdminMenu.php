@@ -17,4 +17,9 @@ class AdminMenu extends Model
     protected $casts = [
         'config' => 'array',
     ];
+
+    public function adminUserCustomerSubsystemMenus()
+    {
+        return $this->hasMany(AdminUserCustomerSubsystemMenu::class);
+    }
 }
