@@ -4,6 +4,27 @@ namespace Qz\Admin\Permission\Facades\Logic;
 
 class AccessLogic
 {
+    protected $customerSubsystemId;
+
+    /**
+     * @return mixed
+     */
+    public function getCustomerSubsystemId()
+    {
+        return $this->customerSubsystemId;
+    }
+
+    /**
+     * @param mixed $customerSubsystemId
+     * @return AccessLogic
+     */
+    public function setCustomerSubsystemId($customerSubsystemId)
+    {
+        $this->customerSubsystemId = $customerSubsystemId;
+        return $this;
+    }
+
+    
     protected $subsystemId;
 
     /**

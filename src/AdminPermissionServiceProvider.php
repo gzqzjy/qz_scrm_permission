@@ -103,6 +103,14 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-menus/add', 'AdminMenuController@store');
                     Route::post('admin-menus/update', 'AdminMenuController@update');
                     Route::post('admin-menus/delete', 'AdminMenuController@destroy');
+                    Route::post('admin-menus/all', 'AdminMenuController@all');
+                });
+                Route::namespace('AdminUser\V1')->group(function () {
+                    Route::post('admin-users/get', 'AdminUserController@get');
+                    Route::post('admin-users/add', 'AdminUserController@store');
+                    Route::post('admin-users/update', 'AdminUserController@update');
+                    Route::post('admin-users/delete', 'AdminUserController@destroy');
+                    Route::post('admin-users/all', 'AdminUserController@all');
                 });
             });
     }

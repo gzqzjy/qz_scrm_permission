@@ -108,22 +108,36 @@ class AccessController extends AdminController
         $columns = $this->getParam('columns');
         $pageColumnIds = [];
         foreach ($columns as $column) {
+            $dataIndex = Arr::get($column, 'data_index');
+            if (is_array($dataIndex)) {
+                $dataIndex = implode('.', $dataIndex);
+            }
             $pageColumnId = AdminPageColumnAdd::init()
                 ->setAdminPageId($pageId)
-                ->setCode(Arr::get($column, 'data_index'))
+                ->setCode($dataIndex)
                 ->setName(Arr::get($column, 'title'))
                 ->run()
                 ->getId();
-            Arr::prepend($pageColumnIds, $pageColumnId);
+            if ($pageColumnId) {
+                $pageColumnIds = Arr::prepend($pageColumnIds, $pageColumnId);
+            }
         }
-        $dataIndexes = AdminPageColumn::query()
-            ->whereHas('AdminUserCustomerSubsystemPageColumn', function (Builder $builder) use ($pageColumnIds) {
-                $builder->where('admin_user_id', Auth::guard('admin')->id())
-                    ->where('customer_id', Access::getCustomerId())
-                    ->where('subsystem_id', Access::getSubsystemId())
-                    ->whereIn('admin_page_column_id', $pageColumnIds);
-            })->pluck('code');
-        return $this->success(compact('dataIndexes'));
+        $model = AdminPageColumn::query()
+            ->whereIn('id', $pageColumnIds);
+        if (!Access::getAdministrator()) {
+            $model->whereHas('AdminUserCustomerSubsystemPageColumns', function (Builder $builder) use ($pageColumnIds) {
+                $builder->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
+                    $builder->where('admin_user_id', Auth::guard('admin')->id())
+                        ->whereHas('customerSubsystem', function (Builder $builder) {
+                            $builder->where('customer_id', Access::getCustomerId())
+                                ->where('subsystem_id', Access::getSubsystemId());
+                        });
+                });
+            });
+        }
+        $dataIndexes = $model
+            ->pluck('code');
+        return $this->response(compact('dataIndexes'));
     }
 
     public function option()
@@ -188,7 +202,6 @@ class AccessController extends AdminController
     public function menu()
     {
         $model = AdminMenu::query()
-            ->where('is_menu', true)
             ->where('parent_id', 0);
         $administrator = $this->isAdministrator();
         if (empty($administrator)) {
@@ -213,13 +226,11 @@ class AccessController extends AdminController
     {
         $route = Arr::get($value, 'config');
         $route = Arr::add($route, 'name', Arr::get($value, 'name'));
+        $route = Arr::add($route, 'path', Arr::get($value, 'path'));
         if (Arr::get($value, 'children')) {
             $routes = [];
             $children = Arr::get($value, 'children');
             foreach ($children as $child) {
-                if (!Arr::get($child, 'is_menu')) {
-                    continue;
-                }
                 $routes[] = $this->menuItem($child);
             }
             if (!empty($routes)) {

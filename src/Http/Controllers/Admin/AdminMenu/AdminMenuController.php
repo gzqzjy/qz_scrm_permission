@@ -29,6 +29,10 @@ class AdminMenuController extends AdminController
         }
         $model = $this->filter($model);
         $model = $model->paginate($this->getPageSize());
+        call_user_func_array([$model, 'load'], [
+            'parent',
+            'adminPage'
+        ]);
         return $this->page($model);
     }
 
@@ -109,4 +113,22 @@ class AdminMenuController extends AdminController
             ->getId();
         return $this->success();
     }
+
+    public function all()
+    {
+        $param = $this->getParam();
+        $select = Arr::get($param, 'select', 'id as value, name as label');
+        $model = AdminMenu::query()
+            ->selectRaw($select)
+            ->where('subsystem_id', Access::getSubsystemId());
+        if (!$this->isAdministrator()) {
+            $model->whereHas('adminUserCustomerSubsystemMenus', function (Builder $builder) {
+                $builder->whereIn('');
+            });
+        }
+        $model = $this->filter($model);
+        $model = $model->get();
+        return $this->response($model);
+    }
+
 }

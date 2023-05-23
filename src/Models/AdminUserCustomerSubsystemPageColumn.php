@@ -13,4 +13,9 @@ class AdminUserCustomerSubsystemPageColumn extends Model
     {
         return $this->belongsTo(AdminPageColumn::class);
     }
+
+    public function adminUserCustomerSubsystem()
+    {
+        return $this->belongsTo(AdminUserCustomerSubsystem::class);
+    }
 }

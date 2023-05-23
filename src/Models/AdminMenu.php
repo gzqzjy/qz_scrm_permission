@@ -22,4 +22,25 @@ class AdminMenu extends Model
     {
         return $this->hasMany(AdminUserCustomerSubsystemMenu::class);
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(AdminMenu::class, 'parent_id');
+    }
+
+    public function child()
+    {
+        return $this->hasMany(AdminMenu::class, 'parent_id', 'id')
+            ->orderByDesc('sort');
+    }
+
+    public function children()
+    {
+        return $this->child()->with('children');
+    }
+
+    public function adminPage()
+    {
+        return $this->belongsTo(AdminPage::class);
+    }
 }

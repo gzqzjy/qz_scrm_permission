@@ -1,32 +1,33 @@
 <?php
 
-namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminPage;
+namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminUser;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
-use Qz\Admin\Permission\Cores\AdminPage\AdminPageDelete;
-use Qz\Admin\Permission\Cores\AdminPage\AdminPageUpdate;
+use Qz\Admin\Permission\Cores\AdminUser\AdminUserAdd;
+use Qz\Admin\Permission\Cores\AdminUser\AdminUserDelete;
+use Qz\Admin\Permission\Cores\AdminUser\AdminUserUpdate;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
-use Qz\Admin\Permission\Models\AdminMenu;
-use Qz\Admin\Permission\Models\AdminPage;
+use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Qz\Admin\Permission\Models\AdminPage;
 
-class AdminPageController extends AdminController
+class AdminUserController extends AdminController
 {
     public function get()
     {
-        $model = AdminPage::query()
-            ->where('subsystem_id', Access::getSubsystemId());
+        $model = AdminUser::query()
+            ->whereHas('adminUserCustomerSubsystems', function (Builder $builder) {
+                $builder->whereHas('customerSubsystem', function (Builder $builder) {
+                    $builder->where('subsystem_id', Access::getSubsystemId());
+                });
+            });
         $model = $this->filter($model);
         $model = $model->paginate($this->getPageSize());
-        foreach ($model as $item) {
-            $item->subsystem_ids = $item->subsystems->pluck('id');
-        }
         return $this->page($model);
     }
 
@@ -40,25 +41,21 @@ class AdminPageController extends AdminController
             'name' => [
                 'required',
             ],
-            'code' => [
+            'mobile' => [
                 'required',
-                Rule::unique(AdminPage::class)
-                    ->withoutTrashed()
-                    ->where('subsystem_id', Access::getSubsystemId())
+                Rule::unique(AdminUser::class)
+                    ->withoutTrashed(),
             ],
         ], [
-            'name' => [
-                'required' => '页面名不能为空',
-            ],
-            'code' => [
-                'required' => '页面标识不能为空',
-                'unique' => '页面标识已重复',
-            ],
+            'name.required' => '员工名不能为空',
+            'mobile.required' => '员工路由不能为空',
+            'mobile.unique' => '员工路由不能重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $id = AdminPageAdd::init()
+        $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
+        $id = AdminUserAdd::init()
             ->setParam($this->getParam())
             ->run()
             ->getId();
@@ -72,22 +69,19 @@ class AdminPageController extends AdminController
     public function update()
     {
         $validator = Validator::make($this->getParam(), [
-            'name' => [
-                'sometimes',
-                Rule::unique('customers')->ignore($this->getParam('id'))
-            ],
-            'admin_user_mobile' => [
-                'sometimes',
-                Rule::unique('customers')->ignore($this->getParam('id'))
+            'mobile' => [
+                Rule::unique(AdminUser::class)
+                    ->withoutTrashed()
+                    ->where('subsystem_id', Access::getSubsystemId())
+                    ->ignore($this->getParam('id'))
             ],
         ], [
-            'name.unique' => '客户名已重复',
-            'admin_user_mobile.unique' => '超级管理员手机号已重复',
+            'mobile.unique' => '员工路由不能重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $id = AdminPageUpdate::init()
+        $id = AdminUserUpdate::init()
             ->setId($this->getParam('id'))
             ->setParam($this->getParam())
             ->run()
@@ -100,14 +94,14 @@ class AdminPageController extends AdminController
         $id = $this->getParam('id');
         if (is_array($id)) {
             foreach ($id as $value) {
-                AdminPageDelete::init()
+                AdminUserDelete::init()
                     ->setId($value)
                     ->run()
                     ->getId();
             }
             return $this->success();
         }
-        AdminPageDelete::init()
+        AdminUserDelete::init()
             ->setId($id)
             ->run()
             ->getId();
@@ -118,9 +112,13 @@ class AdminPageController extends AdminController
     {
         $param = $this->getParam();
         $select = Arr::get($param, 'select', 'id as value, name as label');
-        $model = AdminPage::query()
-            ->selectRaw($select)
-            ->where('subsystem_id', Access::getSubsystemId());
+        $model = AdminUser::query()
+            ->whereHas('adminUserCustomerSubsystems', function (Builder $builder) {
+                $builder->whereHas('customerSubsystem', function (Builder $builder) {
+                    $builder->where('subsystem_id', Access::getSubsystemId());
+                });
+            })
+            ->selectRaw($select);
         $model = $this->filter($model);
         $model = $model->get();
         return $this->response($model);

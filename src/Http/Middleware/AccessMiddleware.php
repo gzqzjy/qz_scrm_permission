@@ -41,6 +41,7 @@ class AccessMiddleware
             ->orderByDesc('id')
             ->first();
         if (!empty($model)) {
+            Access::setCustomerSubsystemId(Arr::get($model, 'id'));
             Access::setCustomerId(Arr::get($model, 'customer_id'));
             $AdminUserCustomerSubsystem = AdminUserCustomerSubsystem::query()
                 ->where('admin_user_id', $adminUserId)

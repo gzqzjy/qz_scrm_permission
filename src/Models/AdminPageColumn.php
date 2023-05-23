@@ -9,4 +9,14 @@ class AdminPageColumn extends Model
         'name',
         'code',
     ];
+    
+    public function adminPage()
+    {
+        return $this->belongsTo(AdminPage::class);
+    }
+    
+    public function adminUserCustomerSubsystemPageColumns()
+    {
+        return $this->hasMany(AdminUserCustomerSubsystemPageColumn::class);
+    }
 }

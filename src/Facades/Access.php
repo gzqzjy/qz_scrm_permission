@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static int getSubsystemId()
  * @method static void setCustomerId($id)
  * @method static int getCustomerId()
+ * @method static void setCustomerSubsystemId($id)
+ * @method static int getCustomerSubsystemId()
  * @method static void setAdministrator($administrator)
  * @method static boolean getAdministrator()
  * @method static void setAdminUserCustomerSubsystemIds($adminUserCustomerSubsystemIds)
