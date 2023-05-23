@@ -79,6 +79,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                         Route::post('login/account', 'AccessController@login');
                         Route::post('login/captcha', 'AccessController@captcha');
                         Route::post('access/option', 'AccessController@option');
+                        Route::post('access/options', 'AccessController@options');
                         Route::post('access/columns', 'AccessController@columns');
                         Route::post('menu', 'AccessController@menu');
                     });

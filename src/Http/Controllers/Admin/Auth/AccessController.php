@@ -9,12 +9,14 @@ use  Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
 use  Qz\Admin\Permission\Cores\AdminPage\AdminPageIdGet;
 use  Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
 use  Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
+use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionDelete;
 use  Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
 use  Qz\Admin\Permission\Facades\Access;
 use  Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminMenu;
 use Qz\Admin\Permission\Models\AdminPage;
 use  Qz\Admin\Permission\Models\AdminPageColumn;
+use Qz\Admin\Permission\Models\AdminPageOption;
 use  Qz\Admin\Permission\Models\AdminUser;
 use  Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemPageOption;
@@ -201,6 +203,57 @@ class AccessController extends AdminController
             ->where('admin_page_option_id', $pageOptionId)
             ->exists();
         return $this->response($access);
+    }
+
+    /**
+     * @return JsonResponse
+     * @throws MessageException
+     */
+    public function options()
+    {
+        $validator = Validator::make($this->getParam(), [
+            'page_code' => [
+                'required',
+                Rule::exists(AdminPage::class, 'code')
+                    ->withoutTrashed()
+                    ->where('subsystem_id', Access::getSubsystemId())
+            ],
+        ], [
+            'page_code.required' => '页面标识不能为空',
+            'page_code.exists' => '页面标识不存在',
+        ]);
+        if ($validator->fails()) {
+            throw new MessageException($validator->errors()->first());
+        }
+        $pageId = AdminPageIdGet::init()
+            ->setSubsystemId(Access::getSubsystemId())
+            ->setCode($this->getParam('page_code'))
+            ->run()
+            ->getId();
+        if (empty($pageId)) {
+            return $this->success();
+        }
+        $adminPageOptions = AdminPageOption::query()
+            ->where('admin_page_id', $pageId)
+            ->select();
+        foreach ($adminPageOptions as $adminPageOption) {
+            AdminPageOptionDelete::init()
+                ->setId(Arr::get($adminPageOption, 'id'))
+                ->run();
+        }
+        $options = $this->getParam('options');
+        if (empty($options)) {
+            return $this->success();
+        }
+        foreach ($options as $option) {
+            AdminPageOptionAdd::init()
+                ->setAdminPageId($pageId)
+                ->setCode(Arr::get($option, 'code'))
+                ->setName(Arr::get($option, 'name'))
+                ->run()
+                ->getId();
+        }
+        return $this->success();
     }
 
     public function menu()
