@@ -2,12 +2,8 @@
 
 namespace Qz\Admin\Permission;
 
-use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Qz\Admin\Permission\Http\Controllers\Admin\Auth\V1\AccessController;
-use Qz\Admin\Permission\Http\Middleware\AccessMiddleware;
 
 class AdminPermissionServiceProvider extends ServiceProvider
 {

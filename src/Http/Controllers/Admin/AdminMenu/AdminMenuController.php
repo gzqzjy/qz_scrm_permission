@@ -2,7 +2,6 @@
 
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminMenu;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminMenu\AdminMenuAdd;
 use Qz\Admin\Permission\Cores\AdminMenu\AdminMenuDelete;
@@ -14,7 +13,6 @@ use Qz\Admin\Permission\Models\AdminMenu;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Qz\Admin\Permission\Models\AdminPage;
 
 class AdminMenuController extends AdminController
 {
@@ -22,11 +20,7 @@ class AdminMenuController extends AdminController
     {
         $model = AdminMenu::query()
             ->where('subsystem_id', Access::getSubsystemId());
-        if (!$this->isAdministrator()) {
-            $model->whereHas('adminUserCustomerSubsystemMenus', function (Builder $builder) {
-                $builder->whereIn('');
-            });
-        }
+
         $model = $this->filter($model);
         $model = $model->paginate($this->getPageSize());
         call_user_func_array([$model, 'load'], [
@@ -121,14 +115,9 @@ class AdminMenuController extends AdminController
         $model = AdminMenu::query()
             ->selectRaw($select)
             ->where('subsystem_id', Access::getSubsystemId());
-        if (!$this->isAdministrator()) {
-            $model->whereHas('adminUserCustomerSubsystemMenus', function (Builder $builder) {
-                $builder->whereIn('');
-            });
-        }
+
         $model = $this->filter($model);
         $model = $model->get();
         return $this->response($model);
     }
-
 }

@@ -15,10 +15,7 @@ class AdminUser extends Model implements AuthenticatableContract, AuthorizableCo
     protected $fillable = [
         'name',
         'mobile',
-        'status',
     ];
-
-    const STATUS_NORMAL = 'normal';
 
     public function adminUserCustomerSubsystems()
     {

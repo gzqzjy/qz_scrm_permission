@@ -2,6 +2,7 @@
 
 namespace Qz\Admin\Permission\Http\Controllers\Admin\Auth;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use  Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
@@ -32,7 +33,6 @@ class AccessController extends AdminController
         $token = '';
         $model = AdminUser::query()
             ->where('mobile', $mobile)
-            ->where('status', AdminUser::STATUS_NORMAL)
             ->whereHas('adminUserCustomerSubsystems', function (Builder $builder) {
                 $builder->where('status', AdminUserCustomerSubsystem::STATUS_NORMAL)
                     ->whereHas('customerSubsystem', function (Builder $builder) {
@@ -140,6 +140,10 @@ class AccessController extends AdminController
         return $this->response(compact('dataIndexes'));
     }
 
+    /**
+     * @return JsonResponse
+     * @throws MessageException
+     */
     public function option()
     {
         $access = false;
@@ -206,7 +210,7 @@ class AccessController extends AdminController
         $administrator = $this->isAdministrator();
         if (empty($administrator)) {
             $model->whereHas('adminUserCustomerSubsystemMenus', function (Builder $builder) {
-                $model->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
+                $builder->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
                     $builder->where('admin_user_id', $this->getLoginAdminUserId());
                 });
             });
@@ -238,43 +242,5 @@ class AccessController extends AdminController
             }
         }
         return $route;
-    }
-
-    public function check()
-    {
-        $accessPageName = $this->getParam('access_page_name');
-        $accessOptionName = $this->getParam('access_option_name');
-        $parent = Menu::query()
-            ->where('code', $accessPageName)
-            ->first();
-        $access = false;
-        if (empty($parent)) {
-            return $this->success(compact('access'));
-        }
-        $parentId = Arr::get($parent, 'id');
-        $menuId = MenuAdd::init()
-            ->setName($accessOptionName)
-            ->setIsMenu(false)
-            ->setParentId($parentId)
-            ->run()
-            ->getId();
-        if (empty($menuId)) {
-            return $this->success(compact('access'));
-        }
-        $adminUser = AdminUser::query()
-            ->find($this->getLoginAdminUserId());
-        if (empty($adminUser)) {
-            return $this->success(compact('access'));
-        }
-        $administrator = Arr::get($adminUser, 'administrator');
-        if (!empty($administrator)) {
-            $access = true;
-            return $this->success(compact('access'));
-        }
-        $access = AdminUserMenu::query()
-            ->where('menu_id', $menuId)
-            ->where('admin_user_id', $this->getLoginAdminUserId())
-            ->exists();
-        return $this->success(compact('access'));
     }
 }

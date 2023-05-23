@@ -61,7 +61,6 @@ class AdminMenuUpdate extends Core
         return $this;
     }
 
-
     protected $name;
 
     /**
@@ -81,6 +80,7 @@ class AdminMenuUpdate extends Core
         $this->name = $name;
         return $this;
     }
+
     protected $path;
 
     /**
@@ -100,6 +100,7 @@ class AdminMenuUpdate extends Core
         $this->path = $path;
         return $this;
     }
+
     protected $subsystemId;
 
     /**
@@ -119,6 +120,7 @@ class AdminMenuUpdate extends Core
         $this->subsystemId = $subsystemId;
         return $this;
     }
+
     protected $parentId;
 
     /**
@@ -138,6 +140,7 @@ class AdminMenuUpdate extends Core
         $this->parentId = $parentId;
         return $this;
     }
+
     protected $sort;
 
     /**
@@ -157,6 +160,7 @@ class AdminMenuUpdate extends Core
         $this->sort = $sort;
         return $this;
     }
+
     protected $adminPageId;
 
     /**
@@ -176,6 +180,7 @@ class AdminMenuUpdate extends Core
         $this->adminPageId = $adminPageId;
         return $this;
     }
+
     protected $config;
 
     /**

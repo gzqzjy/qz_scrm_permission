@@ -2,7 +2,6 @@
 
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminPage;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
 use Qz\Admin\Permission\Cores\AdminPage\AdminPageDelete;
@@ -10,7 +9,6 @@ use Qz\Admin\Permission\Cores\AdminPage\AdminPageUpdate;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
-use Qz\Admin\Permission\Models\AdminMenu;
 use Qz\Admin\Permission\Models\AdminPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
