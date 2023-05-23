@@ -9,8 +9,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
 use Qz\Admin\Permission\Facades\Access;
-use Qz\Admin\Permission\Models\AdminPage;
-use Qz\Admin\Permission\Models\AdminUser;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
 use Qz\Admin\Permission\Models\CustomerSubsystem;
 
@@ -34,9 +32,7 @@ class AccessMiddleware
             ->whereHas('adminUserCustomerSubsystems', function (Builder $builder) use ($adminUserId) {
                 $builder->where('admin_user_id', $adminUserId)
                     ->where('status', AdminUserCustomerSubsystem::STATUS_NORMAL)
-                    ->whereHas('adminUser', function (Builder $builder) {
-                        $builder->where('status', AdminUser::STATUS_NORMAL);
-                    });
+                    ->whereHas('adminUser');
             })
             ->orderByDesc('id')
             ->first();
