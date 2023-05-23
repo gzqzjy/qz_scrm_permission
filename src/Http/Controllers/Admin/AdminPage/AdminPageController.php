@@ -56,6 +56,7 @@ class AdminPageController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
+        $this->addParam('subsystem_id', Access::getSubsystemId());
         $id = AdminPageAdd::init()
             ->setParam($this->getParam())
             ->run()

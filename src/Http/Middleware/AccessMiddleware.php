@@ -3,6 +3,7 @@
 namespace Qz\Admin\Permission\Http\Middleware;
 
 use Closure;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -18,14 +19,21 @@ class AccessMiddleware
      * @param Request $request
      * @param Closure $next
      * @return mixed
+     * @throws Exception
      */
     public function handle(Request $request, Closure $next)
     {
         $subsystemId = SubsystemIdGet::init()
             ->run()
             ->getId();
+        if (empty($subsystemId)) {
+            throw new Exception('子系统不存在');
+        }
         Access::setSubsystemId($subsystemId);
         $adminUserId = Auth::guard('admin')->id();
+        if (empty($adminUserId)) {
+            throw new Exception('用户未登陆');
+        }
         $model = CustomerSubsystem::query()
             ->select('customer_id', 'id')
             ->where('subsystem_id', $subsystemId)
@@ -36,17 +44,18 @@ class AccessMiddleware
             })
             ->orderByDesc('id')
             ->first();
-        if (!empty($model)) {
-            Access::setCustomerSubsystemId(Arr::get($model, 'id'));
-            Access::setCustomerId(Arr::get($model, 'customer_id'));
-            $AdminUserCustomerSubsystem = AdminUserCustomerSubsystem::query()
-                ->where('admin_user_id', $adminUserId)
-                ->where('customer_subsystem_id', Arr::get($model, 'id'))
-                ->where('administrator', true)
-                ->first();
-            if (!empty($AdminUserCustomerSubsystem)) {
-                Access::setAdministrator(true);
-            }
+        if (empty($model)) {
+            throw new Exception('登陆用户客户不存在');
+        }
+        Access::setCustomerSubsystemId(Arr::get($model, 'id'));
+        Access::setCustomerId(Arr::get($model, 'customer_id'));
+        $AdminUserCustomerSubsystem = AdminUserCustomerSubsystem::query()
+            ->where('admin_user_id', $adminUserId)
+            ->where('customer_subsystem_id', Arr::get($model, 'id'))
+            ->where('administrator', true)
+            ->first();
+        if (!empty($AdminUserCustomerSubsystem)) {
+            Access::setAdministrator(true);
         }
         return $next($request);
     }
