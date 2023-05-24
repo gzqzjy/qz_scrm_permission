@@ -71,7 +71,6 @@ class AdminUserController extends AdminController
             'mobile' => [
                 Rule::unique(AdminUser::class)
                     ->withoutTrashed()
-                    ->where('subsystem_id', Access::getSubsystemId())
                     ->ignore($this->getParam('id'))
             ],
         ], [

@@ -40,17 +40,10 @@ class AdminPageController extends AdminController
             ],
             'code' => [
                 'required',
-                Rule::unique(AdminPage::class)
-                    ->withoutTrashed()
-                    ->where('subsystem_id', Access::getSubsystemId())
             ],
         ], [
             'name' => [
                 'required' => '页面名不能为空',
-            ],
-            'code' => [
-                'required' => '页面标识不能为空',
-                'unique' => '页面标识已重复',
             ],
         ]);
         if ($validator->fails()) {
@@ -77,11 +70,9 @@ class AdminPageController extends AdminController
             ],
             'admin_user_mobile' => [
                 'sometimes',
-                Rule::unique('customers')->ignore($this->getParam('id'))
             ],
         ], [
             'name.unique' => '客户名已重复',
-            'admin_user_mobile.unique' => '超级管理员手机号已重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());

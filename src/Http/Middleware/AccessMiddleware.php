@@ -44,9 +44,6 @@ class AccessMiddleware
             })
             ->orderByDesc('id')
             ->first();
-        if (empty($model)) {
-            throw new Exception('登陆用户客户不存在');
-        }
         Access::setCustomerSubsystemId(Arr::get($model, 'id'));
         Access::setCustomerId(Arr::get($model, 'customer_id'));
         $AdminUserCustomerSubsystem = AdminUserCustomerSubsystem::query()
