@@ -234,8 +234,9 @@ class AccessController extends AdminController
             return $this->success();
         }
         $adminPageOptions = AdminPageOption::query()
+            ->select('id')
             ->where('admin_page_id', $pageId)
-            ->select();
+            ->get();
         foreach ($adminPageOptions as $adminPageOption) {
             AdminPageOptionDelete::init()
                 ->setId(Arr::get($adminPageOption, 'id'))
@@ -270,7 +271,7 @@ class AccessController extends AdminController
         }
         $model = $model->get();
         $model->load([
-            'children'
+            'children',
         ]);
         $menus = [];
         foreach ($model as $value) {

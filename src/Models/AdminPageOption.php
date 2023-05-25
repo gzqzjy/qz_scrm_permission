@@ -9,4 +9,9 @@ class AdminPageOption extends Model
         'name',
         'code',
     ];
+    
+    public function adminPage()
+    {
+        return $this->belongsTo(AdminPage::class);
+    }
 }

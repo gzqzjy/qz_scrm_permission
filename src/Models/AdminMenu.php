@@ -36,7 +36,12 @@ class AdminMenu extends Model
 
     public function children()
     {
-        return $this->child()->with('children');
+        return $this->child()->with([
+            'children',
+            'adminPage',
+            'adminPage.adminPageOptions',
+            'adminPage.adminPageColumns',
+        ]);
     }
 
     public function adminPage()

@@ -95,6 +95,12 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-pages/delete', 'AdminPageController@destroy');
                     Route::post('admin-pages/all', 'AdminPageController@all');
                 });
+                Route::namespace('AdminPageOption\V1')->group(function () {
+                    Route::post('admin-page-options/all', 'AdminPageOptionController@all');
+                });
+                Route::namespace('AdminPageColumn\V1')->group(function () {
+                    Route::post('admin-page-columns/all', 'AdminPageColumnController@all');
+                });
                 Route::namespace('AdminMenu\V1')->group(function () {
                     Route::post('admin-menus/get', 'AdminMenuController@get');
                     Route::post('admin-menus/add', 'AdminMenuController@store');
@@ -108,6 +114,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-users/update', 'AdminUserController@update');
                     Route::post('admin-users/delete', 'AdminUserController@destroy');
                     Route::post('admin-users/all', 'AdminUserController@all');
+                    Route::post('admin-users/permission', 'AdminUserController@permission');
                 });
             });
     }

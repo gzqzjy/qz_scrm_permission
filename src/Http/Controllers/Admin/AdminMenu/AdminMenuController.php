@@ -115,7 +115,6 @@ class AdminMenuController extends AdminController
         $model = AdminMenu::query()
             ->selectRaw($select)
             ->where('subsystem_id', Access::getSubsystemId());
-
         $model = $this->filter($model);
         $model = $model->get();
         return $this->response($model);
