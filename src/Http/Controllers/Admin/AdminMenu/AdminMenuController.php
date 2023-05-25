@@ -20,7 +20,6 @@ class AdminMenuController extends AdminController
     {
         $model = AdminMenu::query()
             ->where('subsystem_id', Access::getSubsystemId());
-
         $model = $this->filter($model);
         $model = $model->paginate($this->getPageSize());
         call_user_func_array([$model, 'load'], [
@@ -55,6 +54,9 @@ class AdminMenuController extends AdminController
             throw new MessageException($validator->errors()->first());
         }
         $this->addParam('subsystem_id', Access::getSubsystemId());
+        $this->addParam('parent_id', 0);
+        $this->addParam('sort', 0);
+        $this->addParam('admin_page_id', 0);
         $id = AdminMenuAdd::init()
             ->setParam($this->getParam())
             ->run()
@@ -81,6 +83,9 @@ class AdminMenuController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
+        $this->addParam('parent_id', 0);
+        $this->addParam('sort', 0);
+        $this->addParam('admin_page_id', 0);
         $id = AdminMenuUpdate::init()
             ->setId($this->getParam('id'))
             ->setParam($this->getParam())
