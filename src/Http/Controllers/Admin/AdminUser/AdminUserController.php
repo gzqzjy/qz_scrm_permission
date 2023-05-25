@@ -3,7 +3,6 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminUser;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserAdd;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserDelete;
@@ -44,8 +43,6 @@ class AdminUserController extends AdminController
             ],
             'mobile' => [
                 'required',
-                Rule::unique(AdminUser::class)
-                    ->withoutTrashed(),
             ],
         ], [
             'name.required' => '员工名不能为空',
