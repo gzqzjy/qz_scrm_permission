@@ -31,9 +31,6 @@ class AccessMiddleware
         }
         Access::setSubsystemId($subsystemId);
         $adminUserId = Auth::guard('admin')->id();
-        if (empty($adminUserId)) {
-            throw new Exception('用户未登陆');
-        }
         $model = CustomerSubsystem::query()
             ->select('customer_id', 'id')
             ->where('subsystem_id', $subsystemId)
