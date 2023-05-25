@@ -73,7 +73,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
             ->group(function () {
                 Route::withoutMiddleware([
                     'auth:admin',
-                    'admin.access',
+                    'access',
                 ])->namespace('Auth\V1')
                     ->group(function () {
                         Route::post('login/account', 'AccessController@login');
