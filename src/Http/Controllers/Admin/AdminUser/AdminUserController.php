@@ -49,8 +49,8 @@ class AdminUserController extends AdminController
             ],
         ], [
             'name.required' => '员工名不能为空',
-            'mobile.required' => '员工路由不能为空',
-            'mobile.unique' => '员工路由不能重复',
+            'mobile.required' => '员工手机号不能为空',
+            'mobile.unique' => '员工手机号不能重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
@@ -76,7 +76,7 @@ class AdminUserController extends AdminController
                     ->ignore($this->getParam('id'))
             ],
         ], [
-            'mobile.unique' => '员工路由不能重复',
+            'mobile.unique' => '员工手机号不能重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
