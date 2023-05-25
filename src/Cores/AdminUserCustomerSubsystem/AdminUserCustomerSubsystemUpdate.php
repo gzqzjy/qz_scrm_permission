@@ -57,7 +57,6 @@ class AdminUserCustomerSubsystemUpdate extends Core
         return $this;
     }
 
-    
     protected $adminUserId;
 
     /**
@@ -77,6 +76,7 @@ class AdminUserCustomerSubsystemUpdate extends Core
         $this->adminUserId = $adminUserId;
         return $this;
     }
+
     protected $customerSubsystemId;
 
     /**
@@ -96,6 +96,7 @@ class AdminUserCustomerSubsystemUpdate extends Core
         $this->customerSubsystemId = $customerSubsystemId;
         return $this;
     }
+
     protected $status;
 
     /**
@@ -113,6 +114,26 @@ class AdminUserCustomerSubsystemUpdate extends Core
     public function setStatus($status)
     {
         $this->status = $status;
+        return $this;
+    }
+
+    protected $administrator;
+
+    /**
+     * @return mixed
+     */
+    public function getAdministrator()
+    {
+        return $this->administrator;
+    }
+
+    /**
+     * @param mixed $administrator
+     * @return AdminUserCustomerSubsystemUpdate
+     */
+    public function setAdministrator($administrator)
+    {
+        $this->administrator = $administrator;
         return $this;
     }
 }

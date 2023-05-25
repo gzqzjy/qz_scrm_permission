@@ -29,6 +29,7 @@ class AdminUserAdd extends Core
                 ->setCustomerSubsystemId($this->getCustomerSubsystemId())
                 ->setStatus(AdminUserCustomerSubsystem::STATUS_NORMAL)
                 ->setAdminUserId($this->getId())
+                ->setAdministrator(false)
                 ->run();
         }
     }
@@ -68,7 +69,6 @@ class AdminUserAdd extends Core
         return $this;
     }
 
-
     protected $name;
 
     /**
@@ -88,6 +88,7 @@ class AdminUserAdd extends Core
         $this->name = $name;
         return $this;
     }
+
     protected $mobile;
 
     /**
@@ -107,6 +108,7 @@ class AdminUserAdd extends Core
         $this->mobile = $mobile;
         return $this;
     }
+
     protected $status;
 
     /**

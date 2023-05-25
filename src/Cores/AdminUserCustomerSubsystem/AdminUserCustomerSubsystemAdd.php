@@ -17,6 +17,7 @@ class AdminUserCustomerSubsystemAdd extends Core
                 'customer_subsystem_id' => $this->getCustomerSubsystemId(),
             ]), Arr::whereNotNull([
                 'status' => $this->getStatus(),
+                'administrator' => $this->getAdministrator(),
             ]));
         if ($model->trashed()) {
             $model->restore();
@@ -59,7 +60,6 @@ class AdminUserCustomerSubsystemAdd extends Core
         return $this;
     }
 
-    
     protected $adminUserId;
 
     /**
@@ -79,6 +79,7 @@ class AdminUserCustomerSubsystemAdd extends Core
         $this->adminUserId = $adminUserId;
         return $this;
     }
+
     protected $customerSubsystemId;
 
     /**
@@ -98,6 +99,7 @@ class AdminUserCustomerSubsystemAdd extends Core
         $this->customerSubsystemId = $customerSubsystemId;
         return $this;
     }
+
     protected $status;
 
     /**
@@ -115,6 +117,26 @@ class AdminUserCustomerSubsystemAdd extends Core
     public function setStatus($status)
     {
         $this->status = $status;
+        return $this;
+    }
+
+    protected $administrator;
+
+    /**
+     * @return mixed
+     */
+    public function getAdministrator()
+    {
+        return $this->administrator;
+    }
+
+    /**
+     * @param mixed $administrator
+     * @return AdminUserCustomerSubsystemAdd
+     */
+    public function setAdministrator($administrator)
+    {
+        $this->administrator = $administrator;
         return $this;
     }
 }
