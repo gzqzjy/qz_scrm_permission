@@ -3,7 +3,6 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminUser;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserAdd;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserDelete;
@@ -18,7 +17,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemMenu;
 
 class AdminUserController extends AdminController
 {

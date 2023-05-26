@@ -5,7 +5,6 @@ namespace Qz\Admin\Permission\Cores\AdminUserCustomerSubsystemMenu;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemMenu;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 
 class AdminUserCustomerSubsystemMenuSync extends Core
 {
@@ -19,8 +18,8 @@ class AdminUserCustomerSubsystemMenuSync extends Core
             ->get();
         foreach ($deletes as $delete) {
             AdminUserCustomerSubsystemMenuDelete::init()
-                ->setId()
-                ->run(Arr::get($delete, 'id'));
+                ->setId(Arr::get($delete, 'id'))
+                ->run();
         }
         foreach ($adminMenuIds as $adminMenuId) {
             AdminUserCustomerSubsystemMenuAdd::init()
@@ -41,8 +40,8 @@ class AdminUserCustomerSubsystemMenuSync extends Core
     }
 
     /**
-     * @param mixed $adminUserCustomerSubsystemId
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @param $adminUserCustomerSubsystemId
+     * @return $this
      */
     public function setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
     {

@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static boolean getAdministrator()
  * @method static void setAdminUserCustomerSubsystemIds($adminUserCustomerSubsystemIds)
  * @method static array getAdminUserCustomerSubsystemIds()
+ * @method static void setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
+ * @method static array getAdminUserCustomerSubsystemId()
  */
 class Access extends Facade
 {
