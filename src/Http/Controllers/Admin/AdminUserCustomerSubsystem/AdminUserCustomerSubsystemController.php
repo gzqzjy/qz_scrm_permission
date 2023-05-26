@@ -3,8 +3,6 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminUserCustomerSubsystem;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserAdd;
 use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\AdminUserCustomerSubsystemAdd;
@@ -20,7 +18,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemMenu;
 
 class AdminUserCustomerSubsystemController extends AdminController
 {
@@ -212,6 +209,10 @@ class AdminUserCustomerSubsystemController extends AdminController
         return $data;
     }
 
+    /**
+     * @return JsonResponse
+     * @throws MessageException
+     */
     public function addMenus()
     {
         $validator = Validator::make($this->getParam(), [
