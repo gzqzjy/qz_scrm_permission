@@ -269,7 +269,8 @@ class AccessController extends AdminController
                 });
             });
         }
-        $model = $model->get();
+        $model = $model->orderByDesc('sort')
+            ->get();
         $model->load([
             'children',
         ]);

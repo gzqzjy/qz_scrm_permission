@@ -28,6 +28,13 @@ class AdminMenu extends Model
         return $this->belongsTo(AdminMenu::class, 'parent_id');
     }
 
+    public function parentData()
+    {
+        return $this->parent()->with([
+            'parentData'
+        ]);
+    }
+    
     public function child()
     {
         return $this->hasMany(AdminMenu::class, 'parent_id', 'id')

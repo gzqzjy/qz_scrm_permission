@@ -11,7 +11,7 @@ class AdminUserCustomerSubsystemMenu extends Model
 
     public function adminMenu()
     {
-        return $this->belongsTo(AdminUser::class);
+        return $this->belongsTo(AdminMenu::class);
     }
 
     public function adminUserCustomerSubsystem()

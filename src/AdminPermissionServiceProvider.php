@@ -106,6 +106,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-menus/update', 'AdminMenuController@update');
                     Route::post('admin-menus/delete', 'AdminMenuController@destroy');
                     Route::post('admin-menus/all', 'AdminMenuController@all');
+                    Route::post('admin-menus/cascader', 'AdminMenuController@cascader');
                 });
                 Route::namespace('AdminUser\V1')->group(function () {
                     Route::post('admin-users/get', 'AdminUserController@get');
@@ -113,7 +114,16 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-users/update', 'AdminUserController@update');
                     Route::post('admin-users/delete', 'AdminUserController@destroy');
                     Route::post('admin-users/all', 'AdminUserController@all');
+                    Route::post('admin-users/add-menus', 'AdminUserController@addMenus');
                     Route::post('admin-users/permission', 'AdminUserController@permission');
+                });
+                Route::namespace('AdminUserCustomerSubsystem\V1')->group(function () {
+                    Route::post('admin-user-customer-subsystems/get', 'AdminUserCustomerSubsystemController@get');
+                    Route::post('admin-user-customer-subsystems/add', 'AdminUserCustomerSubsystemController@store');
+                    Route::post('admin-user-customer-subsystems/update', 'AdminUserCustomerSubsystemController@update');
+                    Route::post('admin-user-customer-subsystems/delete', 'AdminUserCustomerSubsystemController@destroy');
+                    Route::post('admin-user-customer-subsystems/all', 'AdminUserCustomerSubsystemController@all');
+                    Route::post('admin-user-customer-subsystems/add-menus', 'AdminUserCustomerSubsystemController@addMenus');
                 });
             });
     }

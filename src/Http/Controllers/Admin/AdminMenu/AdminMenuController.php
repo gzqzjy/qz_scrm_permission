@@ -2,6 +2,7 @@
 
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminMenu;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminMenu\AdminMenuAdd;
 use Qz\Admin\Permission\Cores\AdminMenu\AdminMenuDelete;
@@ -123,5 +124,47 @@ class AdminMenuController extends AdminController
         $model = $this->filter($model);
         $model = $model->get();
         return $this->response($model);
+    }
+
+    public function cascader()
+    {
+        $model = AdminMenu::query()
+            ->where('parent_id', 0);
+        $administrator = $this->isAdministrator();
+        if (empty($administrator)) {
+            $model->whereHas('adminUserCustomerSubsystemMenus', function (Builder $builder) {
+                $builder->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
+                    $builder->where('admin_user_id', $this->getLoginAdminUserId());
+                });
+            });
+        }
+        $model = $model->get();
+        $model->load([
+            'children',
+        ]);
+        $menus = [];
+        foreach ($model as $value) {
+            $menus[] = $this->cascaderItem($value);
+        }
+        return $this->response($menus);
+    }
+
+    protected function cascaderItem($value)
+    {
+        $data = [
+            'label' => Arr::get($value, 'name'),
+            'value' => Arr::get($value, 'id'),
+        ];
+        if (Arr::get($value, 'children')) {
+            $routes = [];
+            $children = Arr::get($value, 'children');
+            foreach ($children as $child) {
+                $routes[] = $this->cascaderItem($child);
+            }
+            if (!empty($routes)) {
+                Arr::set($data, 'children', $routes);
+            }
+        }
+        return $data;
     }
 }

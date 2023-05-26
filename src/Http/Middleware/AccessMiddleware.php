@@ -46,10 +46,10 @@ class AccessMiddleware
         $AdminUserCustomerSubsystem = AdminUserCustomerSubsystem::query()
             ->where('admin_user_id', $adminUserId)
             ->where('customer_subsystem_id', Arr::get($model, 'id'))
-            ->where('administrator', true)
             ->first();
         if (!empty($AdminUserCustomerSubsystem)) {
-            Access::setAdministrator(true);
+            Access::setAdminUserCustomerSubsystemId(Arr::get($AdminUserCustomerSubsystem, 'id'));
+            Access::setAdministrator(Arr::get($AdminUserCustomerSubsystem, 'administrator'));
         }
         return $next($request);
     }

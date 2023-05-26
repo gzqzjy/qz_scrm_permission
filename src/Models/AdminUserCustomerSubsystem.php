@@ -22,4 +22,9 @@ class AdminUserCustomerSubsystem extends Model
     {
         return $this->belongsTo(AdminUser::class);
     }
+
+    public function adminUserCustomerSubsystemMenus()
+    {
+        return $this->hasMany(AdminUserCustomerSubsystemMenu::class);
+    }
 }

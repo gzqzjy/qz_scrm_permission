@@ -81,6 +81,26 @@ class AccessLogic
         return $this;
     }
 
+    protected $adminUserCustomerSubsystemId;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminUserCustomerSubsystemId()
+    {
+        return $this->adminUserCustomerSubsystemId;
+    }
+
+    /**
+     * @param mixed $adminUserCustomerSubsystemId
+     * @return AccessLogic
+     */
+    public function setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
+    {
+        $this->adminUserCustomerSubsystemId = $adminUserCustomerSubsystemId;
+        return $this;
+    }
+
     protected $adminUserCustomerSubsystemIds;
 
     /**
