@@ -16,32 +16,22 @@ use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminRole;
-use Qz\Admin\Permission\Models\AdminRoleGroup;
 
 class AdminRoleController extends AdminController
 {
     public function get()
     {
-        $model = AdminRoleGroup::query()
+        $model = AdminRole::query()
             ->where('customer_subsystem_id', Access::getCustomerSubsystemId());
 
         $model = $this->filter($model);
         $model = $model
-            ->selectRaw('id,name as admin_role_group_name,id admin_role_group_id,created_at')
-            ->paginate($this->getPageSize());
-        Log::info("model", [$model->items()]);
-        $model->load([
-            'adminRoles' => function (HasMany $hasMany) {
-                $hasMany
-                    ->selectRaw('name,id,admin_role_group_id,created_at')
-                    ->withCount([
-                    'departmentRoles'
-                ]);
-            }
+            ->get();
+        $model->loadCount([
+            'departmentRoles',
+            'adminUserCustomerSubsystemRoles'
         ]);
-
-
-        return $this->page($model);
+        return $this->success($model->toArray());
     }
 
     /**
@@ -60,7 +50,6 @@ class AdminRoleController extends AdminController
             'admin_role_group_id' => [
                 'required',
                 Rule::exists(AdminRoleGroup::class, 'id')
-                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
                     ->withoutTrashed(),
             ]
         ], [
@@ -96,9 +85,8 @@ class AdminRoleController extends AdminController
             ],
             'admin_role_group_id' => [
                 'required',
-                Rule::exists(AdminRoleGroup::class, 'id')
-                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
-                    ->withoutTrashed(),
+//                Rule::exists(AdminRoleGroup::class, 'id')
+//                    ->withoutTrashed(),
             ]
         ], [
             'name.required' => '角色名称不能为空',

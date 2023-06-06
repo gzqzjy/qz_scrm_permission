@@ -26,4 +26,9 @@ class AdminRole extends Model
     {
         return $this->hasMany(AdminDepartmentRole::class);
     }
+
+    public function adminUserCustomerSubsystemRoles()
+    {
+        return $this->hasMany(AdminUserCustomerSubsystemRole::class);
+    }
 }

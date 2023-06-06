@@ -16,6 +16,7 @@ use Qz\Admin\Permission\Cores\AdminUser\AdminUserUpdate;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
+use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminRoleGroup;
 use Qz\Admin\Permission\Models\AdminUser;
 
@@ -89,6 +90,12 @@ class AdminRoleGroupController extends AdminController
     public function destroy()
     {
         $id = $this->getParam('id');
+        $isExist = AdminRole::query()
+            ->whereIn('admin_role_group_id', $id)
+            ->exists();
+        if ($isExist){
+            throw new MessageException("角色组下有角色，不可删除！");
+        }
         if (is_array($id)) {
             foreach ($id as $value) {
                 AdminRoleGroupDelete::init()
