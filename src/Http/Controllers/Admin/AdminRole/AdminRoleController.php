@@ -1,0 +1,150 @@
+<?php
+
+namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminRole;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Qz\Admin\Permission\Cores\AdminRole\AdminRoleAdd;
+use Qz\Admin\Permission\Cores\AdminRole\AdminRoleDelete;
+use Qz\Admin\Permission\Cores\AdminRole\AdminRoleUpdate;
+use Qz\Admin\Permission\Exceptions\MessageException;
+use Qz\Admin\Permission\Facades\Access;
+use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
+use Qz\Admin\Permission\Models\AdminRole;
+use Qz\Admin\Permission\Models\AdminRoleGroup;
+
+class AdminRoleController extends AdminController
+{
+    public function get()
+    {
+        $model = AdminRoleGroup::query()
+            ->where('customer_subsystem_id', Access::getCustomerSubsystemId());
+
+        $model = $this->filter($model);
+        $model = $model
+            ->selectRaw('id,name as admin_role_group_name,id admin_role_group_id,created_at')
+            ->paginate($this->getPageSize());
+        Log::info("model", [$model->items()]);
+        $model->load([
+            'adminRoles' => function (HasMany $hasMany) {
+                $hasMany
+                    ->selectRaw('name,id,admin_role_group_id,created_at')
+                    ->withCount([
+                    'departmentRoles'
+                ]);
+            }
+        ]);
+
+
+        return $this->page($model);
+    }
+
+    /**
+     * @return JsonResponse
+     * @throws MessageException
+     */
+    public function store()
+    {
+        $validator = Validator::make($this->getParam(), [
+            'name' => [
+                'required',
+                Rule::unique(AdminRole::class)
+                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+                    ->withoutTrashed(),
+            ],
+            'admin_role_group_id' => [
+                'required',
+                Rule::exists(AdminRoleGroup::class, 'id')
+                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+                    ->withoutTrashed(),
+            ]
+        ], [
+            'name.required' => '角色名称不能为空',
+            'name.unique' => '角色名称不能重复',
+            'admin_role_group_id.required' => '角色组不能为空',
+            'admin_role_group_id.exists' => '角色组不存在',
+        ]);
+        if ($validator->fails()) {
+            throw new MessageException($validator->errors()->first());
+        }
+        $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
+        $id = AdminRoleAdd::init()
+            ->setParam($this->getParam())
+            ->run()
+            ->getId();
+        return $this->success(compact('id'));
+    }
+
+    /**
+     * @return JsonResponse
+     * @throws MessageException
+     */
+    public function update()
+    {
+        $validator = Validator::make($this->getParam(), [
+            'name' => [
+                'required',
+                Rule::unique(AdminRole::class)
+                    ->withoutTrashed()
+                    ->ignore($this->getParam('id'))
+                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+            ],
+            'admin_role_group_id' => [
+                'required',
+                Rule::exists(AdminRoleGroup::class, 'id')
+                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+                    ->withoutTrashed(),
+            ]
+        ], [
+            'name.required' => '角色名称不能为空',
+            'name.unique' => '角色名称不能重复',
+            'admin_role_group_id.required' => '角色组不能为空',
+            'admin_role_group_id.exists' => '角色组不存在',
+        ]);
+        if ($validator->fails()) {
+            throw new MessageException($validator->errors()->first());
+        }
+        $id = AdminRoleUpdate::init()
+            ->setId($this->getParam('id'))
+            ->setParam($this->getParam())
+            ->run()
+            ->getId();
+        return $this->success(compact('id'));
+    }
+
+    public function destroy()
+    {
+        $id = $this->getParam('id');
+        if (is_array($id)) {
+            foreach ($id as $value) {
+                AdminRoleDelete::init()
+                    ->setId($value)
+                    ->run()
+                    ->getId();
+            }
+            return $this->success();
+        }
+        AdminRoleDelete::init()
+            ->setId($id)
+            ->run()
+            ->getId();
+        return $this->success();
+    }
+
+    public function all()
+    {
+        $param = $this->getParam();
+        $select = Arr::get($param, 'select', 'id as value, name as label');
+        $model = AdminRole::query()
+            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+            ->selectRaw($select);
+        $model = $this->filter($model);
+        $model = $model->get();
+        return $this->response($model);
+    }
+}

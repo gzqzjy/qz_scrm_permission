@@ -48,6 +48,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     'provider' => 'admin_users',
                 ],
             ], config('auth.guards', [])),
+            'app.timezone' => 'Asia/Shanghai',
         ]);
     }
 
@@ -124,6 +125,21 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-user-customer-subsystems/delete', 'AdminUserCustomerSubsystemController@destroy');
                     Route::post('admin-user-customer-subsystems/all', 'AdminUserCustomerSubsystemController@all');
                     Route::post('admin-user-customer-subsystems/add-menus', 'AdminUserCustomerSubsystemController@addMenus');
+                });
+                Route::namespace('AdminRoleGroup\V1')->group(function () {
+                    Route::post('admin-role-groups/get', 'AdminRoleGroupController@get');
+                    Route::post('admin-role-groups/add', 'AdminRoleGroupController@store');
+                    Route::post('admin-role-groups/update', 'AdminRoleGroupController@update');
+                    Route::post('admin-role-groups/delete', 'AdminRoleGroupController@destroy');
+                    Route::post('admin-role-groups/all', 'AdminRoleGroupController@all');
+                    Route::post('admin-role-groups/all-by-role', 'AdminRoleGroupController@allByRole');
+                });
+                Route::namespace('AdminRole\V1')->group(function () {
+                    Route::post('admin-roles/get', 'AdminRoleController@get');
+                    Route::post('admin-roles/add', 'AdminRoleController@store');
+                    Route::post('admin-roles/update', 'AdminRoleController@update');
+                    Route::post('admin-roles/delete', 'AdminRoleController@destroy');
+                    Route::post('admin-roles/all', 'AdminRoleController@all');
                 });
             });
     }
