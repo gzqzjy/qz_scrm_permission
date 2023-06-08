@@ -49,7 +49,7 @@ class AdminRoleController extends AdminController
             ],
             'admin_role_group_id' => [
                 'required',
-                Rule::exists(AdminRoleGroup::class, 'id')
+                Rule::exists('admin_role_groups', 'id')
                     ->withoutTrashed(),
             ]
         ], [
@@ -76,6 +76,11 @@ class AdminRoleController extends AdminController
     public function update()
     {
         $validator = Validator::make($this->getParam(), [
+            'id' => [
+                'required',
+                Rule::exists('admin_roles', 'id')
+                    ->withoutTrashed(),
+            ],
             'name' => [
                 'required',
                 Rule::unique(AdminRole::class)
@@ -85,10 +90,12 @@ class AdminRoleController extends AdminController
             ],
             'admin_role_group_id' => [
                 'required',
-//                Rule::exists(AdminRoleGroup::class, 'id')
-//                    ->withoutTrashed(),
+                Rule::exists('admin_role_groups', 'id')
+                    ->withoutTrashed(),
             ]
         ], [
+            'id.required' => '角色id不能为空',
+            'id.exists' => '角色不存在',
             'name.required' => '角色名称不能为空',
             'name.unique' => '角色名称不能重复',
             'admin_role_group_id.required' => '角色组不能为空',
@@ -132,6 +139,15 @@ class AdminRoleController extends AdminController
             ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
             ->selectRaw($select);
         $model = $this->filter($model);
+        if ($this->getParam('admin_departments')){
+            $adminDepartmentIds = Arr::pluck($this->getParam('admin_departments'), 'id');
+            if (empty($adminDepartmentIds)){
+                return $this->response([]);
+            }
+            $model->whereHas('departmentRoles', function (Builder $builder) use ($adminDepartmentIds){
+                $builder->whereIn('admin_department_id', $adminDepartmentIds);
+            });
+        }
         $model = $model->get();
         return $this->response($model);
     }

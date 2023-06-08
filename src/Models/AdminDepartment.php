@@ -12,4 +12,50 @@ class AdminDepartment extends Model
         'level',
         'customer_subsystem_id'
     ];
+
+    public function adminCategoryDepartments()
+    {
+        return $this->hasMany(AdminCategoryDepartment::class);
+    }
+
+    public function adminDepartmentRoles()
+    {
+        return $this->hasMany(AdminDepartmentRole::class);
+    }
+
+    public function adminUserCustomerSubsystemDepartments()
+    {
+        return $this->hasMany(AdminUserCustomerSubsystemDepartment::class);
+    }
+
+    public function child()
+    {
+        return $this->hasMany(self::class, 'pid', 'id');
+    }
+
+    public function children()
+    {
+        return $this->child()->with([
+            'children'
+        ]);
+    }
+
+    public function childrenDepartmentAndAdminUsers()
+    {
+        return $this->child()->with([
+            'childrenDepartmentAndAdminUsers',
+            'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUser',
+            'adminCategoryDepartments',
+            'adminDepartmentRoles',
+        ])->withCount([
+            'adminDepartmentRoles',
+            'adminCategoryDepartments',
+            'adminUserCustomerSubsystemDepartments'
+        ]);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(self::class, 'pid');
+    }
 }

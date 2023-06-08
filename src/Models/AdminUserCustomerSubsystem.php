@@ -27,4 +27,14 @@ class AdminUserCustomerSubsystem extends Model
     {
         return $this->hasMany(AdminUserCustomerSubsystemMenu::class);
     }
+
+    public function adminUserCustomerSubsystemDepartments()
+    {
+        return $this->hasMany(AdminUserCustomerSubsystemDepartment::class);
+    }
+
+    public function adminUserCustomerSubsystemRoles()
+    {
+        return $this->hasMany(AdminUserCustomerSubsystemRole::class);
+    }
 }

@@ -10,4 +10,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
     use HasFactory, SoftDeletes;
 
     protected $connection = 'common';
+
+    public function serializeDate($date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
 }

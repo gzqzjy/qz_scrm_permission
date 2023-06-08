@@ -3,6 +3,8 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminUser;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserAdd;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserDelete;
@@ -24,13 +26,43 @@ class AdminUserController extends AdminController
     {
         $model = AdminUser::query()
             ->whereHas('adminUserCustomerSubsystems', function (Builder $builder) {
-                $builder->whereHas('customerSubsystem', function (Builder $builder) {
-                    $builder->where('subsystem_id', Access::getSubsystemId());
-                });
+                $builder->where('customer_subsystem_id', Access::getCustomerSubsystemId());
+//                $builder->whereHas('customerSubsystem', function (Builder $builder) {
+//                    $builder->where('subsystem_id', Access::getSubsystemId());
+//                });
             });
         $model = $this->filter($model);
-        $model = $model->paginate($this->getPageSize());
-        return $this->page($model);
+        if ($this->getParam('admin_department_id')){
+            $model = $model->whereHas('adminUserCustomerSubsystems',function (Builder $builder){
+                $builder->whereHas('adminUserCustomerSubsystemDepartments', function (Builder $builder) {
+                    $builder->where('admin_department_id', $this->getParam('admin_department_id'));
+                });
+            });
+        }
+        $model = $model->get();
+        $model->load([
+            'adminUserCustomerSubsystems' => function(HasMany $hasMany){
+                $hasMany->where('customer_subsystem_id', Access::getCustomerSubsystemId());
+            },
+            'adminUserCustomerSubsystems.adminUserCustomerSubsystemDepartments',
+            'adminUserCustomerSubsystems.adminUserCustomerSubsystemRoles'
+        ]);
+        $model->append(['statusDesc']);
+        //call_user_func([$model, 'append'], ['status_desc']);
+        foreach ($model as &$item){
+            $adminDepartments = Arr::get($item, 'adminUserCustomerSubsystems.0.adminUserCustomerSubsystemDepartments');
+            $adminRoles = Arr::get($item, 'adminUserCustomerSubsystems.0.adminUserCustomerSubsystemRoles');
+            $department = [];
+            foreach ($adminDepartments as $adminDepartment){
+                $department[] = [
+                    'id' => Arr::get($adminDepartment, 'admin_department_id'),
+                    'administrator' => Arr::get($adminDepartment, 'administrator')
+                ];
+            }
+            $item->admin_departments = $department;
+            $item->admin_role_ids = Arr::pluck($adminRoles, 'id');
+        }
+        return $this->success($model->toArray());
     }
 
     /**
@@ -82,6 +114,7 @@ class AdminUserController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
+        $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
         $id = AdminUserUpdate::init()
             ->setId($this->getParam('id'))
             ->setParam($this->getParam())

@@ -1,38 +1,46 @@
 <?php
+namespace Qz\Admin\Permission\Cores\AdminDepartment;
 
-namespace Qz\Admin\Permission\Cores\AdminUser;
-
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\AdminUserCustomerSubsystemAdd;
-use Qz\Admin\Permission\Cores\Core;
-use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
+use Qz\Admin\Permission\Cores\AdminCategoryDepartment\AdminCategoryDepartmentAdd;
+use Qz\Admin\Permission\Cores\AdminDepartmentRole\AdminDepartmentRoleAdd;
+use Qz\Admin\Permission\Cores\Core;
+use Qz\Admin\Permission\Models\AdminCategoryDepartment;
+use Qz\Admin\Permission\Models\AdminDepartment;
 
-class AdminUserAdd extends Core
+
+class AdminDepartmentAdd extends Core
 {
     protected function execute()
     {
-        $model = AdminUser::withTrashed()
+        $model = AdminDepartment::withTrashed()
             ->firstOrCreate(Arr::whereNotNull([
-                'mobile' => $this->getMobile(),
-            ]), Arr::whereNotNull([
                 'name' => $this->getName(),
-                'status' => $this->getStatus(),
+                'pid' => $this->getPid(),
+                'level' => $this->getLevel(),
+                'customer_subsystem_id' => $this->getCustomerSubsystemId(),
             ]));
         if ($model->trashed()) {
             $model->restore();
         }
         $this->setId($model->getKey());
-        if ($this->getCustomerSubsystemId()) {
-            AdminUserCustomerSubsystemAdd::init()
-                ->setCustomerSubsystemId($this->getCustomerSubsystemId())
-                ->setStatus(AdminUserCustomerSubsystem::STATUS_NORMAL)
-                ->setAdminUserId($this->getId())
-                ->setAdministrator(false)
-                ->setAdminDepartments($this->getAdminDepartments())
-                ->setAdminRoleIds($this->getAdminRoleIds())
-                ->run();
+        if ($this->getCategoryIds()){
+            foreach ($this->getCategoryIds() as $categoryId){
+                AdminCategoryDepartmentAdd::init()
+                    ->setCategoryId($categoryId)
+                    ->setAdminDepartmentId($this->getId())
+                    ->run();
+            }
+        }
+
+        if ($this->getAdminRoleIds()){
+            foreach ($this->getAdminRoleIds() as $adminRoleId){
+                AdminDepartmentRoleAdd::init()
+                    ->setAdminRoleId($adminRoleId)
+                    ->setAdminDepartmentId($this->getId())
+                    ->run();
+            }
         }
     }
 
@@ -48,9 +56,9 @@ class AdminUserAdd extends Core
 
     /**
      * @param mixed $id
-     * @return AdminUserAdd
+     * @return AdminDepartmentAdd
      */
-    protected function setId($id)
+    public function setId($id)
     {
         $this->id = $id;
         return $this;
@@ -58,7 +66,7 @@ class AdminUserAdd extends Core
 
     /**
      * @param $param
-     * @return AdminUserAdd
+     * @return AdminDepartmentAdd
      */
     public function setParam($param)
     {
@@ -83,7 +91,7 @@ class AdminUserAdd extends Core
 
     /**
      * @param mixed $name
-     * @return AdminUserAdd
+     * @return AdminDepartmentAdd
      */
     public function setName($name)
     {
@@ -91,43 +99,43 @@ class AdminUserAdd extends Core
         return $this;
     }
 
-    protected $mobile;
+    protected $pid;
 
     /**
      * @return mixed
      */
-    public function getMobile()
+    public function getPid()
     {
-        return $this->mobile;
+        return $this->pid;
     }
 
     /**
-     * @param mixed $mobile
-     * @return AdminUserAdd
+     * @param mixed $pid
+     * @return AdminDepartmentAdd
      */
-    public function setMobile($mobile)
+    public function setPid($pid)
     {
-        $this->mobile = $mobile;
+        $this->pid = $pid;
         return $this;
     }
 
-    protected $status;
+    protected $level;
 
     /**
      * @return mixed
      */
-    public function getStatus()
+    public function getLevel()
     {
-        return $this->status;
+        return $this->level;
     }
 
     /**
-     * @param mixed $status
-     * @return AdminUserAdd
+     * @param mixed $level
+     * @return AdminDepartmentAdd
      */
-    public function setStatus($status)
+    public function setLevel($level)
     {
-        $this->status = $status;
+        $this->level = $level;
         return $this;
     }
 
@@ -143,7 +151,7 @@ class AdminUserAdd extends Core
 
     /**
      * @param mixed $customerSubsystemId
-     * @return AdminUserAdd
+     * @return AdminDepartmentAdd
      */
     public function setCustomerSubsystemId($customerSubsystemId)
     {
@@ -151,23 +159,23 @@ class AdminUserAdd extends Core
         return $this;
     }
 
-    protected $adminDepartments;
+    protected $categoryIds;
 
     /**
      * @return mixed
      */
-    public function getAdminDepartments()
+    public function getCategoryIds()
     {
-        return $this->adminDepartments;
+        return $this->categoryIds;
     }
 
     /**
-     * @param mixed $adminDepartments
-     * @return AdminUserAdd
+     * @param mixed $categoryIds
+     * @return AdminDepartmentAdd
      */
-    public function setAdminDepartments($adminDepartments)
+    public function setCategoryIds($categoryIds)
     {
-        $this->adminDepartments = $adminDepartments;
+        $this->categoryIds = $categoryIds;
         return $this;
     }
 
@@ -183,12 +191,14 @@ class AdminUserAdd extends Core
 
     /**
      * @param mixed $adminRoleIds
-     * @return AdminUserAdd
+     * @return AdminDepartmentAdd
      */
     public function setAdminRoleIds($adminRoleIds)
     {
         $this->adminRoleIds = $adminRoleIds;
         return $this;
     }
+
+
 
 }

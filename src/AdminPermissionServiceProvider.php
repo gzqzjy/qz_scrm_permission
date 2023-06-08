@@ -141,6 +141,14 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-roles/delete', 'AdminRoleController@destroy');
                     Route::post('admin-roles/all', 'AdminRoleController@all');
                 });
+                Route::namespace('AdminDepartment\V1')->group(function () {
+                    Route::post('admin-departments/get', 'AdminDepartmentController@get');
+                    Route::post('admin-departments/add', 'AdminDepartmentController@store');
+                    Route::post('admin-departments/update', 'AdminDepartmentController@update');
+                    Route::post('admin-departments/delete', 'AdminDepartmentController@destroy');
+                    Route::post('admin-departments/all', 'AdminDepartmentController@all');
+                    Route::post('admin-departments/department-list', 'AdminDepartmentController@departmentList');
+                });
             });
     }
 

@@ -2,10 +2,12 @@
 
 namespace Qz\Admin\Permission\Cores\AdminUser;
 
+use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\AdminUserCustomerSubsystemAdd;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
 
 class AdminUserUpdate extends Core
 {
@@ -20,6 +22,14 @@ class AdminUserUpdate extends Core
         ]));
         $model->save();
         $this->setId($model->getKey());
+        if ($this->getCustomerSubsystemId()) {
+            AdminUserCustomerSubsystemAdd::init()
+                ->setCustomerSubsystemId($this->getCustomerSubsystemId())
+                ->setAdminUserId($this->getId())
+                ->setAdminDepartments($this->getAdminDepartments())
+                ->setAdminRoleIds($this->getAdminRoleIds())
+                ->run();
+        }
     }
 
     protected $id;
@@ -57,7 +67,7 @@ class AdminUserUpdate extends Core
         return $this;
     }
 
-    
+
     protected $name;
 
     /**
@@ -115,4 +125,68 @@ class AdminUserUpdate extends Core
         $this->status = $status;
         return $this;
     }
+
+    protected $customerSubsystemId;
+
+    /**
+     * @return mixed
+     */
+    public function getCustomerSubsystemId()
+    {
+        return $this->customerSubsystemId;
+    }
+
+    /**
+     * @param mixed $customerSubsystemId
+     * @return AdminUserUpdate
+     */
+    public function setCustomerSubsystemId($customerSubsystemId)
+    {
+        $this->customerSubsystemId = $customerSubsystemId;
+        return $this;
+    }
+
+
+    protected $adminDepartments;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminDepartments()
+    {
+        return $this->adminDepartments;
+    }
+
+    /**
+     * @param mixed $adminDepartments
+     * @return AdminUserUpdate
+     */
+    public function setAdminDepartments($adminDepartments)
+    {
+        $this->adminDepartments = $adminDepartments;
+        return $this;
+    }
+
+
+
+    protected $adminRoleIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminRoleIds()
+    {
+        return $this->adminRoleIds;
+    }
+
+    /**
+     * @param mixed $adminRoleIds
+     * @return AdminUserUpdate
+     */
+    public function setAdminRoleIds($adminRoleIds)
+    {
+        $this->adminRoleIds = $adminRoleIds;
+        return $this;
+    }
+
 }
