@@ -147,7 +147,6 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-departments/update', 'AdminDepartmentController@update');
                     Route::post('admin-departments/delete', 'AdminDepartmentController@destroy');
                     Route::post('admin-departments/all', 'AdminDepartmentController@all');
-                    Route::post('admin-departments/department-list', 'AdminDepartmentController@departmentList');
                 });
             });
     }
