@@ -19,6 +19,7 @@ class AdminUserUpdate extends Core
             'name' => $this->getName(),
             'mobile' => $this->getMobile(),
             'status' => $this->getStatus(),
+            'sex' => $this->getSex(),
         ]));
         $model->save();
         $this->setId($model->getKey());
@@ -126,6 +127,26 @@ class AdminUserUpdate extends Core
         return $this;
     }
 
+    protected $sex;
+
+    /**
+     * @return mixed
+     */
+    public function getSex()
+    {
+        return $this->sex;
+    }
+
+    /**
+     * @param mixed $sex
+     * @return AdminUserUpdate
+     */
+    public function setSex($sex)
+    {
+        $this->sex = $sex;
+        return $this;
+    }
+
     protected $customerSubsystemId;
 
     /**
@@ -188,5 +209,66 @@ class AdminUserUpdate extends Core
         $this->adminRoleIds = $adminRoleIds;
         return $this;
     }
+
+    protected $adminMenu;
+
+    protected $adminPageColumn;
+
+    protected $adminPageOption;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminMenu()
+    {
+        return $this->adminMenu;
+    }
+
+    /**
+     * @param mixed $adminMenu
+     * @return AdminUserUpdate
+     */
+    public function setAdminMenu($adminMenu)
+    {
+        $this->adminMenu = $adminMenu;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageColumn()
+    {
+        return $this->adminPageColumn;
+    }
+
+    /**
+     * @param mixed $adminPageColumn
+     * @return AdminUserUpdate
+     */
+    public function setAdminPageColumn($adminPageColumn)
+    {
+        $this->adminPageColumn = $adminPageColumn;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageOption()
+    {
+        return $this->adminPageOption;
+    }
+
+    /**
+     * @param mixed $adminPageOption
+     * @return AdminUserUpdate
+     */
+    public function setAdminPageOption($adminPageOption)
+    {
+        $this->adminPageOption = $adminPageOption;
+        return $this;
+    }
+
 
 }

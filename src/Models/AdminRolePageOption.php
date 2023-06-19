@@ -4,7 +4,7 @@
 namespace Qz\Admin\Permission\Models;
 
 
-class AdminPageOptionRole extends Model
+class AdminRolePageOption extends Model
 {
     protected $fillable = [
         'admin_role_id',

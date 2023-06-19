@@ -17,6 +17,7 @@ class AdminUser extends Model implements AuthenticatableContract, AuthorizableCo
         'name',
         'mobile',
         'status',
+        'sex',
     ];
 
     const STATUS_WORKING = 1;
@@ -29,11 +30,25 @@ class AdminUser extends Model implements AuthenticatableContract, AuthorizableCo
         self::STATUS_LEAVED => '离职',
     ];
 
+    const SEX_UNKNOWN = 'unknown';
+    const SEX_MAN = 'man';
+    const SEX_WOMAN = 'woman';
+
+    const SEX_DESC = [
+        self::SEX_UNKNOWN => '未知',
+        self::SEX_MAN => '男',
+        self::SEX_WOMAN => '女',
+    ];
+
     public function getStatusDescAttribute()
     {
         return Arr::get(self::STATUS_DESC, $this->getOriginal('status'), '');
     }
-    
+
+    public function getSexDescAttribute()
+    {
+        return Arr::get(self::STATUS_DESC, $this->getOriginal('status'), '');
+    }
     public function adminUserCustomerSubsystems()
     {
         return $this->hasMany(AdminUserCustomerSubsystem::class);

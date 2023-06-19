@@ -31,4 +31,19 @@ class AdminRole extends Model
     {
         return $this->hasMany(AdminUserCustomerSubsystemRole::class);
     }
+
+    public function adminRoleMenus()
+    {
+        return $this->hasMany(AdminRoleMenu::class);
+    }
+
+    public function adminRolePageColumns()
+    {
+        return $this->hasMany(AdminRolePageColumn::class);
+    }
+
+    public function adminRolePageOptions()
+    {
+        return $this->hasMany(AdminRolePageOption::class);
+    }
 }

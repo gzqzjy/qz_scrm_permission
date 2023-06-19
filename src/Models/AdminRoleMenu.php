@@ -4,16 +4,16 @@
 namespace Qz\Admin\Permission\Models;
 
 
-class AdminPageColumnRole extends Model
+class AdminRoleMenu extends Model
 {
     protected $fillable = [
         'admin_role_id',
-        'admin_page_column_id'
+        'admin_menu_id'
     ];
 
-    public function adminPageColumn()
+    public function adminMenu()
     {
-        return $this->belongsTo(AdminPageColumn::class);
+        return $this->belongsTo(AdminMenu::class);
     }
 
     public function adminRole()

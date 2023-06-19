@@ -4,6 +4,8 @@
 namespace Qz\Admin\Permission\Models;
 
 
+use Illuminate\Support\Arr;
+
 class AdminDepartment extends Model
 {
     protected $fillable = [
@@ -45,6 +47,8 @@ class AdminDepartment extends Model
         return $this->child()->with([
             'childrenDepartmentAndAdminUsers',
             'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUser',
+            'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUserCustomerSubsystemRoles.adminRole',
+            'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUserCustomerSubsystemDepartments',
             'adminCategoryDepartments',
             'adminDepartmentRoles',
         ])->withCount([

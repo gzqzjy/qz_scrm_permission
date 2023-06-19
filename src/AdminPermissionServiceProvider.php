@@ -88,6 +88,9 @@ class AdminPermissionServiceProvider extends ServiceProvider
                         Route::post('user', 'AccessController@user');
                         Route::post('logout', 'AccessController@logout');
                     });
+                Route::namespace('Category\V1')->group(function () {
+                    Route::post('categories/all', 'CategoryController@all');
+                });
                 Route::namespace('AdminPage\V1')->group(function () {
                     Route::post('admin-pages/get', 'AdminPageController@get');
                     Route::post('admin-pages/add', 'AdminPageController@store');
@@ -115,8 +118,11 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-users/update', 'AdminUserController@update');
                     Route::post('admin-users/delete', 'AdminUserController@destroy');
                     Route::post('admin-users/all', 'AdminUserController@all');
+                    Route::post('admin-users/all-status', 'AdminUserController@allStatus');
+                    Route::post('admin-users/all-sex', 'AdminUserController@allSex');
                     Route::post('admin-users/add-menus', 'AdminUserController@addMenus');
                     Route::post('admin-users/permission', 'AdminUserController@permission');
+                    Route::post('admin-users/update-permission', 'AdminUserController@updatePermission');
                 });
                 Route::namespace('AdminUserCustomerSubsystem\V1')->group(function () {
                     Route::post('admin-user-customer-subsystems/get', 'AdminUserCustomerSubsystemController@get');
@@ -127,7 +133,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-user-customer-subsystems/add-menus', 'AdminUserCustomerSubsystemController@addMenus');
                 });
                 Route::namespace('AdminRoleGroup\V1')->group(function () {
-                    Route::post('admin-role-groups/get', 'AdminRoleGroupController@get');
+                    Route::post('admin-role-groups/get', 'AdminRoleGroupController@getByRole');
                     Route::post('admin-role-groups/add', 'AdminRoleGroupController@store');
                     Route::post('admin-role-groups/update', 'AdminRoleGroupController@update');
                     Route::post('admin-role-groups/delete', 'AdminRoleGroupController@destroy');
@@ -140,6 +146,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-roles/update', 'AdminRoleController@update');
                     Route::post('admin-roles/delete', 'AdminRoleController@destroy');
                     Route::post('admin-roles/all', 'AdminRoleController@all');
+                    Route::post('admin-roles/permission', 'AdminRoleController@permission');
                 });
                 Route::namespace('AdminDepartment\V1')->group(function () {
                     Route::post('admin-departments/get', 'AdminDepartmentController@get');

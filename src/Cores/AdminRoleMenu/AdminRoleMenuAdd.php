@@ -1,19 +1,18 @@
 <?php
+namespace Qz\Admin\Permission\Cores\AdminRoleMenu;
 
-namespace Qz\Admin\Permission\Cores\AdminUserCustomerSubsystemMenu;
-
-use Qz\Admin\Permission\Cores\Core;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemMenu;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Cores\Core;
+use Qz\Admin\Permission\Models\AdminRoleMenu;
 
-class AdminUserCustomerSubsystemMenuAdd extends Core
+class AdminRoleMenuAdd extends Core
 {
     protected function execute()
     {
-        $model = AdminUserCustomerSubsystemMenu::withTrashed()
+        $model = AdminRoleMenu::withTrashed()
             ->firstOrCreate(Arr::whereNotNull([
-                'admin_user_customer_subsystem_id' => $this->getAdminUserCustomerSubsystemId(),
+                'admin_role_id' => $this->getAdminRoleId(),
                 'admin_menu_id' => $this->getAdminMenuId(),
             ]));
         if ($model->trashed()) {
@@ -34,9 +33,9 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
 
     /**
      * @param mixed $id
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @return AdminRoleMenuAdd
      */
-    protected function setId($id)
+    public function setId($id)
     {
         $this->id = $id;
         return $this;
@@ -44,7 +43,7 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
 
     /**
      * @param $param
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @return AdminRoleMenuAdd
      */
     public function setParam($param)
     {
@@ -57,23 +56,23 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
         return $this;
     }
 
-    protected $adminUserCustomerSubsystemId;
+    protected $adminRoleId;
 
     /**
      * @return mixed
      */
-    public function getAdminUserCustomerSubsystemId()
+    public function getAdminRoleId()
     {
-        return $this->adminUserCustomerSubsystemId;
+        return $this->adminRoleId;
     }
 
     /**
-     * @param mixed $adminUserCustomerSubsystemId
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @param mixed $adminRoleId
+     * @return AdminRoleMenuAdd
      */
-    public function setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
+    public function setAdminRoleId($adminRoleId)
     {
-        $this->adminUserCustomerSubsystemId = $adminUserCustomerSubsystemId;
+        $this->adminRoleId = $adminRoleId;
         return $this;
     }
 
@@ -89,31 +88,11 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
 
     /**
      * @param mixed $adminMenuId
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @return AdminRoleMenuAdd
      */
     public function setAdminMenuId($adminMenuId)
     {
         $this->adminMenuId = $adminMenuId;
-        return $this;
-    }
-
-    protected $type;
-
-    /**
-     * @return mixed
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param mixed $type
-     * @return AdminUserCustomerSubsystemMenuAdd
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
         return $this;
     }
 

@@ -186,7 +186,7 @@ class AdminUserCustomerSubsystemAdd extends Core
         $this->adminDepartments = $adminDepartments;
         return $this;
     }
-    
+
 
     protected $adminRoleIds;
 

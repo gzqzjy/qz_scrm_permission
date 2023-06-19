@@ -19,6 +19,7 @@ class AdminUserAdd extends Core
             ]), Arr::whereNotNull([
                 'name' => $this->getName(),
                 'status' => $this->getStatus(),
+                'sex' => $this->getSex(),
             ]));
         if ($model->trashed()) {
             $model->restore();
@@ -150,6 +151,26 @@ class AdminUserAdd extends Core
         $this->customerSubsystemId = $customerSubsystemId;
         return $this;
     }
+    
+    protected $sex;
+
+    /**
+     * @return mixed
+     */
+    public function getSex()
+    {
+        return $this->sex;
+    }
+
+    /**
+     * @param mixed $sex
+     * @return AdminUserAdd
+     */
+    public function setSex($sex)
+    {
+        $this->sex = $sex;
+        return $this;
+    }
 
     protected $adminDepartments;
 
@@ -190,5 +211,68 @@ class AdminUserAdd extends Core
         $this->adminRoleIds = $adminRoleIds;
         return $this;
     }
+
+    protected $adminMenu;
+
+    protected $adminPageColumn;
+
+    protected $adminPageOption;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminMenu()
+    {
+        return $this->adminMenu;
+    }
+
+    /**
+     * @param mixed $adminMenu
+     * @return AdminUserAdd
+     */
+    public function setAdminMenu($adminMenu)
+    {
+        $this->adminMenu = $adminMenu;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageColumn()
+    {
+        return $this->adminPageColumn;
+    }
+
+    /**
+     * @param mixed $adminPageColumn
+     * @return AdminUserAdd
+     */
+    public function setAdminPageColumn($adminPageColumn)
+    {
+        $this->adminPageColumn = $adminPageColumn;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageOption()
+    {
+        return $this->adminPageOption;
+    }
+
+    /**
+     * @param mixed $adminPageOption
+     * @return AdminUserAdd
+     */
+    public function setAdminPageOption($adminPageOption)
+    {
+        $this->adminPageOption = $adminPageOption;
+        return $this;
+    }
+
+
+
 
 }

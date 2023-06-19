@@ -3,6 +3,7 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\Auth;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use  Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
@@ -10,6 +11,7 @@ use  Qz\Admin\Permission\Cores\AdminPage\AdminPageIdGet;
 use  Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
 use  Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionDelete;
+use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetPermissionByAdminUserCustomerSubsystemId;
 use  Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
 use  Qz\Admin\Permission\Facades\Access;
 use  Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
@@ -19,6 +21,7 @@ use  Qz\Admin\Permission\Models\AdminPageColumn;
 use Qz\Admin\Permission\Models\AdminPageOption;
 use  Qz\Admin\Permission\Models\AdminUser;
 use  Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemDepartment;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemPageOption;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -86,8 +89,9 @@ class AccessController extends AdminController
         $name = '';
         if ($user instanceof AdminUser) {
             $name = Arr::get($user, 'name', '');
+            $administrator = $this->isAdministrator();
         }
-        return $this->success(compact('name'));
+        return $this->success(compact('name','administrator'));
     }
 
     public function addPage()
@@ -127,15 +131,11 @@ class AccessController extends AdminController
         $model = AdminPageColumn::query()
             ->whereIn('id', $pageColumnIds);
         if (!Access::getAdministrator()) {
-            $model->whereHas('AdminUserCustomerSubsystemPageColumns', function (Builder $builder) use ($pageColumnIds) {
-                $builder->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
-                    $builder->where('admin_user_id', Auth::guard('admin')->id())
-                        ->whereHas('customerSubsystem', function (Builder $builder) {
-                            $builder->where('customer_id', Access::getCustomerId())
-                                ->where('subsystem_id', Access::getSubsystemId());
-                        });
-                });
-            });
+            $adminPageColumnIds = GetPermissionByAdminUserCustomerSubsystemId::init()
+                ->setAdminUserCustomerSubsystemId(Access::getAdminUserCustomerSubsystemId())
+                ->run()
+                ->getAdminPageColumnIds();
+            $model->whereIn('id',  array_intersect($pageColumnIds, $adminPageColumnIds));
         }
         $dataIndexes = $model
             ->pluck('code');
@@ -246,15 +246,30 @@ class AccessController extends AdminController
         if (empty($options)) {
             return $this->success();
         }
+        $pageOptionIds = [];
         foreach ($options as $option) {
-            AdminPageOptionAdd::init()
+            $pageOptionId = AdminPageOptionAdd::init()
                 ->setAdminPageId($pageId)
                 ->setCode(Arr::get($option, 'code'))
                 ->setName(Arr::get($option, 'name'))
                 ->run()
                 ->getId();
+            if ($pageOptionId) {
+                $pageOptionIds = Arr::prepend($pageOptionIds, $pageOptionId);
+            }
         }
-        return $this->success();
+        $model = AdminPageOption::query()
+            ->whereIn('id', $pageOptionIds);
+        if (!Access::getAdministrator()) {
+            $adminPageOptionIds = GetPermissionByAdminUserCustomerSubsystemId::init()
+                ->setAdminUserCustomerSubsystemId(Access::getAdminUserCustomerSubsystemId())
+                ->run()
+                ->getAdminPageOptionIds();
+            $model->whereIn('id', array_intersect($pageOptionIds, $adminPageOptionIds));
+        }
+        $dataIndexes = $model
+            ->pluck('code');
+        return $this->response(compact('dataIndexes'));
     }
 
     public function menu()
@@ -262,27 +277,47 @@ class AccessController extends AdminController
         $model = AdminMenu::query()
             ->where('parent_id', 0);
         $administrator = $this->isAdministrator();
+        $adminMenuIds = [];
+        $menus = [];
         if (empty($administrator)) {
-            $model->whereHas('adminUserCustomerSubsystemMenus', function (Builder $builder) {
-                $builder->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
-                    $builder->where('admin_user_id', $this->getLoginAdminUserId());
-                });
-            });
+            $adminMenuIds = GetPermissionByAdminUserCustomerSubsystemId::init()
+                ->setAdminUserCustomerSubsystemId(Access::getAdminUserCustomerSubsystemId())
+                ->run()
+                ->getAdminMenuIds();
+            $adminDepartmentIds = AdminUserCustomerSubsystemDepartment::query()
+                ->where('admin_user_customer_subsystem_id', Access::getAdminUserCustomerSubsystemId())
+                ->where('administrator', 1)
+                ->pluck('admin_department_id')
+                ->toArray();
+            if (!empty($adminDepartmentIds)){
+                $addAdminMenuIds = AdminMenu::query()
+                    ->where('name', '部门管理')
+                    ->OrWhere('name', '系统设置')
+                    ->pluck('id')
+                    ->toArray();
+                $adminMenuIds = array_merge($adminMenuIds, $addAdminMenuIds);
+            }else{
+                return $this->response($menus);
+            }
         }
         $model = $model->orderByDesc('sort')
             ->get();
         $model->load([
             'children',
         ]);
-        $menus = [];
         foreach ($model as $value) {
-            $menus[] = $this->menuItem($value);
+            if ($menu = $this->menuItem($value, $administrator, $adminMenuIds)){
+                $menus[] = $menu;
+            }
         }
         return $this->response($menus);
     }
 
-    protected function menuItem($value)
+    protected function menuItem($value, $administrator, $adminMenuIds)
     {
+        if (empty($administrator) && !in_array(Arr::get($value, 'id'), $adminMenuIds)){
+            return [];
+        }
         $route = Arr::get($value, 'config');
         $route = Arr::add($route, 'name', Arr::get($value, 'name'));
         $route = Arr::add($route, 'path', Arr::get($value, 'path'));
@@ -290,7 +325,9 @@ class AccessController extends AdminController
             $routes = [];
             $children = Arr::get($value, 'children');
             foreach ($children as $child) {
-                $routes[] = $this->menuItem($child);
+                if ($itemRoute = $this->menuItem($child, $administrator, $adminMenuIds)){
+                    $routes[] = $itemRoute;
+                }
             }
             if (!empty($routes)) {
                 Arr::set($route, 'routes', $routes);

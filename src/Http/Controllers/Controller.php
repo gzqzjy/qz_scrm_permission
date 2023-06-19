@@ -20,6 +20,7 @@ class Controller extends BaseController
     public function __construct(Request $request = null)
     {
         if ($request) {
+            $request->offsetSet('page', max(1, (int)$request->input('current')));
             $this->setParam($request->all());
         }
     }

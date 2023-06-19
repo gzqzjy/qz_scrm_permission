@@ -1,20 +1,21 @@
 <?php
 
-namespace Qz\Admin\Permission\Cores\AdminUserCustomerSubsystemMenu;
+namespace Qz\Admin\Permission\Cores\AdminUserCustomerSubsystemPageOption;
 
 use Qz\Admin\Permission\Cores\Core;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemMenu;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemPageOption;
 
-class AdminUserCustomerSubsystemMenuAdd extends Core
+class AdminUserCustomerSubsystemPageOptionAdd extends Core
 {
     protected function execute()
     {
-        $model = AdminUserCustomerSubsystemMenu::withTrashed()
+        $model = AdminUserCustomerSubsystemPageOption::withTrashed()
             ->firstOrCreate(Arr::whereNotNull([
                 'admin_user_customer_subsystem_id' => $this->getAdminUserCustomerSubsystemId(),
-                'admin_menu_id' => $this->getAdminMenuId(),
+                'admin_page_option_id' => $this->getAdminPageOptionId(),
+                'type' => $this->getType(),
             ]));
         if ($model->trashed()) {
             $model->restore();
@@ -34,7 +35,7 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
 
     /**
      * @param mixed $id
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @return AdminUserCustomerSubsystemPageOptionAdd
      */
     protected function setId($id)
     {
@@ -44,7 +45,7 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
 
     /**
      * @param $param
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @return AdminUserCustomerSubsystemPageOptionAdd
      */
     public function setParam($param)
     {
@@ -69,7 +70,7 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
 
     /**
      * @param mixed $adminUserCustomerSubsystemId
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @return AdminUserCustomerSubsystemPageOptionAdd
      */
     public function setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
     {
@@ -77,25 +78,26 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
         return $this;
     }
 
-    protected $adminMenuId;
+    protected $adminPageOptionId;
 
     /**
      * @return mixed
      */
-    public function getAdminMenuId()
+    public function getAdminPageOptionId()
     {
-        return $this->adminMenuId;
+        return $this->adminPageOptionId;
     }
 
     /**
-     * @param mixed $adminMenuId
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @param mixed $adminPageOptionId
+     * @return AdminUserCustomerSubsystemPageOptionAdd
      */
-    public function setAdminMenuId($adminMenuId)
+    public function setAdminPageOptionId($adminPageOptionId)
     {
-        $this->adminMenuId = $adminMenuId;
+        $this->adminPageOptionId = $adminPageOptionId;
         return $this;
     }
+
 
     protected $type;
 
@@ -109,7 +111,7 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
 
     /**
      * @param mixed $type
-     * @return AdminUserCustomerSubsystemMenuAdd
+     * @return AdminUserCustomerSubsystemPageOptionAdd
      */
     public function setType($type)
     {

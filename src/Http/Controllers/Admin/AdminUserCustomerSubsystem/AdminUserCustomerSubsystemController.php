@@ -84,6 +84,7 @@ class AdminUserCustomerSubsystemController extends AdminController
         $adminUserId = AdminUserAdd::init()
             ->setMobile($this->getParam('mobile'))
             ->setName($this->getParam('name'))
+            ->setSex($this->getParam('sex'))
             ->run()
             ->getId();
         $id = AdminUserCustomerSubsystemAdd::init()
@@ -126,6 +127,7 @@ class AdminUserCustomerSubsystemController extends AdminController
         $adminUserId = AdminUserAdd::init()
             ->setMobile($this->getParam('mobile'))
             ->setName($this->getParam('name'))
+            ->setSex($this->getParam('sex'))
             ->run()
             ->getId();
         $id = AdminUserCustomerSubsystemUpdate::init()

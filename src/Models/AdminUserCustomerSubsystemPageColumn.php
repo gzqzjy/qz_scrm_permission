@@ -7,6 +7,7 @@ class AdminUserCustomerSubsystemPageColumn extends Model
     protected $fillable = [
         'admin_user_customer_subsystem_id',
         'admin_page_column_id',
+        'type',
     ];
 
     public function adminPageColumn()

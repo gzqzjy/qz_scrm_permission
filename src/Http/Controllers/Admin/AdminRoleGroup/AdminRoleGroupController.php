@@ -3,6 +3,7 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminRoleGroup;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -10,25 +11,42 @@ use Illuminate\Validation\Rule;
 use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupAdd;
 use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupDelete;
 use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupUpdate;
-use Qz\Admin\Permission\Cores\AdminUser\AdminUserAdd;
-use Qz\Admin\Permission\Cores\AdminUser\AdminUserDelete;
-use Qz\Admin\Permission\Cores\AdminUser\AdminUserUpdate;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminRoleGroup;
-use Qz\Admin\Permission\Models\AdminUser;
 
 class AdminRoleGroupController extends AdminController
 {
-    public function get()
-    {
+    public function get(){
         $model = AdminRoleGroup::query()
             ->where('customer_subsystem_id', Access::getCustomerSubsystemId());
 
         $model = $this->filter($model);
-        $model = $model->paginate($this->getPageSize());
+        $model = $model
+            ->selectRaw('id,name as admin_role_group_name,id admin_role_group_id,created_at')
+            ->paginate($this->getPageSize());
+        $model->load([
+            'adminRoles' => function (HasMany $hasMany) {
+                $hasMany
+                    ->selectRaw('name,id,admin_role_group_id,created_at')
+                    ->withCount([
+                        'departmentRoles',
+                        'adminUserCustomerSubsystemRoles'
+                    ]);
+            }
+        ]);
+        foreach ($model->items() as $item){
+            $item->key = Arr::get($item, 'id');
+            if (Arr::get($item, 'adminRoles')){
+                foreach (Arr::get($item, 'adminRoles') as $value){
+                    $value->key = Arr::get($item, 'id') . '-' . Arr::get($value, 'id');
+                }
+            }
+        }
+
+
         return $this->page($model);
     }
 
@@ -39,20 +57,21 @@ class AdminRoleGroupController extends AdminController
     public function store()
     {
         $validator = Validator::make($this->getParam(), [
-            'name' => [
+            'admin_role_group_name' => [
                 'required',
-                Rule::unique(AdminRoleGroup::class)
+                Rule::unique(AdminRoleGroup::class, 'name')
                     ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
                     ->withoutTrashed(),
             ],
         ], [
-            'name.required' => '角色组名称不能为空',
-            'name.unique' => '角色组名称不能重复',
+            'admin_role_group_name.required' => '角色组名称不能为空',
+            'admin_role_group_name.unique' => '角色组名称不能重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
         $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
+        $this->addParam('name', $this->getParam('admin_role_group_name'));
         $id = AdminRoleGroupAdd::init()
             ->setParam($this->getParam())
             ->run()
@@ -67,18 +86,19 @@ class AdminRoleGroupController extends AdminController
     public function update()
     {
         $validator = Validator::make($this->getParam(), [
-            'name' => [
-                Rule::unique(AdminRoleGroup::class)
+            'admin_role_group_name' => [
+                Rule::unique(AdminRoleGroup::class, 'name')
                     ->withoutTrashed()
                     ->ignore($this->getParam('id'))
                     ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
             ],
         ], [
-            'name.unique' => '角色组名称不能重复',
+            'admin_role_group_name.unique' => '角色组名称不能重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
+        $this->addParam('name', $this->getParam('admin_role_group_name'));
         $id = AdminRoleGroupUpdate::init()
             ->setId($this->getParam('id'))
             ->setParam($this->getParam())
