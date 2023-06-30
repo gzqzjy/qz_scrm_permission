@@ -15,6 +15,7 @@ class AdminUserCustomerSubsystemMenuAdd extends Core
             ->firstOrCreate(Arr::whereNotNull([
                 'admin_user_customer_subsystem_id' => $this->getAdminUserCustomerSubsystemId(),
                 'admin_menu_id' => $this->getAdminMenuId(),
+                'type' => $this->getType(),
             ]));
         if ($model->trashed()) {
             $model->restore();

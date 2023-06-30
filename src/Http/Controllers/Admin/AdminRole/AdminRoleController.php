@@ -2,6 +2,7 @@
 
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminRole;
 
+use AlibabaCloud\SDK\Dysmsapi\V20170525\Models\AddShortUrlResponseBody\data;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
@@ -20,6 +21,8 @@ use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminDepartmentRole;
 use Qz\Admin\Permission\Models\AdminMenu;
 use Qz\Admin\Permission\Models\AdminRole;
+use Qz\Admin\Permission\Models\AdminRoleGroup;
+use Qz\Admin\Permission\Models\AdminRoleRequest;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRole;
 
 class AdminRoleController extends AdminController
@@ -79,6 +82,19 @@ class AdminRoleController extends AdminController
             $this->addParam('admin_role_page_column', array_unique($adminPageColumnIds));
             $this->addParam('admin_role_page_option', array_unique($adminPageOptionIds));
         }
+        if ($dataPermissions = $this->getParam('data_permission')){
+            $adminRoleRequests = [];
+            $character = AdminRoleRequest::CHARACTER;
+            foreach ($dataPermissions as $dataPermission){
+                $adminRoleRequests[] = [
+                    'admin_request_id' => Arr::get($dataPermission, 'admin_request_id'),
+                    'type' => implode($character, Arr::get($dataPermission, 'actions'))
+                ];
+            }
+            if ($adminRoleRequests){
+                $this->addParam('admin_role_request', $adminRoleRequests);
+            }
+        }
 
         $id = AdminRoleAdd::init()
             ->setParam($this->getParam())
@@ -134,6 +150,19 @@ class AdminRoleController extends AdminController
             $this->addParam('admin_role_page_column', array_unique($adminPageColumnIds));
             $this->addParam('admin_role_page_option', array_unique($adminPageOptionIds));
         }
+        if ($dataPermissions = $this->getParam('data_permission')){
+            $adminRoleRequests = [];
+            $character = AdminRoleRequest::CHARACTER;
+            foreach ($dataPermissions as $dataPermission){
+                $adminRoleRequests[] = [
+                    'admin_request_id' => Arr::get($dataPermission, 'admin_request_id'),
+                    'type' => implode($character, Arr::get($dataPermission, 'actions'))
+                ];
+            }
+            if ($adminRoleRequests){
+                $this->addParam('admin_role_request', $adminRoleRequests);
+            }
+        }
         $id = AdminRoleUpdate::init()
             ->setId($this->getParam('id'))
             ->setParam($this->getParam())
@@ -178,9 +207,16 @@ class AdminRoleController extends AdminController
     {
         $param = $this->getParam();
         $select = Arr::get($param, 'select', 'id as value, name as label');
+        $groupModel = AdminRoleGroup::query()
+            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+            ->selectRaw($select)
+            ->get();
+        if (empty($groupModel)){
+            return $this->response([]);
+        }
         $model = AdminRole::query()
             ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
-            ->selectRaw($select);
+            ->selectRaw($select . ',admin_role_group_id');
         $model = $this->filter($model);
         $adminDepartmentIds = [];
         if ($this->getParam('admin_departments')){
@@ -199,19 +235,63 @@ class AdminRoleController extends AdminController
             });
         }
         $model = $model->get();
-        return $this->response($model);
+        $model = $model
+            ->groupBy('admin_role_group_id')
+            ->toArray();
+        foreach ($groupModel as &$item){
+            $pid = Arr::get($item, 'value');
+            if ($children = Arr::get($model, $pid)){
+                Arr::set($item, 'children', array_values($children));
+            }
+            Arr::set($item, 'value', 'admin_role_group_'.$pid);
+        }
+        return $this->response($groupModel);
     }
 
     protected function permission()
     {
-        $permission = GetMenuByAdminRole::init();
-        if ($this->getParam('id')){
-            $permission->setAdminRoleIds([$this->getParam('id')]);
-        }
-        $menus = $permission->run()
-            ->getMenus();
+        if ($this->getParam('type') == 'data'){
+            //数据权限
+            if (empty($this->getParam('id'))){
+                return $this->success([
+                    [
+                        "adminRequestId" => 0,
+                        "actions" => []
+                    ]
+                ]);
+            }
+            $adminRoleRequests = AdminRoleRequest::query()
+                ->where('admin_role_id', $this->getParam('id'))
+                ->get();
+            $data = [];
+            foreach ($adminRoleRequests as $adminRoleRequest){
+                $data[] = [
+                    "adminRequestId" => Arr::get($adminRoleRequest, 'admin_request_id'),
+                    "actions" => Arr::get($adminRoleRequest, 'type') ? explode(AdminRoleRequest::CHARACTER, Arr::get($adminRoleRequest, 'type')) :[],
+                ];
+            }
+            if (empty($data)){
+                return $this->success([
+                    [
+                        "adminRequestId" => 0,
+                        "actions" => []
+                    ]
+                ]);
+            }
+            return $this->success($data);
+        }else{
+            //功能权限
+            $permission = GetMenuByAdminRole::init();
+            if ($this->getParam('id')){
+                $permission->setAdminRoleIds([$this->getParam('id')]);
+            }
+            $menus = $permission
+                ->setSubsystemId(Access::getSubsystemId())
+                ->run()
+                ->getMenus();
 
-        return $this->success($menus);
+            return $this->success($menus);
+        }
     }
 
     protected function permissionItem($value, $menuIds, $pageColumnIds, $pageOptionIds)

@@ -23,7 +23,7 @@ class AdminRoleGroupController extends AdminController
         $model = AdminRoleGroup::query()
             ->where('customer_subsystem_id', Access::getCustomerSubsystemId());
 
-        $model = $this->filter($model);
+//        $model = $this->filter($model);
         $model = $model
             ->selectRaw('id,name as admin_role_group_name,id admin_role_group_id,created_at')
             ->paginate($this->getPageSize());
@@ -35,6 +35,9 @@ class AdminRoleGroupController extends AdminController
                         'departmentRoles',
                         'adminUserCustomerSubsystemRoles'
                     ]);
+                if ($name = $this->getParam('name')){
+                    $hasMany->where('name', 'like', "%{$name}%");
+                }
             }
         ]);
         foreach ($model->items() as $item){

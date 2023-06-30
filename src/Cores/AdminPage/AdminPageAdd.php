@@ -12,7 +12,7 @@ class AdminPageAdd extends Core
     protected function execute()
     {
         $model = AdminPage::withTrashed()
-            ->firstOrCreate(Arr::whereNotNull([
+            ->updateOrCreate(Arr::whereNotNull([
                 'code' => $this->getCode(),
                 'subsystem_id' => $this->getSubsystemId(),
             ]), Arr::whereNotNull([

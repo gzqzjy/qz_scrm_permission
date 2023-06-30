@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Qz\Admin\Permission\Cores\AdminRoleMenu\AdminRoleMenuAdd;
 use Qz\Admin\Permission\Cores\AdminRolePageColumn\AdminRolePageColumnAdd;
 use Qz\Admin\Permission\Cores\AdminRolePageOption\AdminRolePageOptionAdd;
+use Qz\Admin\Permission\Cores\AdminRoleRequest\AdminRoleRequestAdd;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRole;
 
@@ -48,6 +49,16 @@ class AdminRoleAdd extends Core
                 AdminRolePageOptionAdd::init()
                     ->setAdminRoleId($this->getId())
                     ->setAdminPageOptionId($adminPageOptionId)
+                    ->run();
+            }
+        }
+
+        if ($this->getAdminRoleRequest()){
+            foreach ($this->getAdminRoleRequest() as $item){
+                AdminRoleRequestAdd::init()
+                    ->setAdminRoleId($this->getId())
+                    ->setAdminRequestId(Arr::get($item, 'admin_request_id'))
+                    ->setType(Arr::get($item, 'type'))
                     ->run();
             }
         }
@@ -209,6 +220,27 @@ class AdminRoleAdd extends Core
         $this->adminRolePageOption = $adminRolePageOption;
         return $this;
     }
+
+    protected $adminRoleRequest;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminRoleRequest()
+    {
+        return $this->adminRoleRequest;
+    }
+
+    /**
+     * @param mixed $adminRoleRequest
+     * @return AdminRoleAdd
+     */
+    public function setAdminRoleRequest($adminRoleRequest)
+    {
+        $this->adminRoleRequest = $adminRoleRequest;
+        return $this;
+    }
+
 
 
 

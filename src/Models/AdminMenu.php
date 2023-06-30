@@ -34,7 +34,7 @@ class AdminMenu extends Model
             'parentData'
         ]);
     }
-    
+
     public function child()
     {
         return $this->hasMany(AdminMenu::class, 'parent_id', 'id')
@@ -54,5 +54,15 @@ class AdminMenu extends Model
     public function adminPage()
     {
         return $this->belongsTo(AdminPage::class);
+    }
+
+    public function childrenRequest()
+    {
+        return $this->child()->with([
+            'children',
+            'adminPage',
+            'adminPage.adminPageOptions',
+            'adminPage.adminPageOptions.adminRequests',
+        ]);
     }
 }

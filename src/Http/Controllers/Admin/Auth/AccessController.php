@@ -88,10 +88,11 @@ class AccessController extends AdminController
         $user = Auth::guard('admin')->user();
         $name = '';
         if ($user instanceof AdminUser) {
+            $id = Arr::get($user, 'id', '');
             $name = Arr::get($user, 'name', '');
             $administrator = $this->isAdministrator();
         }
-        return $this->success(compact('name','administrator'));
+        return $this->success(compact('id','name','administrator'));
     }
 
     public function addPage()
@@ -296,8 +297,6 @@ class AccessController extends AdminController
                     ->pluck('id')
                     ->toArray();
                 $adminMenuIds = array_merge($adminMenuIds, $addAdminMenuIds);
-            }else{
-                return $this->response($menus);
             }
         }
         $model = $model->orderByDesc('sort')

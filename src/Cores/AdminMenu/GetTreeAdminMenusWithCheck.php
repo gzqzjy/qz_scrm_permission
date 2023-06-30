@@ -5,6 +5,7 @@ namespace Qz\Admin\Permission\Cores\AdminMenu;
 
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Qz\Admin\Permission\Cores\Core;
 
 class GetTreeAdminMenusWithCheck extends Core
@@ -13,6 +14,15 @@ class GetTreeAdminMenusWithCheck extends Core
     {
         if (empty($this->getAdminMenus())) {
             return;
+        }
+        if (empty($this->getAdminMenuIds())) {
+            $this->setAdminMenuIds([]);
+        }
+        if (empty($this->getAdminPageColumnIds())) {
+            $this->setAdminPageColumnIds([]);
+        }
+        if (empty($this->getAdminPageOptionIds())) {
+            $this->setAdminPageOptionIds([]);
         }
         $menus = [];
         foreach ($this->getAdminMenus() as $menu) {
@@ -98,7 +108,7 @@ class GetTreeAdminMenusWithCheck extends Core
         }
         return $data;
     }
-    
+
     protected $adminMenus;
 
     protected $adminMenuIds;
@@ -181,7 +191,7 @@ class GetTreeAdminMenusWithCheck extends Core
         return $this;
     }
 
-    
+
 
     /**
      * @return mixed
@@ -200,6 +210,6 @@ class GetTreeAdminMenusWithCheck extends Core
         $this->treeAdminMenus = $treeAdminMenus;
         return $this;
     }
-    
-    
+
+
 }

@@ -12,11 +12,12 @@ class AdminPageOptionAdd extends Core
     protected function execute()
     {
         $model = AdminPageOption::withTrashed()
-            ->firstOrCreate(Arr::whereNotNull([
+            ->updateOrCreate(Arr::whereNotNull([
                 'admin_page_id' => $this->getAdminPageId(),
                 'code' => $this->getCode(),
             ]), Arr::whereNotNull([
                 'name' => $this->getName(),
+                'is_show' => $this->getIsShow(),
             ]));
         if ($model->trashed()) {
             $model->restore();
@@ -118,4 +119,25 @@ class AdminPageOptionAdd extends Core
         $this->code = $code;
         return $this;
     }
+
+    protected $isShow;
+
+    /**
+     * @return mixed
+     */
+    public function getIsShow()
+    {
+        return $this->isShow;
+    }
+
+    /**
+     * @param mixed $isShow
+     * @return AdminPageOptionAdd
+     */
+    public function setIsShow($isShow)
+    {
+        $this->isShow = $isShow;
+        return $this;
+    }
+
 }

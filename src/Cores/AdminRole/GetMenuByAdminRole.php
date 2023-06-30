@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminMenu\GetTreeAdminMenusWithCheck;
 use Qz\Admin\Permission\Models\AdminMenu;
+use Qz\Admin\Permission\Models\AdminPageColumn;
+use Qz\Admin\Permission\Models\AdminPageOption;
 use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminRoleMenu;
 use Qz\Admin\Permission\Models\AdminRolePageColumn;
@@ -19,6 +21,7 @@ class GetMenuByAdminRole extends Core
     protected function execute()
     {
         $excludeMenuId = AdminMenu::query()
+            ->where('subsystem_id', $this->getSubsystemId())
             ->where('name', '系统设置')
             ->where('parent_id', 0)
             ->value('id');//系统设置不显示
@@ -166,6 +169,28 @@ class GetMenuByAdminRole extends Core
         $this->menus = $menus;
         return $this;
     }
+
+    protected $subsystemId;
+
+    /**
+     * @return mixed
+     */
+    public function getSubsystemId()
+    {
+        return $this->subsystemId;
+    }
+
+    /**
+     * @param mixed $subsystemId
+     * @return GetMenuByAdminRole
+     */
+    public function setSubsystemId($subsystemId)
+    {
+        $this->subsystemId = $subsystemId;
+        return $this;
+    }
+
+
 
 
 

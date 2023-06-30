@@ -15,6 +15,11 @@ class AdminDepartment extends Model
         'customer_subsystem_id'
     ];
 
+    public function customerSubsystem()
+    {
+        return $this->belongsTo(CustomerSubsystem::class);
+    }
+
     public function adminCategoryDepartments()
     {
         return $this->hasMany(AdminCategoryDepartment::class);

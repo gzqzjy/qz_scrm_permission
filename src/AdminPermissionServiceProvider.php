@@ -88,9 +88,6 @@ class AdminPermissionServiceProvider extends ServiceProvider
                         Route::post('user', 'AccessController@user');
                         Route::post('logout', 'AccessController@logout');
                     });
-                Route::namespace('Category\V1')->group(function () {
-                    Route::post('categories/all', 'CategoryController@all');
-                });
                 Route::namespace('AdminPage\V1')->group(function () {
                     Route::post('admin-pages/get', 'AdminPageController@get');
                     Route::post('admin-pages/add', 'AdminPageController@store');
@@ -123,6 +120,8 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-users/add-menus', 'AdminUserController@addMenus');
                     Route::post('admin-users/permission', 'AdminUserController@permission');
                     Route::post('admin-users/update-permission', 'AdminUserController@updatePermission');
+                    Route::post('admin-users/department-permission', 'AdminUserController@departmentPermission');
+                    Route::post('admin-users/department-admin-user-permission', 'AdminUserController@departmentAdminUserPermission');
                 });
                 Route::namespace('AdminUserCustomerSubsystem\V1')->group(function () {
                     Route::post('admin-user-customer-subsystems/get', 'AdminUserCustomerSubsystemController@get');
@@ -154,6 +153,10 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-departments/update', 'AdminDepartmentController@update');
                     Route::post('admin-departments/delete', 'AdminDepartmentController@destroy');
                     Route::post('admin-departments/all', 'AdminDepartmentController@all');
+                });
+
+                Route::namespace('AdminRequest\V1')->group(function () {
+                    Route::post('admin-requests/all', 'AdminRequestController@all');
                 });
             });
     }

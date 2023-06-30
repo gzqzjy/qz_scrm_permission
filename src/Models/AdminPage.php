@@ -19,4 +19,9 @@ class AdminPage extends Model
     {
         return $this->hasMany(AdminPageColumn::class);
     }
+
+    public function adminMenus()
+    {
+        return $this->hasMany(AdminMenu::class);
+    }
 }

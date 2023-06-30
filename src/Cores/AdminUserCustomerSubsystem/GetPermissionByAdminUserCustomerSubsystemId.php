@@ -10,6 +10,7 @@ use Qz\Admin\Permission\Cores\AdminRole\GetMenuByAdminRole;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemMenu;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemPageColumn;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemPageOption;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRole;
 
 class GetPermissionByAdminUserCustomerSubsystemId extends Core
@@ -56,9 +57,9 @@ class GetPermissionByAdminUserCustomerSubsystemId extends Core
             $adminPageColumnIds = array_diff($adminPageColumnIds, Arr::pluck($adminPageColumnDelete, 'admin_page_column_id'));
         }
         $this->setAdminPageColumnIds(array_values($adminPageColumnIds));
-        $adminUserPageOptionIds = AdminUserCustomerSubsystemPageColumn::query()
+        $adminUserPageOptionIds = AdminUserCustomerSubsystemPageOption::query()
             ->where('admin_user_customer_subsystem_id', $this->getAdminUserCustomerSubsystemId())
-            ->select(['type', 'admin_page_column_id'])
+            ->select(['type', 'admin_page_option_id'])
             ->get();
         $adminUserPageOptionIds = $adminUserPageOptionIds->groupBy('type')->toArray();
         if ($adminPageOptionAdd = Arr::get($adminUserPageOptionIds, 'add')) {

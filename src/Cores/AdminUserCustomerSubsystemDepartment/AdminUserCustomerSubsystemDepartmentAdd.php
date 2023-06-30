@@ -10,7 +10,7 @@ class AdminUserCustomerSubsystemDepartmentAdd extends Core
     protected function execute()
     {
         $model = AdminUserCustomerSubsystemDepartment::withTrashed()
-            ->firstOrCreate(Arr::whereNotNull([
+            ->updateOrCreate(Arr::whereNotNull([
                 'admin_user_customer_subsystem_id' => $this->getAdminUserCustomerSubsystemId(),
                 'admin_department_id' => $this->getAdminDepartmentId(),
             ]), Arr::whereNotNull([
