@@ -37,7 +37,6 @@ use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemDepartment;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRequestDepartment;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRequestEmployee;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRole;
 
 class AdminUserController extends AdminController
 {

@@ -5,10 +5,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
-use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
-use Qz\Admin\Permission\Models\AdminMenu;
-use Qz\Admin\Permission\Models\AdminPage;
 use Qz\Admin\Permission\Models\AdminRequest;
 
 class AdminRequestController extends AdminController

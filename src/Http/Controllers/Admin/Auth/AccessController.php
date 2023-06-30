@@ -6,21 +6,21 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use  Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
-use  Qz\Admin\Permission\Cores\AdminPage\AdminPageIdGet;
-use  Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
-use  Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
+use Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
+use Qz\Admin\Permission\Cores\AdminPage\AdminPageIdGet;
+use Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
+use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionDelete;
 use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetPermissionByAdminUserCustomerSubsystemId;
-use  Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
-use  Qz\Admin\Permission\Facades\Access;
-use  Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
+use Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
+use Qz\Admin\Permission\Facades\Access;
+use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminMenu;
 use Qz\Admin\Permission\Models\AdminPage;
-use  Qz\Admin\Permission\Models\AdminPageColumn;
+use Qz\Admin\Permission\Models\AdminPageColumn;
 use Qz\Admin\Permission\Models\AdminPageOption;
-use  Qz\Admin\Permission\Models\AdminUser;
-use  Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
+use Qz\Admin\Permission\Models\AdminUser;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemDepartment;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemPageOption;
 use Illuminate\Database\Eloquent\Builder;
@@ -92,7 +92,7 @@ class AccessController extends AdminController
             $name = Arr::get($user, 'name', '');
             $administrator = $this->isAdministrator();
         }
-        return $this->success(compact('id','name','administrator'));
+        return $this->success(compact('id', 'name', 'administrator'));
     }
 
     public function addPage()
@@ -136,7 +136,7 @@ class AccessController extends AdminController
                 ->setAdminUserCustomerSubsystemId(Access::getAdminUserCustomerSubsystemId())
                 ->run()
                 ->getAdminPageColumnIds();
-            $model->whereIn('id',  array_intersect($pageColumnIds, $adminPageColumnIds));
+            $model->whereIn('id', array_intersect($pageColumnIds, $adminPageColumnIds));
         }
         $dataIndexes = $model
             ->pluck('code');
@@ -290,7 +290,7 @@ class AccessController extends AdminController
                 ->where('administrator', 1)
                 ->pluck('admin_department_id')
                 ->toArray();
-            if (!empty($adminDepartmentIds)){
+            if (!empty($adminDepartmentIds)) {
                 $addAdminMenuIds = AdminMenu::query()
                     ->where('name', '部门管理')
                     ->OrWhere('name', '系统设置')
@@ -305,7 +305,7 @@ class AccessController extends AdminController
             'children',
         ]);
         foreach ($model as $value) {
-            if ($menu = $this->menuItem($value, $administrator, $adminMenuIds)){
+            if ($menu = $this->menuItem($value, $administrator, $adminMenuIds)) {
                 $menus[] = $menu;
             }
         }
@@ -314,7 +314,7 @@ class AccessController extends AdminController
 
     protected function menuItem($value, $administrator, $adminMenuIds)
     {
-        if (empty($administrator) && !in_array(Arr::get($value, 'id'), $adminMenuIds)){
+        if (empty($administrator) && !in_array(Arr::get($value, 'id'), $adminMenuIds)) {
             return [];
         }
         $route = Arr::get($value, 'config');
@@ -324,7 +324,7 @@ class AccessController extends AdminController
             $routes = [];
             $children = Arr::get($value, 'children');
             foreach ($children as $child) {
-                if ($itemRoute = $this->menuItem($child, $administrator, $adminMenuIds)){
+                if ($itemRoute = $this->menuItem($child, $administrator, $adminMenuIds)) {
                     $routes[] = $itemRoute;
                 }
             }

@@ -6,7 +6,6 @@ use Illuminate\Support\Str;
 use Qz\Admin\Permission\Cores\AdminCategoryDepartment\AdminCategoryDepartmentAdd;
 use Qz\Admin\Permission\Cores\AdminDepartmentRole\AdminDepartmentRoleAdd;
 use Qz\Admin\Permission\Cores\Core;
-use Qz\Admin\Permission\Models\AdminCategoryDepartment;
 use Qz\Admin\Permission\Models\AdminDepartment;
 
 

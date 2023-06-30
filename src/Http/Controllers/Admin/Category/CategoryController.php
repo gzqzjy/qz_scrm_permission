@@ -5,9 +5,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Qz\Admin\Permission\Cores\AdminDepartment\GetInfoByAdminUserCustomerSubsystemId;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
-use Qz\Admin\Permission\Models\AdminCategoryDepartment;
-use Qz\Admin\Permission\Models\AdminDepartmentRole;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemDepartment;
 use Qz\Admin\Permission\Models\Category;
 
 class CategoryController extends AdminController

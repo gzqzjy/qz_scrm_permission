@@ -19,7 +19,6 @@ use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminDepartmentRole;
-use Qz\Admin\Permission\Models\AdminMenu;
 use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminRoleGroup;
 use Qz\Admin\Permission\Models\AdminRoleRequest;
