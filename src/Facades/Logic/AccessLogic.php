@@ -120,4 +120,26 @@ class AccessLogic
         $this->adminUserCustomerSubsystemIds = $adminUserCustomerSubsystemIds;
         return $this;
     }
+    
+    protected $adminUserId;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminUserId()
+    {
+        return $this->adminUserId;
+    }
+
+    /**
+     * @param mixed $adminUserId
+     * @return AccessLogic
+     */
+    public function setAdminUserId($adminUserId)
+    {
+        $this->adminUserId = $adminUserId;
+        return $this;
+    }
+    
+    
 }

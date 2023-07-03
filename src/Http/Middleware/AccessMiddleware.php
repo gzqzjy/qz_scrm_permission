@@ -32,6 +32,7 @@ class AccessMiddleware
         }
         Access::setSubsystemId($subsystemId);
         $adminUserId = Auth::guard('admin')->id();
+        Access::setAdminUserId($adminUserId);
         $model = CustomerSubsystem::query()
             ->select('customer_id', 'id')
             ->where('subsystem_id', $subsystemId)

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Facade;
 /**
  * Class Access
  * @package Qz\Admin\Permission\Facades
+ * @method static void setAdminUserId($id)
+ * @method static int getAdminUserId()
  * @method static void setSubsystemId($id)
  * @method static int getSubsystemId()
  * @method static void setCustomerId($id)
