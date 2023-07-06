@@ -4,7 +4,9 @@ namespace Qz\Admin\Permission\Http\Controllers\Admin;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Qz\Admin\Permission\Cores\Common\Filter;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Controller;
@@ -45,6 +47,26 @@ class AdminController extends Controller
             }
         }
         return $model;
+    }
+
+    protected function getChildFilter()
+    {
+        $filter = [];
+        if ($this->getParam('filter')){
+            foreach ($this->getParam('filter') as $item){
+                $field = Str::snake(Arr::get($item, 'field'));
+                if (strpos($field, '.') !== false) {
+                    $firstField = Str::beforeLast($field, '.');
+                    $otherField = Str::afterLast($field, '.');
+                    $firstField = Str::camel($firstField);
+                    $option = Arr::get($item, 'option');
+                    $value = Arr::get($item, 'value');
+                    $item['field'] = $otherField;
+                    $filter[$firstField][] = $item;
+                }
+            }
+        }
+        return $filter;
     }
 
     protected function isAdministrator()

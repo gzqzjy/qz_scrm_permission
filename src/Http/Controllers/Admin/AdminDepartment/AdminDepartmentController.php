@@ -12,6 +12,7 @@ use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentDelete;
 use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentUpdate;
 use Qz\Admin\Permission\Cores\AdminDepartment\GetTreeDepartmentList;
 use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetSubAdminDepartmentIdsByAdminDepartmentIds;
+use Qz\Admin\Permission\Cores\Common\Filter;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
@@ -49,17 +50,22 @@ class AdminDepartmentController extends AdminController
                 ->getAllAdminDepartmentIds();
             $model->whereIn('id', $adminDepartmentIds);
         }
-        if ($departmentName = $this->getParam('department_name')) {
-            $model->where('name', 'like', '%' . $departmentName . '%');
-        }
         $model = $this->filter($model);
+        $filter = [];
+        if ($this->getParam('filter')){
+            $filter = $this->getChildFilter();
+        }
         $model = $model
             ->orderBy('level')
             ->get();
         $model->load([
-            'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUser' => function(BelongsTo $belongsTo){
-                if ($this->getParam('admin_user_name')){
-                    $belongsTo->where('name', 'like', '%'. $this->getParam('admin_user_name') .'%');
+            'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUser' => function(BelongsTo $belongsTo) use ($filter){
+                if ($adminUser = Arr::get($filter, 'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUser')){
+                    $belongsTo = Filter::init()
+                        ->setModel($belongsTo)
+                        ->setParam($adminUser)
+                        ->run()
+                        ->getModel();
                 }
             },
             'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUserCustomerSubsystemRoles.adminRole',

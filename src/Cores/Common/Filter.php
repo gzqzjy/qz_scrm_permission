@@ -36,11 +36,12 @@ class Filter extends Core
         $this->setModel($model);
     }
 
-    protected function searchItem(Builder $model, $field, $option, $value)
+    protected function searchItem($model, $field, $option, $value)
     {
         if (strpos($field, '.') !== false) {
             $firstField = Str::before($field, '.');
             $otherField = Str::after($field, '.');
+            $firstField = Str::camel($firstField);
             return $model->whereHas($firstField, function (Builder $query) use ($otherField, $option, $value) {
                 return $this->searchItem($query, $otherField, $option, $value);
             });
@@ -116,10 +117,10 @@ class Filter extends Core
     }
 
     /**
-     * @param Builder $model
+     * @param $model
      * @return $this
      */
-    public function setModel(Builder $model)
+    public function setModel($model)
     {
         $this->model = $model;
         return $this;
