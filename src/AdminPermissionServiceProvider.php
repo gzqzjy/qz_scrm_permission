@@ -130,6 +130,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-user-customer-subsystems/delete', 'AdminUserCustomerSubsystemController@destroy');
                     Route::post('admin-user-customer-subsystems/all', 'AdminUserCustomerSubsystemController@all');
                     Route::post('admin-user-customer-subsystems/add-menus', 'AdminUserCustomerSubsystemController@addMenus');
+                    Route::post('admin-user-customer-subsystems/all-status', 'AdminUserCustomerSubsystemController@allStatus');
                 });
                 Route::namespace('AdminRoleGroup\V1')->group(function () {
                     Route::post('admin-role-groups/get', 'AdminRoleGroupController@get');

@@ -14,7 +14,7 @@ class AdminUserAdd extends Core
     protected function execute()
     {
         $model = AdminUser::withTrashed()
-            ->firstOrCreate(Arr::whereNotNull([
+            ->updateOrCreate(Arr::whereNotNull([
                 'mobile' => $this->getMobile(),
             ]), Arr::whereNotNull([
                 'name' => $this->getName(),
@@ -25,16 +25,6 @@ class AdminUserAdd extends Core
             $model->restore();
         }
         $this->setId($model->getKey());
-        if ($this->getCustomerSubsystemId()) {
-            AdminUserCustomerSubsystemAdd::init()
-                ->setCustomerSubsystemId($this->getCustomerSubsystemId())
-                ->setStatus(AdminUserCustomerSubsystem::STATUS_NORMAL)
-                ->setAdminUserId($this->getId())
-                ->setAdministrator(false)
-                ->setAdminDepartments($this->getAdminDepartments())
-                ->setAdminRoleIds($this->getAdminRoleIds())
-                ->run();
-        }
     }
 
     protected $id;
@@ -151,7 +141,7 @@ class AdminUserAdd extends Core
         $this->customerSubsystemId = $customerSubsystemId;
         return $this;
     }
-    
+
     protected $sex;
 
     /**

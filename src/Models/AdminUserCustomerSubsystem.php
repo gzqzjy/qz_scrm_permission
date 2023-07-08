@@ -9,9 +9,19 @@ class AdminUserCustomerSubsystem extends Model
         'customer_subsystem_id',
         'status',
         'administrator',
+        'name',
+        'sex',
     ];
 
     const STATUS_NORMAL = 'normal';
+    const STATUS_LEAVING = 'leaving';
+    const STATUS_LEAVED = 'leaved';
+
+    const STATUS_DESC = [
+        self::STATUS_NORMAL => '在职',
+        self::STATUS_LEAVING => '离职中',
+        self::STATUS_LEAVED => '离职',
+    ];
 
     public function customerSubsystem()
     {

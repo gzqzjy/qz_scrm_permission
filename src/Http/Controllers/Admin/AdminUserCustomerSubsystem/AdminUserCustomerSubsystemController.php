@@ -64,34 +64,47 @@ class AdminUserCustomerSubsystemController extends AdminController
      */
     public function store()
     {
-        $validator = Validator::make($this->getParam('admin_user'), [
+        $validator = Validator::make($this->getParam(), [
             'name' => [
                 'required',
             ],
             'mobile' => [
                 'required',
-                Rule::unique(AdminUser::class, 'mobile')
-                    ->withoutTrashed(),
             ],
         ], [
             'name.required' => '员工名不能为空',
             'mobile.required' => '员工手机号不能为空',
-            'mobile.unique' => '员工手机号不能重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $adminUserId = AdminUserAdd::init()
+        $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
+        //根据手机号查找admin_user_id
+        $adminUserId = AdminUser::query()
+            ->where('mobile', $this->getParam('mobile'))
+            ->value('id');
+        if ($adminUserId){
+            $exists = AdminUserCustomerSubsystem::query()
+                ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+                ->where('admin_user_id', $adminUserId)
+                ->exists();
+            if ($exists){
+                throw new MessageException("员工手机号不能重复");
+            }
+        }
+        $id = AdminUserAdd::init()
             ->setMobile($this->getParam('mobile'))
             ->setName($this->getParam('name'))
             ->setSex($this->getParam('sex'))
             ->run()
             ->getId();
         $id = AdminUserCustomerSubsystemAdd::init()
-            ->setAdminUserId($adminUserId)
-            ->setAdministrator(false)
-            ->setStatus(AdminUserCustomerSubsystem::STATUS_NORMAL)
             ->setCustomerSubsystemId(Access::getCustomerSubsystemId())
+            ->setAdminUserId($id)
+            ->setAdminDepartments($this->getParam('admin_departments'))
+            ->setAdminRoleIds($this->getParam('admin_role_ids'))
+            ->setStatus(AdminUserCustomerSubsystem::STATUS_NORMAL)
+            ->setAdministrator(false)
             ->run()
             ->getId();
         return $this->success(compact('id'));
@@ -105,7 +118,7 @@ class AdminUserCustomerSubsystemController extends AdminController
     {
         $model = AdminUserCustomerSubsystem::query()
             ->find($this->getParam('id'));
-        $validator = Validator::make($this->getParam('admin_user'), [
+        $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
                 Rule::exists(AdminUserCustomerSubsystem::class)
@@ -133,6 +146,9 @@ class AdminUserCustomerSubsystemController extends AdminController
         $id = AdminUserCustomerSubsystemUpdate::init()
             ->setAdminUserId($adminUserId)
             ->setId($this->getParam('id'))
+            ->setStatus($this->getParam('status'))
+            ->setAdminDepartments($this->getParam('admin_departments'))
+            ->setAdminRoleIds($this->getParam('admin_role_ids'))
             ->run()
             ->getId();
         return $this->success(compact('id'));
@@ -167,6 +183,16 @@ class AdminUserCustomerSubsystemController extends AdminController
         $model = $this->filter($model);
         $model = $model->get();
         return $this->response($model);
+    }
+
+    public function allStatus()
+    {
+        $statusDesc = AdminUserCustomerSubsystem::STATUS_DESC;
+        $data = [];
+        foreach ($statusDesc as $value => $label) {
+            $data[] = compact('value', 'label');
+        }
+        return $this->response($data);
     }
 
     public function menus()

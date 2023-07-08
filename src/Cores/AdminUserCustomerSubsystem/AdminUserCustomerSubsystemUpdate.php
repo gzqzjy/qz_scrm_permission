@@ -2,10 +2,14 @@
 
 namespace Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem;
 
+use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystemDepartment\AdminUserCustomerSubsystemDepartmentAdd;
+use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystemRole\AdminUserCustomerSubsystemRoleAdd;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemDepartment;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRole;
 
 class AdminUserCustomerSubsystemUpdate extends Core
 {
@@ -20,6 +24,29 @@ class AdminUserCustomerSubsystemUpdate extends Core
         ]));
         $model->save();
         $this->setId($model->getKey());
+        AdminUserCustomerSubsystemDepartment::query()
+            ->where('admin_user_customer_subsystem_id', $this->getId())
+            ->delete();
+        if ($this->getAdminDepartments()){
+            foreach ($this->getAdminDepartments() as $adminDepartment){
+                AdminUserCustomerSubsystemDepartmentAdd::init()
+                    ->setAdminUserCustomerSubsystemId($this->getId())
+                    ->setAdminDepartmentId(Arr::get($adminDepartment, 'id'))
+                    ->setAdministrator(Arr::get($adminDepartment, 'administrator'))
+                    ->run();
+            }
+        }
+        AdminUserCustomerSubsystemRole::query()
+            ->where('admin_user_customer_subsystem_id', $this->getId())
+            ->delete();
+        if ($this->getAdminRoleIds()){
+            foreach ($this->getAdminRoleIds() as $adminRoleId){
+                AdminUserCustomerSubsystemRoleAdd::init()
+                    ->setAdminUserCustomerSubsystemId($this->getId())
+                    ->setAdminRoleId($adminRoleId)
+                    ->run();
+            }
+        }
     }
 
     protected $id;
@@ -136,4 +163,46 @@ class AdminUserCustomerSubsystemUpdate extends Core
         $this->administrator = $administrator;
         return $this;
     }
+    
+    protected $adminDepartments;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminDepartments()
+    {
+        return $this->adminDepartments;
+    }
+
+    /**
+     * @param mixed $adminDepartments
+     * @return AdminUserCustomerSubsystemUpdate
+     */
+    public function setAdminDepartments($adminDepartments)
+    {
+        $this->adminDepartments = $adminDepartments;
+        return $this;
+    }
+    
+    protected $adminRoleIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminRoleIds()
+    {
+        return $this->adminRoleIds;
+    }
+
+    /**
+     * @param mixed $adminRoleIds
+     * @return AdminUserCustomerSubsystemUpdate
+     */
+    public function setAdminRoleIds($adminRoleIds)
+    {
+        $this->adminRoleIds = $adminRoleIds;
+        return $this;
+    }
+    
+    
 }

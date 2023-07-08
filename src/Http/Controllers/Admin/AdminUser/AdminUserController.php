@@ -158,7 +158,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists('admin_user_customer_subsystems')
                     ->withoutTrashed()
             ],
             'permission' => [
@@ -180,15 +180,8 @@ class AdminUserController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $adminUserCustomerSubsystemId = AdminUserCustomerSubsystem::query()
-            ->where('admin_user_id', $this->getParam('id'))
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
-            ->value('id');
-        if (empty($adminUserCustomerSubsystemId)) {
-            throw new MessageException("该员工找不到子系统");
-        }
         $featurePermission = GetFeaturePermissionByAdminUserCustomerSubsystemId::init()
-            ->setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
+            ->setAdminUserCustomerSubsystemId($this->getParam('id'))
             ->setFeaturePermission($this->getParam('permission'))
             ->run();
         $adminMenus = $featurePermission->getAdminMenus();
@@ -196,7 +189,7 @@ class AdminUserController extends AdminController
         $adminPageOptions = $featurePermission->getAdminPageOptions();
 
         $dataPermission = GetDataPermissionByAdminUserCustomerSubsystemId::init()
-            ->setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
+            ->setAdminUserCustomerSubsystemId($this->getParam('id'))
             ->setDataPermission($this->getParam('data_permission'))
             ->run();
 
@@ -204,7 +197,7 @@ class AdminUserController extends AdminController
         $adminUserCustomerSubsystemRequestEmployees = $dataPermission->getAdminUserCustomerSubsystemRequestEmployees();
 
         $id = AdminUserCustomerSubsystemUpdatePermission::init()
-            ->setId($adminUserCustomerSubsystemId)
+            ->setId($this->getParam('id'))
             ->setAdminMenu($adminMenus)
             ->setAdminPageColumn($adminPageColumns)
             ->setAdminPageOption($adminPageOptions)
@@ -276,7 +269,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists('admin_user_customer_subsystems')
                     ->withoutTrashed()
             ]
         ], [
@@ -287,19 +280,12 @@ class AdminUserController extends AdminController
             throw new MessageException($validator->errors()->first());
         }
 
-        $adminUserCustomerSubsystemId = AdminUserCustomerSubsystem::query()
-            ->where('admin_user_id', $this->getParam('id'))
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
-            ->value('id');
-        if (empty($adminUserCustomerSubsystemId)) {
-            throw new MessageException("该员工找不到子系统");
-        }
         if ($this->getParam('type') == 'data'){
             //数据权限
-            $data = $this->getDataPermission($adminUserCustomerSubsystemId);
+            $data = $this->getDataPermission($this->getParam('id'));
             return $this->success($data);
         }else{
-            $menus = $this->getFeaturePermission($adminUserCustomerSubsystemId);
+            $menus = $this->getFeaturePermission($this->getParam('id'));
             return $this->success($menus);
         }
 
@@ -352,15 +338,13 @@ class AdminUserController extends AdminController
             ->setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
             ->run();
         //对比登录员工权限+选择员工拥有的权限
-        $menus = GetTreeAdminMenusWithCheck::init()
+        return GetTreeAdminMenusWithCheck::init()
             ->setAdminMenus($data)
             ->setAdminMenuIds($permission->getAdminMenuIds())
             ->setAdminPageColumnIds($permission->getAdminPageColumnIds())
             ->setAdminPageOptionIds($permission->getAdminPageOptionIds())
             ->run()
             ->getTreeAdminMenus();
-
-        return $menus;
     }
 
     protected function item($value, $adminMenuIds, $adminPageOptionIds, $adminPageColumnIds, &$existMenuIds)
@@ -460,6 +444,8 @@ class AdminUserController extends AdminController
             $adminRequests = [[]];
         }
 
+        $adminDepartments = [];
+        $adminLoginUserRequestDepartmentAndUsers = [];
         //登录用户所有的数据权限
         if ($this->isAdministrator()){
             //超管所有部门、所有员工都可查看
@@ -503,13 +489,6 @@ class AdminUserController extends AdminController
             }
             //登录员工能看到的权限列表
             if (empty($this->isAdministrator())){
-                //登录员工当前请求可查看的用户列表
-                $adminLoginUserRequestEmoloyees = GetAdminUserIdsByAdminUserCustomerSubsystemId::init()
-                    ->setAdminUserCustomerSubSystemId(Access::getAdminUserCustomerSubsystemId())
-                    ->setAdminRequestId($adminRequestId)
-                    ->run()
-                    ->getAdminUserCustomerSubSystemIds();
-
                 //登录员工当前可查看的部门
                 $adminDepartmentIds = AdminUserCustomerSubsystemDepartment::query()
                     ->where('admin_user_customer_subsystem_id', Access::getAdminUserCustomerSubsystemId())
@@ -576,7 +555,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists('admin_user_customer_subsystems')
                     ->withoutTrashed()
             ],
             'actions' => [
@@ -596,13 +575,6 @@ class AdminUserController extends AdminController
         }
         $adminRequestId = $this->getParam('admin_request_id');
         $actions = $this->getParam('actions');
-        $adminUserCustomerSubsystemId = AdminUserCustomerSubsystem::query()
-            ->where('admin_user_id', $this->getParam('id'))
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
-            ->value('id');
-        if (empty($adminUserCustomerSubsystemId)) {
-            throw new MessageException("该员工找不到子系统");
-        }
 
         $adminLoginUserRequestEmoloyees = GetAdminUserIdsByAdminUserCustomerSubsystemId::init()
             ->setAdminUserCustomerSubSystemId(Access::getAdminUserCustomerSubsystemId())
@@ -638,7 +610,7 @@ class AdminUserController extends AdminController
 
         //员工可选择记录
         $adminRequestEmployees = GetAdminUserCustomerSubsystemIdsByAdminUserCustomerSubsystemIdAndType::init()
-            ->setAdminUserCustomerSubSystemId($adminUserCustomerSubsystemId)
+            ->setAdminUserCustomerSubSystemId($this->getParam('id'))
             ->setDepartmentType($actions)
             ->run()
             ->getAdminUserCustomerSubSystemIds();
@@ -685,7 +657,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists('admin_user_customer_subsystems')
                     ->withoutTrashed()
             ],
             'actions' => [
@@ -702,15 +674,8 @@ class AdminUserController extends AdminController
         if (empty($this->getParam('actions'))){
             return $this->success([]);
         }
-        $adminUserCustomerSubsystemId = AdminUserCustomerSubsystem::query()
-            ->where('admin_user_id', $this->getParam('id'))
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
-            ->value('id');
-        if (empty($adminUserCustomerSubsystemId)) {
-            throw new MessageException("该员工找不到子系统");
-        }
         $adminUserCustomerSubsystemIds = GetAdminUserCustomerSubsystemIdsByAdminUserCustomerSubsystemIdAndType::init()
-            ->setAdminUserCustomerSubSystemId($adminUserCustomerSubsystemId)
+            ->setAdminUserCustomerSubSystemId($this->getParam('id'))
             ->setDepartmentType($this->getParam('actions'))
             ->run()
             ->getAdminUserCustomerSubSystemIds();

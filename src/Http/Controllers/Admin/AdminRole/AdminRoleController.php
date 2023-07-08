@@ -172,7 +172,18 @@ class AdminRoleController extends AdminController
 
     public function destroy()
     {
+        $validator = Validator::make($this->getParam(), [
+            'id' => [
+                'required',
+            ],
+        ], [
+            'id.required' => '请选择要删除的角色',
+        ]);
+        if ($validator->fails()) {
+            throw new MessageException($validator->errors()->first());
+        }
         $id = $this->getParam('id');
+        $id = is_array($id) ? $id : [$id];
         $isExist = AdminUserCustomerSubsystemRole::query()
             ->whereIn('admin_role_id', $id)
             ->exists();
@@ -186,19 +197,12 @@ class AdminRoleController extends AdminController
             throw new MessageException("角色下有部门，不可删除！");
         }
 
-        if (is_array($id)) {
-            foreach ($id as $value) {
-                AdminRoleDelete::init()
-                    ->setId($value)
-                    ->run()
-                    ->getId();
-            }
-            return $this->success();
+        foreach ($id as $value) {
+            AdminRoleDelete::init()
+                ->setId($value)
+                ->run()
+                ->getId();
         }
-        AdminRoleDelete::init()
-            ->setId($id)
-            ->run()
-            ->getId();
         return $this->success();
     }
 

@@ -47,21 +47,6 @@ class AdminDepartment extends Model
         ]);
     }
 
-    public function childrenDepartmentAndAdminUsers()
-    {
-        return $this->child()->with([
-            'childrenDepartmentAndAdminUsers',
-            'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUser',
-            'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUserCustomerSubsystemRoles.adminRole',
-            'adminUserCustomerSubsystemDepartments.adminUserCustomerSubsystem.adminUserCustomerSubsystemDepartments',
-            'adminCategoryDepartments',
-            'adminDepartmentRoles',
-        ])->withCount([
-            'adminDepartmentRoles',
-            'adminCategoryDepartments',
-            'adminUserCustomerSubsystemDepartments'
-        ]);
-    }
 
     public function parent()
     {

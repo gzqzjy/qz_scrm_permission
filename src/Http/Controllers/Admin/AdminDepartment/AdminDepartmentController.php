@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminUser;
+use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
 use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemDepartment;
 use Qz\Admin\Permission\Models\Category;
 
@@ -100,7 +101,7 @@ class AdminDepartmentController extends AdminController
         $data['admin_role_ids'] = Arr::pluck(Arr::get($value, 'admin_department_roles'), 'admin_role_id');
         if (Arr::get($value, 'admin_user_customer_subsystem_departments')) {
             $adminUsers = [];
-            $statusDesc = AdminUser::STATUS_DESC;
+            $statusDesc = AdminUserCustomerSubsystem::STATUS_DESC;
             foreach (Arr::get($value, 'admin_user_customer_subsystem_departments') as $item) {
                 if (empty(Arr::get($item, 'admin_user_customer_subsystem.admin_user'))){
                     continue;
@@ -116,13 +117,20 @@ class AdminDepartmentController extends AdminController
                     ];
                 }, $adminDepartments);
 
-                Arr::set($item, 'admin_user_customer_subsystem.admin_user.adminDepartments', $adminDepartments);
-                Arr::set($item, 'admin_user_customer_subsystem.admin_user.adminRoleNames', implode(",", $roleName));
-                Arr::set($item, 'admin_user_customer_subsystem.admin_user.adminRoleIds', $roleId);
-                Arr::set($item, 'admin_user_customer_subsystem.admin_user.statusDesc', $statusDesc[Arr::get($item, 'admin_user_customer_subsystem.admin_user.status')]);
                 $adminDepartmentAdministrators = array_column($adminDepartments, null, 'id');
-                Arr::set($item, 'admin_user_customer_subsystem.admin_user.administrator', Arr::get($adminDepartmentAdministrators, Arr::get($item, 'admin_department_id') . '.administrator'));
-                $adminUsers[] = Arr::get($item, 'admin_user_customer_subsystem.admin_user');
+                $adminUsers[] = [
+                    "id" => Arr::get($item, 'admin_user_customer_subsystem.id'),
+                    "name" => Arr::get($item, 'admin_user_customer_subsystem.admin_user.name'),
+                    "mobile" => Arr::get($item, 'admin_user_customer_subsystem.admin_user.mobile'),
+                    "sex" => Arr::get($item, 'admin_user_customer_subsystem.admin_user.sex'),
+                    "status" => Arr::get($item, 'admin_user_customer_subsystem.status'),
+                    "statusDesc" => $statusDesc[Arr::get($item, 'admin_user_customer_subsystem.status')],
+                    "adminRoleIds" => $roleId,
+                    "adminRoleNames" => implode(",", $roleName),
+                    "adminDepartments" => $adminDepartments,
+                    "administrator" => Arr::get($adminDepartmentAdministrators, Arr::get($item, 'admin_department_id') . '.administrator'),
+                    "created_at" => Arr::get($item, 'admin_user_customer_subsystem.created_at')
+                ];
             }
             $data['admin_users'] = $adminUsers;
         }
@@ -135,6 +143,7 @@ class AdminDepartmentController extends AdminController
             }
         }
         $data['children'] = $children;
+        $data['deleted_isabled'] = Arr::get($data, 'admin_users') || Arr::get($data, 'children');
         return $data;
     }
 

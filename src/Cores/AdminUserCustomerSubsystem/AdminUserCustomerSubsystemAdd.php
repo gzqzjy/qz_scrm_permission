@@ -16,7 +16,7 @@ class AdminUserCustomerSubsystemAdd extends Core
     protected function execute()
     {
         $model = AdminUserCustomerSubsystem::withTrashed()
-            ->firstOrCreate(Arr::whereNotNull([
+            ->updateOrCreate(Arr::whereNotNull([
                 'admin_user_id' => $this->getAdminUserId(),
                 'customer_subsystem_id' => $this->getCustomerSubsystemId(),
             ]), Arr::whereNotNull([

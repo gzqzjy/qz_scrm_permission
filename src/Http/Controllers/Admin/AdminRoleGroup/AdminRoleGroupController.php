@@ -54,8 +54,11 @@ class AdminRoleGroupController extends AdminController
         ]);
         foreach ($model->items() as $item){
             $item->key = Arr::get($item, 'id');
-            if (Arr::get($item, 'adminRoles')){
+            $item->deleted_isabled = false;
+            if (Arr::get($item, 'adminRoles') && count(Arr::get($item, 'adminRoles'))){
+                $item->deleted_isabled = true;
                 foreach (Arr::get($item, 'adminRoles') as $value){
+                    $value->deleted_isabled = Arr::get($value, 'department_roles_count') || Arr::get($value, 'admin_user_customer_subsystem_roles_count');
                     $value->key = Arr::get($item, 'id') . '-' . Arr::get($value, 'id');
                 }
             }
@@ -124,26 +127,30 @@ class AdminRoleGroupController extends AdminController
 
     public function destroy()
     {
+        $validator = Validator::make($this->getParam(), [
+            'id' => [
+                'required',
+            ],
+        ], [
+            'id.required' => '请选择要删除的角色组',
+        ]);
+        if ($validator->fails()) {
+            throw new MessageException($validator->errors()->first());
+        }
         $id = $this->getParam('id');
+        $id = is_array($id) ? $id : [$id];
         $isExist = AdminRole::query()
             ->whereIn('admin_role_group_id', $id)
             ->exists();
         if ($isExist){
             throw new MessageException("角色组下有角色，不可删除！");
         }
-        if (is_array($id)) {
-            foreach ($id as $value) {
-                AdminRoleGroupDelete::init()
-                    ->setId($value)
-                    ->run()
-                    ->getId();
-            }
-            return $this->success();
+        foreach ($id as $value) {
+            AdminRoleGroupDelete::init()
+                ->setId($value)
+                ->run()
+                ->getId();
         }
-        AdminRoleGroupDelete::init()
-            ->setId($id)
-            ->run()
-            ->getId();
         return $this->success();
     }
 
