@@ -255,7 +255,7 @@ class AdminDepartmentController extends AdminController
 
     public function destroy()
     {
-        $id = $this->getParam('id');
+        $id = is_array($this->getParam('id')) ? $this->getParam('id') : [$this->getParam('id')];
         $isExist = AdminUserCustomerSubsystemDepartment::query()
             ->whereIn('admin_department_id', $id)
             ->exists();
