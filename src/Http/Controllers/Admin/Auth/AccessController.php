@@ -88,9 +88,9 @@ class AccessController extends AdminController
         $user = Auth::guard('admin')->user();
         $name = '';
         if ($user instanceof AdminUser) {
-            $id = Arr::get($user, 'id', '');
+            $id = Access::getAdminUserCustomerSubsystemId();
             $name = Arr::get($user, 'name', '');
-            $administrator = $this->isAdministrator();
+            $administrator = Access::getAdministrator();
         }
         return $this->success(compact('id', 'name', 'administrator'));
     }
