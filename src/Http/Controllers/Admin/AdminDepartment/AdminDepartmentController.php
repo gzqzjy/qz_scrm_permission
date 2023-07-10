@@ -143,7 +143,7 @@ class AdminDepartmentController extends AdminController
             }
         }
         $data['children'] = $children;
-        $data['deleted_isabled'] = Arr::get($data, 'admin_users') || Arr::get($data, 'children');
+        $data['delete_disabled'] = Arr::get($data, 'admin_users') || Arr::get($data, 'children');
         return $data;
     }
 

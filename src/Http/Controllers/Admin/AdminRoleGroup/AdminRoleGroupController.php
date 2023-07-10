@@ -54,11 +54,11 @@ class AdminRoleGroupController extends AdminController
         ]);
         foreach ($model->items() as $item){
             $item->key = Arr::get($item, 'id');
-            $item->deleted_isabled = false;
+            $item->delete_disabled = false;
             if (Arr::get($item, 'adminRoles') && count(Arr::get($item, 'adminRoles'))){
-                $item->deleted_isabled = true;
+                $item->delete_disabled = true;
                 foreach (Arr::get($item, 'adminRoles') as $value){
-                    $value->deleted_isabled = Arr::get($value, 'department_roles_count') || Arr::get($value, 'admin_user_customer_subsystem_roles_count');
+                    $value->delete_disabled = Arr::get($value, 'department_roles_count') || Arr::get($value, 'admin_user_customer_subsystem_roles_count');
                     $value->key = Arr::get($item, 'id') . '-' . Arr::get($value, 'id');
                 }
             }
