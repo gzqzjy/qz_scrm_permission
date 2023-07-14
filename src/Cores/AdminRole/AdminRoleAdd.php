@@ -19,15 +19,15 @@ class AdminRoleAdd extends Core
             ->firstOrCreate(Arr::whereNotNull([
                 'name' => $this->getName(),
                 'admin_role_group_id' => $this->getAdminRoleGroupId(),
-                'customer_subsystem_id' => $this->getCustomerSubsystemId(),
+                'customer_id' => $this->getCustomerId(),
             ]));
         if ($model->trashed()) {
             $model->restore();
         }
         $this->setId($model->getKey());
 
-        if ($this->getAdminRoleMenu()){
-            foreach ($this->getAdminRoleMenu() as $adminMenuId){
+        if ($this->getAdminRoleMenu()) {
+            foreach ($this->getAdminRoleMenu() as $adminMenuId) {
                 AdminRoleMenuAdd::init()
                     ->setAdminRoleId($this->getId())
                     ->setAdminMenuId($adminMenuId)
@@ -35,8 +35,8 @@ class AdminRoleAdd extends Core
             }
         }
 
-        if ($this->getAdminRolePageColumn()){
-            foreach ($this->getAdminRolePageColumn() as $adminPageColumnId){
+        if ($this->getAdminRolePageColumn()) {
+            foreach ($this->getAdminRolePageColumn() as $adminPageColumnId) {
                 AdminRolePageColumnAdd::init()
                     ->setAdminRoleId($this->getId())
                     ->setAdminPageColumnId($adminPageColumnId)
@@ -44,8 +44,8 @@ class AdminRoleAdd extends Core
             }
         }
 
-        if ($this->getAdminRolePageOption()){
-            foreach ($this->getAdminRolePageOption() as $adminPageOptionId){
+        if ($this->getAdminRolePageOption()) {
+            foreach ($this->getAdminRolePageOption() as $adminPageOptionId) {
                 AdminRolePageOptionAdd::init()
                     ->setAdminRoleId($this->getId())
                     ->setAdminPageOptionId($adminPageOptionId)
@@ -53,8 +53,8 @@ class AdminRoleAdd extends Core
             }
         }
 
-        if ($this->getAdminRoleRequest()){
-            foreach ($this->getAdminRoleRequest() as $item){
+        if ($this->getAdminRoleRequest()) {
+            foreach ($this->getAdminRoleRequest() as $item) {
                 AdminRoleRequestAdd::init()
                     ->setAdminRoleId($this->getId())
                     ->setAdminRequestId(Arr::get($item, 'admin_request_id'))
@@ -139,24 +139,23 @@ class AdminRoleAdd extends Core
         return $this;
     }
 
-
-    protected $customerSubsystemId;
+    protected $customerId;
 
     /**
      * @return mixed
      */
-    public function getCustomerSubsystemId()
+    public function getCustomerId()
     {
-        return $this->customerSubsystemId;
+        return $this->customerId;
     }
 
     /**
-     * @param mixed $customerSubsystemId
+     * @param mixed $customerId
      * @return AdminRoleAdd
      */
-    public function setCustomerSubsystemId($customerSubsystemId)
+    public function setCustomerId($customerId)
     {
-        $this->customerSubsystemId = $customerSubsystemId;
+        $this->customerId = $customerId;
         return $this;
     }
 
@@ -200,7 +199,6 @@ class AdminRoleAdd extends Core
         return $this;
     }
 
-
     protected $adminRolePageOption;
 
     /**
@@ -240,9 +238,4 @@ class AdminRoleAdd extends Core
         $this->adminRoleRequest = $adminRoleRequest;
         return $this;
     }
-
-
-
-
-
 }

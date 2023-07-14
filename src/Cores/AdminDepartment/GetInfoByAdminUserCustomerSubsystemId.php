@@ -34,12 +34,12 @@ class GetInfoByAdminUserCustomerSubsystemId extends Core
     {
         $this->adminUserCustomerSubsystemId = $adminUserCustomerSubsystemId;
         $adminDepartmentIds = AdminUserCustomerSubsystemDepartment::query()
-            ->where('admin_user_customer_subsystem_id', $adminUserCustomerSubsystemId)
+            ->where('admin_user_id', $adminUserCustomerSubsystemId)
             ->pluck('admin_department_id')
             ->toArray();
         $this->setAdminDepartmentIds($adminDepartmentIds);
         $adminUserCustomerSubsystemRoleIds = AdminUserCustomerSubsystemRole::query()
-            ->where('admin_user_customer_subsystem_id', $adminUserCustomerSubsystemId)
+            ->where('admin_user_id', $adminUserCustomerSubsystemId)
             ->pluck('admin_role_id')
             ->toArray();
         $this->setAdminUserCustomerSubsystemRoleIds($adminUserCustomerSubsystemRoleIds);
@@ -64,12 +64,12 @@ class GetInfoByAdminUserCustomerSubsystemId extends Core
     {
         $this->adminUserCustomerSubsystemIds = $adminUserCustomerSubsystemIds;
         $adminDepartmentIds = AdminUserCustomerSubsystemDepartment::query()
-            ->whereIn('admin_user_customer_subsystem_id', $adminUserCustomerSubsystemIds)
+            ->whereIn('admin_user_id', $adminUserCustomerSubsystemIds)
             ->pluck('admin_department_id')
             ->toArray();
         $this->setAdminDepartmentIds($adminDepartmentIds);
         $adminUserCustomerSubsystemRoleIds = AdminUserCustomerSubsystemRole::query()
-            ->whereIn('admin_user_customer_subsystem_id', $adminUserCustomerSubsystemIds)
+            ->whereIn('admin_user_id', $adminUserCustomerSubsystemIds)
             ->pluck('admin_role_id')
             ->toArray();
         $this->setAdminUserCustomerSubsystemRoleIds($adminUserCustomerSubsystemRoleIds);

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -15,6 +16,7 @@ use Qz\Admin\Permission\Cores\AdminRole\AdminRoleAdd;
 use Qz\Admin\Permission\Cores\AdminRole\AdminRoleDelete;
 use Qz\Admin\Permission\Cores\AdminRole\AdminRoleUpdate;
 use Qz\Admin\Permission\Cores\AdminRole\GetMenuByAdminRole;
+use Qz\Admin\Permission\Cores\Common\Filter;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
@@ -22,21 +24,19 @@ use Qz\Admin\Permission\Models\AdminDepartmentRole;
 use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminRoleGroup;
 use Qz\Admin\Permission\Models\AdminRoleRequest;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRole;
+use Qz\Admin\Permission\Models\AdminUserRole;
 
 class AdminRoleController extends AdminController
 {
     public function get()
     {
-        $model = AdminRole::query()
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId());
-
+        $model = AdminRole::query();
         $model = $this->filter($model);
         $model = $model
             ->get();
         $model->loadCount([
             'departmentRoles',
-            'adminUserCustomerSubsystemRoles'
+            'adminUserRoles'
         ]);
         return $this->success($model->toArray());
     }
@@ -51,7 +51,6 @@ class AdminRoleController extends AdminController
             'name' => [
                 'required',
                 Rule::unique(AdminRole::class)
-                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
                     ->withoutTrashed(),
             ],
             'admin_role_group_id' => [
@@ -68,10 +67,10 @@ class AdminRoleController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
-        if ($permissions = $this->getParam('permission')){
+        $this->addParam('customer_id', Access::getCustomerId());
+        if ($permissions = $this->getParam('permission')) {
             $adminMenuIds = $adminPageColumnIds = $adminPageOptionIds = [];
-            foreach ($permissions as $permission){
+            foreach ($permissions as $permission) {
                 list($itemAdminMenuIds, $itemAdminPageColumnIds, $itemAdminPageOptionIds) = $this->getPermission($permission);
                 $adminMenuIds = array_merge($itemAdminMenuIds, $adminMenuIds);
                 $adminPageColumnIds = array_merge($itemAdminPageColumnIds, $adminPageColumnIds);
@@ -81,16 +80,16 @@ class AdminRoleController extends AdminController
             $this->addParam('admin_role_page_column', array_unique($adminPageColumnIds));
             $this->addParam('admin_role_page_option', array_unique($adminPageOptionIds));
         }
-        if ($dataPermissions = $this->getParam('data_permission')){
+        if ($dataPermissions = $this->getParam('data_permission')) {
             $adminRoleRequests = [];
             $character = AdminRoleRequest::CHARACTER;
-            foreach ($dataPermissions as $dataPermission){
+            foreach ($dataPermissions as $dataPermission) {
                 $adminRoleRequests[] = [
                     'admin_request_id' => Arr::get($dataPermission, 'admin_request_id'),
                     'type' => implode($character, Arr::get($dataPermission, 'actions'))
                 ];
             }
-            if ($adminRoleRequests){
+            if ($adminRoleRequests) {
                 $this->addParam('admin_role_request', $adminRoleRequests);
             }
         }
@@ -118,8 +117,7 @@ class AdminRoleController extends AdminController
                 'required',
                 Rule::unique(AdminRole::class)
                     ->withoutTrashed()
-                    ->ignore($this->getParam('id'))
-                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+                    ->ignore($this->getParam('id')),
             ],
             'admin_role_group_id' => [
                 'required',
@@ -137,9 +135,9 @@ class AdminRoleController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        if ($permissions = $this->getParam('permission')){
+        if ($permissions = $this->getParam('permission')) {
             $adminMenuIds = $adminPageColumnIds = $adminPageOptionIds = [];
-            foreach ($permissions as $permission){
+            foreach ($permissions as $permission) {
                 list($itemAdminMenuIds, $itemAdminPageColumnIds, $itemAdminPageOptionIds) = $this->getPermission($permission);
                 $adminMenuIds = array_merge($itemAdminMenuIds, $adminMenuIds);
                 $adminPageColumnIds = array_merge($itemAdminPageColumnIds, $adminPageColumnIds);
@@ -149,16 +147,16 @@ class AdminRoleController extends AdminController
             $this->addParam('admin_role_page_column', array_unique($adminPageColumnIds));
             $this->addParam('admin_role_page_option', array_unique($adminPageOptionIds));
         }
-        if ($dataPermissions = $this->getParam('data_permission')){
+        if ($dataPermissions = $this->getParam('data_permission')) {
             $adminRoleRequests = [];
             $character = AdminRoleRequest::CHARACTER;
-            foreach ($dataPermissions as $dataPermission){
+            foreach ($dataPermissions as $dataPermission) {
                 $adminRoleRequests[] = [
                     'admin_request_id' => Arr::get($dataPermission, 'admin_request_id'),
                     'type' => implode($character, Arr::get($dataPermission, 'actions'))
                 ];
             }
-            if ($adminRoleRequests){
+            if ($adminRoleRequests) {
                 $this->addParam('admin_role_request', $adminRoleRequests);
             }
         }
@@ -184,16 +182,16 @@ class AdminRoleController extends AdminController
         }
         $id = $this->getParam('id');
         $id = is_array($id) ? $id : [$id];
-        $isExist = AdminUserCustomerSubsystemRole::query()
+        $isExist = AdminUserRole::query()
             ->whereIn('admin_role_id', $id)
             ->exists();
-        if ($isExist){
+        if ($isExist) {
             throw new MessageException("角色下有员工，不可删除！");
         }
         $isExist = AdminDepartmentRole::query()
             ->whereIn('admin_role_id', $id)
             ->exists();
-        if ($isExist){
+        if ($isExist) {
             throw new MessageException("角色下有部门，不可删除！");
         }
 
@@ -209,53 +207,39 @@ class AdminRoleController extends AdminController
     public function all()
     {
         $param = $this->getParam();
-        $select = Arr::get($param, 'select', 'id as value, name as label');
-        $groupModel = AdminRoleGroup::query()
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
-            ->selectRaw($select)
+        $model = AdminRoleGroup::query()
+            ->selectRaw('id,name as label')
+            ->whereHas('adminRoles', function (Builder $builder) use ($param) {
+                return Filter::init()
+                    ->setModel($builder)
+                    ->setParam(Arr::get($param, 'filter'))
+                    ->run()
+                    ->getModel();
+            })
             ->get();
-        if (empty($groupModel)){
-            return $this->response([]);
-        }
-        $model = AdminRole::query()
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
-            ->selectRaw($select . ',admin_role_group_id');
-        $model = $this->filter($model);
-        $adminDepartmentIds = [];
-        if ($this->getParam('admin_departments')){
-            $adminDepartmentIds = Arr::pluck($this->getParam('admin_departments'), 'id');
-            if (empty($adminDepartmentIds)){
-                return $this->response([]);
+        $model->load([
+            'adminRoles' => function (HasMany $hasMany) use ($param) {
+                $select = Arr::get($param, 'select', 'id as value, name as label');
+                $hasMany->selectRaw($select . ',admin_role_group_id');
+
+                return Filter::init()
+                    ->setModel($hasMany)
+                    ->setParam(Arr::get($param, 'filter'))
+                    ->run()
+                    ->getModel();
             }
-            $model->whereHas('departmentRoles', function (Builder $builder) use ($adminDepartmentIds){
-                $builder->whereIn('admin_department_id', $adminDepartmentIds);
-            });
+        ]);
+        foreach ($model as $value) {
+            $value->options = $value->adminRoles;
         }
-        if ($this->getParam('admin_department_id')){
-            $adminDepartmentId = $this->getParam('admin_department_id');
-            $model->whereHas('departmentRoles', function (Builder $builder) use ($adminDepartmentId){
-                $builder->where('admin_department_id', $adminDepartmentId);
-            });
-        }
-        $model = $model->get();
-        $model = $model
-            ->groupBy('admin_role_group_id')
-            ->toArray();
-        foreach ($groupModel as &$item){
-            $pid = Arr::get($item, 'value');
-            if ($children = Arr::get($model, $pid)){
-                Arr::set($item, 'children', array_values($children));
-            }
-            Arr::set($item, 'value', 'admin_role_group_'.$pid);
-        }
-        return $this->response($groupModel);
+        return $this->response($model->toArray());
     }
 
     protected function permission()
     {
-        if ($this->getParam('type') == 'data'){
+        if ($this->getParam('type') == 'data') {
             //数据权限
-            if (empty($this->getParam('id'))){
+            if (empty($this->getParam('id'))) {
                 return $this->success([
                     [
                         "adminRequestId" => 0,
@@ -267,13 +251,13 @@ class AdminRoleController extends AdminController
                 ->where('admin_role_id', $this->getParam('id'))
                 ->get();
             $data = [];
-            foreach ($adminRoleRequests as $adminRoleRequest){
+            foreach ($adminRoleRequests as $adminRoleRequest) {
                 $data[] = [
                     "adminRequestId" => Arr::get($adminRoleRequest, 'admin_request_id'),
-                    "actions" => Arr::get($adminRoleRequest, 'type') ? explode(AdminRoleRequest::CHARACTER, Arr::get($adminRoleRequest, 'type')) :[],
+                    "actions" => Arr::get($adminRoleRequest, 'type') ? explode(AdminRoleRequest::CHARACTER, Arr::get($adminRoleRequest, 'type')) : [],
                 ];
             }
-            if (empty($data)){
+            if (empty($data)) {
                 return $this->success([
                     [
                         "adminRequestId" => 0,
@@ -282,14 +266,13 @@ class AdminRoleController extends AdminController
                 ]);
             }
             return $this->success($data);
-        }else{
+        } else {
             //功能权限
             $permission = GetMenuByAdminRole::init();
-            if ($this->getParam('id')){
+            if ($this->getParam('id')) {
                 $permission->setAdminRoleIds([$this->getParam('id')]);
             }
             $menus = $permission
-                ->setSubsystemId(Access::getSubsystemId())
                 ->run()
                 ->getMenus();
 
@@ -302,9 +285,9 @@ class AdminRoleController extends AdminController
         $data = [];
         Arr::set($data, 'label', Arr::get($value, 'name'));
         Arr::set($data, 'value', Arr::get($value, 'id'));
-        if (in_array(Arr::get($value, 'id'), $menuIds)){
+        if (in_array(Arr::get($value, 'id'), $menuIds)) {
             Arr::set($data, 'check', true);
-        }else{
+        } else {
             Arr::set($data, 'check', false);
         }
         if (Arr::get($value, 'admin_page_id')) {
@@ -313,7 +296,7 @@ class AdminRoleController extends AdminController
         $adminPageOptions = Arr::get($value, 'admin_page.admin_page_options');
         $allCheckedOption = $allCheckedColumn = "null";
         if (!empty($adminPageOptions)) {
-            Arr::set($data, 'options', array_map(function ($option) use ($pageOptionIds){
+            Arr::set($data, 'options', array_map(function ($option) use ($pageOptionIds) {
                 return [
                     'label' => Arr::get($option, 'name'),
                     'value' => Arr::get($option, 'id'),
@@ -321,9 +304,9 @@ class AdminRoleController extends AdminController
                 ];
             }, $adminPageOptions));
             $check = array_unique(Arr::pluck(Arr::get($data, 'options'), 'check'));
-            if (count($check) > 1){
+            if (count($check) > 1) {
                 $allCheckedOption = "some";
-            }else{
+            } else {
                 $allCheckedOption = Arr::get($check, '0') ? "all" : "null";
             }
             Arr::set($data, 'options.allCheck', $allCheckedOption);
@@ -338,20 +321,20 @@ class AdminRoleController extends AdminController
                 ];
             }, $adminPageColumns));
             $check = array_unique(Arr::pluck(Arr::get($data, 'columns'), 'check'));
-            if (count($check) > 1){
+            if (count($check) > 1) {
                 $allCheckedColumn = "some";
-            }else{
+            } else {
                 $allCheckedColumn = Arr::get($check, '0') ? "all" : "null";
             }
             Arr::set($data, 'columns.allCheck', $allCheckedColumn);
         }
-        if ($allCheckedOption == "all" && $allCheckedColumn == "all"){
+        if ($allCheckedOption == "all" && $allCheckedColumn == "all") {
             Arr::set($data, 'allCheck', "all");
-        }elseif($allCheckedOption == "some" || $allCheckedColumn == "some"){
+        } elseif ($allCheckedOption == "some" || $allCheckedColumn == "some") {
             Arr::set($data, 'allCheck', "some");
-        }elseif (!empty($adminPageColumns) || !empty($adminPageOptions)){
+        } elseif (!empty($adminPageColumns) || !empty($adminPageOptions)) {
             Arr::set($data, 'allCheck', "null");
-        }else{
+        } else {
             Arr::set($data, 'allCheck', Arr::get($data, 'check') ? "all" : "null");
         }
 
@@ -364,9 +347,9 @@ class AdminRoleController extends AdminController
             if (!empty($routes)) {
                 Arr::set($data, 'children', $routes);
                 $check = array_unique(Arr::pluck($routes, 'allCheck'));
-                if (count($check) > 1){
+                if (count($check) > 1) {
                     Arr::set($data, 'allCheck', "some");
-                }else{
+                } else {
                     Arr::set($data, 'allCheck', Arr::get($check, '0'));
                 }
             }
@@ -377,28 +360,28 @@ class AdminRoleController extends AdminController
     protected function getPermission($permission)
     {
         $adminMenuIds = $adminPageColumnIds = $adminPageOptionIds = [];
-        if (Arr::get($permission, 'check')){
+        if (Arr::get($permission, 'check')) {
             $adminMenuIds[] = Arr::get($permission, 'value');
         }
-        if ($columns = Arr::get($permission, 'columns')){
-            $adminPageColumnIds = array_map(function ($column){
+        if ($columns = Arr::get($permission, 'columns')) {
+            $adminPageColumnIds = array_map(function ($column) {
                 return Str::replace('column_', '', Arr::get($column, 'value'));
-            }, array_filter($columns, function ($column){
-                if (Arr::get($column, 'check')){
+            }, array_filter($columns, function ($column) {
+                if (Arr::get($column, 'check')) {
                     return Arr::get($column, 'value');
                 }
             }));
         }
-        if ($options = Arr::get($permission, 'options')){
-            $adminPageOptionIds = array_map(function ($option){
+        if ($options = Arr::get($permission, 'options')) {
+            $adminPageOptionIds = array_map(function ($option) {
                 return Str::replace('option_', '', Arr::get($option, 'value'));
-            }, array_filter($options, function ($option){
-                if (Arr::get($option, 'check')){
+            }, array_filter($options, function ($option) {
+                if (Arr::get($option, 'check')) {
                     return Arr::get($option, 'value');
                 }
             }));
         }
-        if ($children = Arr::get($permission, 'children')){
+        if ($children = Arr::get($permission, 'children')) {
             foreach ($children as $child) {
                 list($adminItemMenuIds, $adminItemPageColumnIds, $adminItemPageOptionIds) = $this->getPermission($child);
                 $adminMenuIds = array_merge($adminItemMenuIds, $adminMenuIds);
@@ -406,6 +389,6 @@ class AdminRoleController extends AdminController
                 $adminPageOptionIds = array_merge($adminItemPageOptionIds, $adminPageOptionIds);
             }
         }
-        return [$adminMenuIds,$adminPageColumnIds,$adminPageOptionIds];
+        return [$adminMenuIds, $adminPageColumnIds, $adminPageOptionIds];
     }
 }

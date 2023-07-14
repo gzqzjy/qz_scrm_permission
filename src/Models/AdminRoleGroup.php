@@ -1,24 +1,23 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Models;
 
+use Qz\Admin\Permission\Scopes\CustomerIdScope;
 
 class AdminRoleGroup extends Model
 {
     protected $fillable = [
         'name',
-        'customer_subsystem_id'
+        'customer_id'
     ];
 
-    public function customerSubsystem()
+    protected static function booted()
     {
-        return $this->belongsTo(CustomerSubsystem::class);
+        static::addGlobalScope(new CustomerIdScope());
     }
 
     public function adminRoles()
     {
         return $this->hasMany(AdminRole::class);
     }
-    
 }

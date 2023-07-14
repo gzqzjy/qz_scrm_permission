@@ -8,21 +8,21 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Cores\AdminDepartment\GetInfoByAdminUserCustomerSubsystemId;
-use Qz\Admin\Permission\Cores\AdminDepartment\GetTreeCheckDepartmentWithAdminUserCustomerSubsystem;
+use Qz\Admin\Permission\Cores\AdminDepartment\GetInfoByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminDepartment\GetTreeCheckDepartmentWithAdminUser;
 use Qz\Admin\Permission\Cores\AdminDepartment\GetTreeDepartmentList;
 use Qz\Admin\Permission\Cores\AdminMenu\GetTreeAdminMenusWithCheck;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserAdd;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserDelete;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserUpdate;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\AdminUserCustomerSubsystemUpdatePermission;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetAdminUserCustomerSubsystemIdsByAdminUserCustomerSubsystemIdAndType;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetAdminUserIdsByAdminUserCustomerSubsystemId;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetDataPermissionByAdminUserCustomerSubsystemId;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetFeaturePermissionByAdminUserCustomerSubsystemId;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetPermissionByAdminUserCustomerSubsystemId;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetSubAdminDepartmentIdsByAdminDepartmentIds;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystemMenu\AdminUserCustomerSubsystemMenuSync;
+use Qz\Admin\Permission\Cores\AdminUser\AdminUserUpdatePermission;
+use Qz\Admin\Permission\Cores\AdminUser\GetAdminUserIdsByAdminUserIdAndType;
+use Qz\Admin\Permission\Cores\AdminUser\GetAdminUserIdsByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUser\GetDataPermissionByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUser\GetFeaturePermissionByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUser\GetPermissionByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUser\GetSubAdminDepartmentIdsByAdminDepartmentIds;
+use Qz\Admin\Permission\Cores\AdminUserMenu\AdminUserMenuSync;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
@@ -33,43 +33,42 @@ use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemDepartment;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRequestDepartment;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRequestEmployee;
+use Qz\Admin\Permission\Models\AdminUserDepartment;
+use Qz\Admin\Permission\Models\AdminUserRequestDepartment;
+use Qz\Admin\Permission\Models\AdminUserRequestEmployee;
 
 class AdminUserController extends AdminController
 {
     public function get()
     {
         $model = AdminUser::query()
-            ->whereHas('adminUserCustomerSubsystems', function (Builder $builder) {
-                $builder->where('customer_subsystem_id', Access::getCustomerSubsystemId());
+            ->whereHas('adminUsers', function (Builder $builder) {
+                $builder->where('customer_subsystem_id', Access::getId());
 //                $builder->whereHas('customerSubsystem', function (Builder $builder) {
 //                    $builder->where('subsystem_id', Access::getSubsystemId());
 //                });
             });
         $model = $this->filter($model);
         if ($this->getParam('admin_department_id')) {
-            $model = $model->whereHas('adminUserCustomerSubsystems', function (Builder $builder) {
-                $builder->whereHas('adminUserCustomerSubsystemDepartments', function (Builder $builder) {
+            $model = $model->whereHas('adminUsers', function (Builder $builder) {
+                $builder->whereHas('adminUserDepartments', function (Builder $builder) {
                     $builder->where('admin_department_id', $this->getParam('admin_department_id'));
                 });
             });
         }
         $model = $model->get();
         $model->load([
-            'adminUserCustomerSubsystems' => function (HasMany $hasMany) {
-                $hasMany->where('customer_subsystem_id', Access::getCustomerSubsystemId());
+            'adminUsers' => function (HasMany $hasMany) {
+                $hasMany->where('customer_subsystem_id', Access::getId());
             },
-            'adminUserCustomerSubsystems.adminUserCustomerSubsystemDepartments',
-            'adminUserCustomerSubsystems.adminUserCustomerSubsystemRoles'
+            'adminUsers.adminUserDepartments',
+            'adminUsers.adminUserRoles'
         ]);
         $model->append(['statusDesc']);
         //call_user_func([$model, 'append'], ['status_desc']);
         foreach ($model as &$item) {
-            $adminDepartments = Arr::get($item, 'adminUserCustomerSubsystems.0.adminUserCustomerSubsystemDepartments');
-            $adminRoles = Arr::get($item, 'adminUserCustomerSubsystems.0.adminUserCustomerSubsystemRoles');
+            $adminDepartments = Arr::get($item, 'adminUsers.0.adminUserDepartments');
+            $adminRoles = Arr::get($item, 'adminUsers.0.adminUserRoles');
             $department = [];
             foreach ($adminDepartments as $adminDepartment) {
                 $department[] = [
@@ -89,24 +88,7 @@ class AdminUserController extends AdminController
      */
     public function store()
     {
-        $validator = Validator::make($this->getParam(), [
-            'name' => [
-                'required',
-            ],
-            'mobile' => [
-                'required',
-                Rule::unique(AdminUser::class)
-                    ->withoutTrashed(),
-            ],
-        ], [
-            'name.required' => '员工名不能为空',
-            'mobile.required' => '员工手机号不能为空',
-            'mobile.unique' => '员工手机号不能重复',
-        ]);
-        if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
-        }
-        $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
+        $this->addParam('customer_id', Access::getCustomerId());
         $id = AdminUserAdd::init()
             ->setParam($this->getParam())
             ->run()
@@ -123,7 +105,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists(AdminUser::class)
                     ->withoutTrashed(),
             ],
             'mobile' => [
@@ -139,8 +121,6 @@ class AdminUserController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
-
         $id = AdminUserUpdate::init()
             ->setId($this->getParam('id'))
             ->setParam($this->getParam())
@@ -158,7 +138,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_user_customer_subsystems')
+                Rule::exists('admin_users')
                     ->withoutTrashed()
             ],
             'permission' => [
@@ -180,29 +160,29 @@ class AdminUserController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $featurePermission = GetFeaturePermissionByAdminUserCustomerSubsystemId::init()
-            ->setAdminUserCustomerSubsystemId($this->getParam('id'))
+        $featurePermission = GetFeaturePermissionByAdminUserId::init()
+            ->setAdminUserId($this->getParam('id'))
             ->setFeaturePermission($this->getParam('permission'))
             ->run();
         $adminMenus = $featurePermission->getAdminMenus();
         $adminPageColumns = $featurePermission->getAdminPageColumns();
         $adminPageOptions = $featurePermission->getAdminPageOptions();
 
-        $dataPermission = GetDataPermissionByAdminUserCustomerSubsystemId::init()
-            ->setAdminUserCustomerSubsystemId($this->getParam('id'))
+        $dataPermission = GetDataPermissionByAdminUserId::init()
+            ->setAdminUserId($this->getParam('id'))
             ->setDataPermission($this->getParam('data_permission'))
             ->run();
 
-        $adminUserCustomerSubsystemRequestDepartments = $dataPermission->getAdminUserCustomerSubsystemRequestDepartments();
-        $adminUserCustomerSubsystemRequestEmployees = $dataPermission->getAdminUserCustomerSubsystemRequestEmployees();
+        $adminUserRequestDepartments = $dataPermission->getAdminUserRequestDepartments();
+        $adminUserRequestEmployees = $dataPermission->getAdminUserRequestEmployees();
 
-        $id = AdminUserCustomerSubsystemUpdatePermission::init()
+        $id = AdminUserUpdatePermission::init()
             ->setId($this->getParam('id'))
             ->setAdminMenu($adminMenus)
             ->setAdminPageColumn($adminPageColumns)
             ->setAdminPageOption($adminPageOptions)
-            ->setAdminUserCustomerSubsystemRequestDepartments($adminUserCustomerSubsystemRequestDepartments)
-            ->setAdminUserCustomerSubsystemRequestEmployees($adminUserCustomerSubsystemRequestEmployees)
+            ->setAdminUserRequestDepartments($adminUserRequestDepartments)
+            ->setAdminUserRequestEmployees($adminUserRequestEmployees)
             ->run()
             ->getId();
         return $this->success(compact('id'));
@@ -232,7 +212,7 @@ class AdminUserController extends AdminController
         $param = $this->getParam();
         $select = Arr::get($param, 'select', 'id as value, name as label');
         $model = AdminUser::query()
-            ->whereHas('adminUserCustomerSubsystems', function (Builder $builder) {
+            ->whereHas('adminUsers', function (Builder $builder) {
                 $builder->whereHas('customerSubsystem', function (Builder $builder) {
                     $builder->where('subsystem_id', Access::getSubsystemId());
                 });
@@ -269,7 +249,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_user_customer_subsystems')
+                Rule::exists('admin_users')
                     ->withoutTrashed()
             ]
         ], [
@@ -291,7 +271,7 @@ class AdminUserController extends AdminController
 
     }
 
-    protected function getFeaturePermission($adminUserCustomerSubsystemId)
+    protected function getFeaturePermission($adminUserId)
     {
         //获取用户的功能权限
         $model = AdminMenu::query();
@@ -299,8 +279,8 @@ class AdminUserController extends AdminController
         $adminMenuIds = $adminPageOptionIds = $adminPageColumnIds = [];
         if (empty($administrator)) {
             //获取用户的角色
-            $permission = GetPermissionByAdminUserCustomerSubsystemId::init()
-                ->setAdminUserCustomerSubsystemId(Access::getAdminUserCustomerSubsystemId())
+            $permission = GetPermissionByAdminUserId::init()
+                ->setAdminUserId(Access::getAdminUserId())
                 ->run();
             $adminMenuIds = $permission->getAdminMenuIds();
             $adminPageOptionIds = $permission->getAdminPageOptionIds();
@@ -334,8 +314,8 @@ class AdminUserController extends AdminController
         }
 
         //选择的员工所有的权限
-        $permission = GetPermissionByAdminUserCustomerSubsystemId::init()
-            ->setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
+        $permission = GetPermissionByAdminUserId::init()
+            ->setAdminUserId($adminUserId)
             ->run();
         //对比登录员工权限+选择员工拥有的权限
         return GetTreeAdminMenusWithCheck::init()
@@ -389,34 +369,34 @@ class AdminUserController extends AdminController
         return $data;
     }
 
-    protected function getDataPermission($adminUserCustomerSubsystemId){
+    protected function getDataPermission($adminUserId){
         //获取用户所有的数据权限
         //1、根据用户id、用户角色、返回所有数据权限(admin_request_id)
         $data = [];
-        $adminUserCustomerSubsystemRequestDepartments = AdminUserCustomerSubsystemRequestDepartment::query()
-            ->where('admin_user_customer_subsystem_id', $adminUserCustomerSubsystemId)
+        $adminUserRequestDepartments = AdminUserRequestDepartment::query()
+            ->where('admin_user_id', $adminUserId)
             ->pluck('type', 'admin_request_id')
             ->toArray();
 
         //员工额外添加或删除的其余员工权限
-        $adminUserCustomerSubsystemRequestEmployees = AdminUserCustomerSubsystemRequestEmployee::query()
-            ->where('admin_user_customer_subsystem_id', $adminUserCustomerSubsystemId)
-            ->select(['id', 'admin_request_id', 'type', 'permission_admin_user_customer_subsystem_id'])
+        $adminUserRequestEmployees = AdminUserRequestEmployee::query()
+            ->where('admin_user_id', $adminUserId)
+            ->select(['id', 'admin_request_id', 'type', 'permission_admin_user_id'])
             ->get()
             ->groupBy(['admin_request_id', 'type'])
             ->toArray();
 
-        $adminUserRoleIds = GetInfoByAdminUserCustomerSubsystemId::init()
-            ->setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
-            ->getAdminUserCustomerSubsystemRoleIds();
+        $adminUserRoleIds = GetInfoByAdminUserId::init()
+            ->setAdminUserId($adminUserId)
+            ->getAdminUserRoleIds();
 
         $adminRoleRequests = AdminRoleRequest::query()
             ->whereIn('admin_role_id', $adminUserRoleIds);
-        if ($adminUserCustomerSubsystemRequestDepartments){
-            $adminRoleRequests = $adminRoleRequests->whereNotIn('admin_request_id', array_keys($adminUserCustomerSubsystemRequestDepartments));
-            foreach ($adminUserCustomerSubsystemRequestDepartments as $key => $adminUserCustomerSubsystemRequestDepartment){
-                $type = $adminUserCustomerSubsystemRequestDepartment ? explode(AdminUserCustomerSubsystemRequestDepartment::CHARACTER, $adminUserCustomerSubsystemRequestDepartment) : [];
-                $adminUserCustomerSubsystemRequestDepartments[$key] = $type;
+        if ($adminUserRequestDepartments){
+            $adminRoleRequests = $adminRoleRequests->whereNotIn('admin_request_id', array_keys($adminUserRequestDepartments));
+            foreach ($adminUserRequestDepartments as $key => $adminUserRequestDepartment){
+                $type = $adminUserRequestDepartment ? explode(AdminUserRequestDepartment::CHARACTER, $adminUserRequestDepartment) : [];
+                $adminUserRequestDepartments[$key] = $type;
             }
         }
         $adminRoleRequests = $adminRoleRequests
@@ -437,7 +417,7 @@ class AdminUserController extends AdminController
             }
             $adminRoleRequests = $adminRoleRequestGroups;
         }
-        $adminRequests = $adminRoleRequests + $adminUserCustomerSubsystemRequestDepartments;
+        $adminRequests = $adminRoleRequests + $adminUserRequestDepartments;
 
         if (empty($adminRequests)){
             //未设置权限
@@ -450,7 +430,7 @@ class AdminUserController extends AdminController
         if ($this->isAdministrator()){
             //超管所有部门、所有员工都可查看
             $adminDepartments = AdminDepartment::query()
-                ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+                ->where('customer_subsystem_id', Access::getId())
                 ->orderBy('level')
                 ->get()
                 ->toArray();
@@ -459,17 +439,17 @@ class AdminUserController extends AdminController
                 ->run()
                 ->getTreeAdminDepartments();
 
-            $adminLoginUserRequestDepartmentAndUsers = AdminUserCustomerSubsystemDepartment::query()
+            $adminLoginUserRequestDepartmentAndUsers = AdminUserDepartment::query()
                 ->whereHas('adminDepartment', function (Builder $builder){
-                    $builder->where('customer_subsystem_id', Access::getCustomerSubsystemId());
+                    $builder->where('customer_subsystem_id', Access::getId());
                 })
-                //->whereIn('admin_user_customer_subsystem_id', Arr::pluck($adminLoginUserRequestEmoloyees, 'id'))
-                ->select(['admin_department_id', 'admin_user_customer_subsystem_id'])
+                //->whereIn('admin_user_id', Arr::pluck($adminLoginUserRequestEmoloyees, 'id'))
+                ->select(['admin_department_id', 'admin_user_id'])
                 ->get();
             if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
                 $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
-                    'adminUserCustomerSubsystem:id,admin_user_id',
-                    'adminUserCustomerSubsystem.adminUser:id,name'
+                    'adminUser:id,admin_user_id',
+                    'adminUser.adminUser:id,name'
                 ]);
                 $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->groupBy('admin_department_id')
                     ->toArray();
@@ -477,21 +457,21 @@ class AdminUserController extends AdminController
         }
 
         foreach ($adminRequests as $adminRequestId => $actions){
-            $adminRequestEmployees = GetAdminUserCustomerSubsystemIdsByAdminUserCustomerSubsystemIdAndType::init()
-                ->setAdminUserCustomerSubSystemId($adminUserCustomerSubsystemId)
+            $adminRequestEmployees = GetAdminUserIdsByAdminUserIdAndType::init()
+                ->setAdminUserCustomerSubSystemId($adminUserId)
                 ->setDepartmentType($actions)
                 ->run()
                 ->getAdminUserCustomerSubSystemIds();
 
-            if (Arr::get($adminUserCustomerSubsystemRequestEmployees, $adminRequestId)){
-                Arr::get($adminUserCustomerSubsystemRequestEmployees, $adminRequestId. '.add') && $adminRequestEmployees = array_merge($adminRequestEmployees, Arr::pluck(Arr::get($adminUserCustomerSubsystemRequestEmployees, $adminRequestId. '.add'), 'permission_admin_user_customer_subsystem_id'));
-                Arr::get($adminUserCustomerSubsystemRequestEmployees, $adminRequestId. '.delete') && $adminRequestEmployees = array_diff($adminRequestEmployees, Arr::pluck(Arr::get($adminUserCustomerSubsystemRequestEmployees, $adminRequestId. '.delete'), 'permission_admin_user_customer_subsystem_id'));
+            if (Arr::get($adminUserRequestEmployees, $adminRequestId)){
+                Arr::get($adminUserRequestEmployees, $adminRequestId. '.add') && $adminRequestEmployees = array_merge($adminRequestEmployees, Arr::pluck(Arr::get($adminUserRequestEmployees, $adminRequestId. '.add'), 'permission_admin_user_id'));
+                Arr::get($adminUserRequestEmployees, $adminRequestId. '.delete') && $adminRequestEmployees = array_diff($adminRequestEmployees, Arr::pluck(Arr::get($adminUserRequestEmployees, $adminRequestId. '.delete'), 'permission_admin_user_id'));
             }
             //登录员工能看到的权限列表
             if (empty($this->isAdministrator())){
                 //登录员工当前可查看的部门
-                $adminDepartmentIds = AdminUserCustomerSubsystemDepartment::query()
-                    ->where('admin_user_customer_subsystem_id', Access::getAdminUserCustomerSubsystemId())
+                $adminDepartmentIds = AdminUserDepartment::query()
+                    ->where('admin_user_id', Access::getAdminUserId())
                     ->where('administrator', 1)
                     ->pluck('admin_department_id')
                     ->toArray();
@@ -510,15 +490,15 @@ class AdminUserController extends AdminController
                     ->run()
                     ->getTreeAdminDepartments();
 
-                //$adminUserCustomerSubsystemIds = Arr::prepend($adminLoginUserRequestEmoloyees, Access::getAdminUserCustomerSubsystemId());
-                $adminLoginUserRequestDepartmentAndUsers = AdminUserCustomerSubsystemDepartment::query()
+                //$adminUserIds = Arr::prepend($adminLoginUserRequestEmoloyees, Access::getAdminUserId());
+                $adminLoginUserRequestDepartmentAndUsers = AdminUserDepartment::query()
                     ->whereIn('admin_department_id', $adminDepartmentIds)
-                    ->select(['admin_department_id', 'admin_user_customer_subsystem_id'])
+                    ->select(['admin_department_id', 'admin_user_id'])
                     ->get();
                 if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
                     $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
-                        'adminUserCustomerSubsystem:id,admin_user_id',
-                        'adminUserCustomerSubsystem.adminUser:id,name'
+                        'adminUser:id,admin_user_id',
+                        'adminUser.adminUser:id,name'
                     ]);
                     $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->groupBy('admin_department_id');
 
@@ -527,10 +507,10 @@ class AdminUserController extends AdminController
                 $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->toArray();
             }
 
-            $department = GetTreeCheckDepartmentWithAdminUserCustomerSubsystem::init()
+            $department = GetTreeCheckDepartmentWithAdminUser::init()
                 ->setAdminDepartments($adminDepartments)
-                ->setAdminUserCustomerSubsystemDepartments($adminLoginUserRequestDepartmentAndUsers)
-                ->setCheckAdminUserCustomerSubsystemIds($adminRequestEmployees);
+                ->setAdminUserDepartments($adminLoginUserRequestDepartmentAndUsers)
+                ->setCheckAdminUserIds($adminRequestEmployees);
             $department = $department->run()
                 ->getTreeAdminDepartments();
 
@@ -555,7 +535,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_user_customer_subsystems')
+                Rule::exists('admin_users')
                     ->withoutTrashed()
             ],
             'actions' => [
@@ -576,8 +556,8 @@ class AdminUserController extends AdminController
         $adminRequestId = $this->getParam('admin_request_id');
         $actions = $this->getParam('actions');
 
-        $adminLoginUserRequestEmoloyees = GetAdminUserIdsByAdminUserCustomerSubsystemId::init()
-            ->setAdminUserCustomerSubSystemId(Access::getAdminUserCustomerSubsystemId())
+        $adminLoginUserRequestEmoloyees = GetAdminUserIdsByAdminUserId::init()
+            ->setAdminUserCustomerSubSystemId(Access::getAdminUserId())
             ->setAdminRequestId($adminRequestId)
             ->run()
             ->getAdminUserCustomerSubSystemIds();
@@ -585,8 +565,8 @@ class AdminUserController extends AdminController
         $adminDepartments = AdminDepartment::query();
         //登录员工当前可查看的部门
         if (empty($this->isAdministrator())){
-            $adminDepartmentIds = AdminUserCustomerSubsystemDepartment::query()
-                ->where('admin_user_customer_subsystem_id', Access::getAdminUserCustomerSubsystemId())
+            $adminDepartmentIds = AdminUserDepartment::query()
+                ->where('admin_user_id', Access::getAdminUserId())
                 ->where('administrator', 1)
                 ->pluck('admin_department_id')
                 ->toArray();
@@ -609,24 +589,24 @@ class AdminUserController extends AdminController
 
 
         //员工可选择记录
-        $adminRequestEmployees = GetAdminUserCustomerSubsystemIdsByAdminUserCustomerSubsystemIdAndType::init()
+        $adminRequestEmployees = GetAdminUserIdsByAdminUserIdAndType::init()
             ->setAdminUserCustomerSubSystemId($this->getParam('id'))
             ->setDepartmentType($actions)
             ->run()
             ->getAdminUserCustomerSubSystemIds();
 
-        //$adminUserCustomerSubsystemIds = Arr::prepend($adminLoginUserRequestEmoloyees, Access::getAdminUserCustomerSubsystemId());
-        $adminLoginUserRequestDepartmentAndUsers = AdminUserCustomerSubsystemDepartment::query();
+        //$adminUserIds = Arr::prepend($adminLoginUserRequestEmoloyees, Access::getAdminUserId());
+        $adminLoginUserRequestDepartmentAndUsers = AdminUserDepartment::query();
         if (empty($this->isAdministrator())){
             $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->whereIn('admin_department_id', $adminDepartmentIds);
         }
         $adminLoginUserRequestDepartmentAndUsers =  $adminLoginUserRequestDepartmentAndUsers
-            ->select(['admin_department_id', 'admin_user_customer_subsystem_id'])
+            ->select(['admin_department_id', 'admin_user_id'])
             ->get();
         if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
             $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
-                'adminUserCustomerSubsystem:id,admin_user_id',
-                'adminUserCustomerSubsystem.adminUser:id,name'
+                'adminUser:id,admin_user_id',
+                'adminUser.adminUser:id,name'
             ]);
             $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->groupBy('admin_department_id');
 
@@ -634,10 +614,10 @@ class AdminUserController extends AdminController
 
         $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->toArray();
 
-        $department = GetTreeCheckDepartmentWithAdminUserCustomerSubsystem::init()
+        $department = GetTreeCheckDepartmentWithAdminUser::init()
             ->setAdminDepartments($adminDepartments)
-            ->setAdminUserCustomerSubsystemDepartments($adminLoginUserRequestDepartmentAndUsers)
-            ->setCheckAdminUserCustomerSubsystemIds($adminRequestEmployees)
+            ->setAdminUserDepartments($adminLoginUserRequestDepartmentAndUsers)
+            ->setCheckAdminUserIds($adminRequestEmployees)
             ->run()
             ->getTreeAdminDepartments();
 
@@ -657,7 +637,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_user_customer_subsystems')
+                Rule::exists('admin_users')
                     ->withoutTrashed()
             ],
             'actions' => [
@@ -674,22 +654,22 @@ class AdminUserController extends AdminController
         if (empty($this->getParam('actions'))){
             return $this->success([]);
         }
-        $adminUserCustomerSubsystemIds = GetAdminUserCustomerSubsystemIdsByAdminUserCustomerSubsystemIdAndType::init()
+        $adminUserIds = GetAdminUserIdsByAdminUserIdAndType::init()
             ->setAdminUserCustomerSubSystemId($this->getParam('id'))
             ->setDepartmentType($this->getParam('actions'))
             ->run()
             ->getAdminUserCustomerSubSystemIds();
-        if (empty($adminUserCustomerSubsystemIds)){
+        if (empty($adminUserIds)){
             return $this->success([]);
         }
         $data = [];
-        $adminUserCustomerDepartments = AdminUserCustomerSubsystemDepartment::query()
-            ->whereIn('admin_user_customer_subsystem_id', $adminUserCustomerSubsystemIds)
-            ->select(['admin_department_id','admin_user_customer_subsystem_id'])
+        $adminUserCustomerDepartments = AdminUserDepartment::query()
+            ->whereIn('admin_user_id', $adminUserIds)
+            ->select(['admin_department_id','admin_user_id'])
             ->get()
             ->toArray();
         foreach ($adminUserCustomerDepartments as $adminUserCustomerDepartment){
-            $data[] = "department_" . Arr::get($adminUserCustomerDepartment, 'admin_department_id'). '-' . Arr::get($adminUserCustomerDepartment, 'admin_user_customer_subsystem_id');
+            $data[] = "department_" . Arr::get($adminUserCustomerDepartment, 'admin_department_id'). '-' . Arr::get($adminUserCustomerDepartment, 'admin_user_id');
         }
         return $this->success($data);
     }
@@ -698,17 +678,17 @@ class AdminUserController extends AdminController
     public function addMenus()
     {
         $id = $this->getParam('id');
-        $adminUserCustomerSubsystem = AdminUserCustomerSubsystem::query()
+        $adminUser = AdminUser::query()
             ->where('admin_user_id', $id)
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+            ->where('customer_subsystem_id', Access::getId())
             ->first();
-        if (empty($adminUserCustomerSubsystem)) {
+        if (empty($adminUser)) {
             return $this->success();
         }
         $menuIds = Arr::collapse($this->getParam('menu_ids'));
         $menuIds = array_unique($menuIds);
-        AdminUserCustomerSubsystemMenuSync::init()
-            ->setAdminUserCustomerSubsystemId(Arr::get($adminUserCustomerSubsystem, 'id'))
+        AdminUserMenuSync::init()
+            ->setAdminUserId(Arr::get($adminUser, 'id'))
             ->setAdminMenuIds($menuIds)
             ->run();
         return $this->success();

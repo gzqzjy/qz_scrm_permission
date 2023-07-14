@@ -35,13 +35,13 @@ class GetTreeCheckDepartmentWithAdminUserCustomerSubsystem extends Core
         if ($adminUserCustomerSubsystemAndDepartments = Arr::get($this->getAdminUserCustomerSubsystemDepartments(), $id)) {
             $adminUserCustomerSubsystems = array_map(function ($adminUser) {
                 return [
-                    "label" => Arr::get($adminUser, 'admin_user_customer_subsystem.admin_user.name'),
-                    "value" => Arr::get($adminUser, 'admin_user_customer_subsystem_id'),
-                    "check" => in_array(Arr::get($adminUser, 'admin_user_customer_subsystem_id'), $this->getCheckAdminUserCustomerSubsystemIds()) ? true : false
+                    "label" => Arr::get($adminUser, 'admin_user.admin_user.name'),
+                    "value" => Arr::get($adminUser, 'admin_user_id'),
+                    "check" => in_array(Arr::get($adminUser, 'admin_user_id'), $this->getCheckAdminUserCustomerSubsystemIds()) ? true : false
                 ];
             }, $adminUserCustomerSubsystemAndDepartments);
             $adminUserCustomerSubsystems = array_values($adminUserCustomerSubsystems);
-//            $adminUserCustomerSubsystemIds = Arr::pluck($adminUserCustomerSubsystemAndDepartments, 'admin_user_customer_subsystem_id');
+//            $adminUserCustomerSubsystemIds = Arr::pluck($adminUserCustomerSubsystemAndDepartments, 'admin_user_id');
 //            $adminUserCustomerSubsystems = Arr::only($this->getAdminUserCustomerSubsystems(), $adminUserCustomerSubsystemIds);
 //            $adminUserCustomerSubsystems = array_map(function ($adminUser) {
 //                return [

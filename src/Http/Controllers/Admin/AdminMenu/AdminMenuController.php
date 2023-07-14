@@ -132,8 +132,8 @@ class AdminMenuController extends AdminController
             ->where('parent_id', 0);
         $administrator = $this->isAdministrator();
         if (empty($administrator)) {
-            $model->whereHas('adminUserCustomerSubsystemMenus', function (Builder $builder) {
-                $builder->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
+            $model->whereHas('adminUserMenus', function (Builder $builder) {
+                $builder->whereHas('adminUser', function (Builder $builder) {
                     $builder->where('admin_user_id', $this->getLoginAdminUserId());
                 });
             });

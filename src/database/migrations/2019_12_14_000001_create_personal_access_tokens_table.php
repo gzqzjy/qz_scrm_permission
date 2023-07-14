@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePersonalAccessTokensTable extends Migration
 {
-    protected $connection = 'common';
-
     /**
      * Run the migrations.
      *

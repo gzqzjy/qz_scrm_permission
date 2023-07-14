@@ -1,9 +1,8 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Models;
 
-
+use Qz\Admin\Permission\Scopes\CustomerIdScope;
 
 class AdminCategoryDepartment extends Model
 {

@@ -1,14 +1,11 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Cores\AdminRoleGroup;
-
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRoleGroup;
-
 
 class AdminRoleGroupUpdate extends Core
 {
@@ -75,5 +72,4 @@ class AdminRoleGroupUpdate extends Core
         $this->name = $name;
         return $this;
     }
-
 }

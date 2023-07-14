@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Cores\AdminRole;
-
 
 use App\Cores\Core;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,14 +19,13 @@ class GetMenuByAdminRole extends Core
     protected function execute()
     {
         $excludeMenuId = AdminMenu::query()
-            ->where('subsystem_id', $this->getSubsystemId())
             ->where('name', '系统设置')
             ->where('parent_id', 0)
             ->value('id');//系统设置不显示
         $adminMenuModel = AdminMenu::query()
             ->where('parent_id', 0)
-            ->where(function (Builder $builder) use ($excludeMenuId){
-                if ($excludeMenuId){
+            ->where(function (Builder $builder) use ($excludeMenuId) {
+                if ($excludeMenuId) {
                     $builder->where('id', '<>', $excludeMenuId);
                 }
             });
@@ -50,7 +47,6 @@ class GetMenuByAdminRole extends Core
             ->getTreeAdminMenus();
         $this->setMenus($menus);
     }
-
 
     protected $adminRoleIds;
 
@@ -75,14 +71,13 @@ class GetMenuByAdminRole extends Core
             ->pluck('admin_menu_id')
             ->toArray();
         $adminRolePageOptionIds = AdminRolePageOption::query()
-                ->whereIn('admin_role_id', $adminRoleIds)
-                ->pluck('admin_page_option_id')
-                ->toArray();
+            ->whereIn('admin_role_id', $adminRoleIds)
+            ->pluck('admin_page_option_id')
+            ->toArray();
         $adminRolePageColumnIds = AdminRolePageColumn::query()
             ->whereIn('admin_role_id', $adminRoleIds)
             ->pluck('admin_page_column_id')
             ->toArray();
-
 
         $this->setAdminMenuIds($adminRoleMenuIds);
         $this->setAdminPageColumnIds($adminRolePageColumnIds);
@@ -169,30 +164,4 @@ class GetMenuByAdminRole extends Core
         $this->menus = $menus;
         return $this;
     }
-
-    protected $subsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getSubsystemId()
-    {
-        return $this->subsystemId;
-    }
-
-    /**
-     * @param mixed $subsystemId
-     * @return GetMenuByAdminRole
-     */
-    public function setSubsystemId($subsystemId)
-    {
-        $this->subsystemId = $subsystemId;
-        return $this;
-    }
-
-
-
-
-
-
 }

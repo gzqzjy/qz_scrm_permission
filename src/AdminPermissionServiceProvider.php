@@ -21,7 +21,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     'url' => env('DATABASE_URL'),
                     'host' => env('DB_HOST', '127.0.0.1'),
                     'port' => env('DB_PORT', '3306'),
-                    'database' => env('DB_DATABASE', 'forge'),
+                    'database' => env('COMMON_DB_DATABASE', 'forge'),
                     'username' => env('DB_USERNAME', 'forge'),
                     'password' => env('DB_PASSWORD', ''),
                     'unix_socket' => env('DB_SOCKET', ''),
@@ -60,6 +60,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->configureMiddleware();
+        $this->configureFactorie();
         $this->adminV1Routes();
     }
 
@@ -164,5 +165,11 @@ class AdminPermissionServiceProvider extends ServiceProvider
 
     protected function configureMiddleware()
     {
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+    }
+
+    protected function configureFactorie()
+    {
+        $this->loadFactoriesFrom(__DIR__ . '/database/factories');
     }
 }

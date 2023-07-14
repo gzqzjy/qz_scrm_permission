@@ -6,8 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateAdminPagesTable extends Migration
 {
-    protected $connection = 'common';
-
     /**
      * Run the migrations.
      *
@@ -17,11 +15,11 @@ class CreateAdminPagesTable extends Migration
     {
         Schema::create('admin_pages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subsystem_id')->default(0)->comment('系统ID');
-            $table->string('name')->default('')->comment('页面名');
+            $table->string('name')->default('')->index()->comment('页面名');
             $table->string('code')->default('')->comment('页面标识');
             $table->timestamps();
             $table->softDeletes();
+            $table->unique(['code'], 'admin_pages_unique');
         });
     }
 

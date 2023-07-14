@@ -79,14 +79,14 @@ class Filter extends Core
                 break;
             case 'contain':
                 if (is_array($value)) {
-                    $model->whereIn($field, $option, $value);
+                    $model->whereIn($field, $value);
                 } else {
                     $model->where($field, 'like', '%' . $value . '%');
                 }
                 break;
             case 'not_contain':
                 if (is_array($value)) {
-                    $model->whereNotIn($field, $option, $value);
+                    $model->whereNotIn($field, $value);
                 } else {
                     $model->where($field, 'not like', '%' . $value . '%');
                 }

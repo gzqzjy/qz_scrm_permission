@@ -14,7 +14,6 @@ class AdminPageAdd extends Core
         $model = AdminPage::withTrashed()
             ->updateOrCreate(Arr::whereNotNull([
                 'code' => $this->getCode(),
-                'subsystem_id' => $this->getSubsystemId(),
             ]), Arr::whereNotNull([
                 'name' => $this->getName(),
             ]));
@@ -97,23 +96,5 @@ class AdminPageAdd extends Core
     {
         $this->code = $code;
         return $this;
-    }
-
-    protected $subsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getSubsystemId()
-    {
-        return $this->subsystemId;
-    }
-
-    /**
-     * @param mixed $subsystemId
-     */
-    public function setSubsystemId($subsystemId)
-    {
-        $this->subsystemId = $subsystemId;
     }
 }

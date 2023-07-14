@@ -7,7 +7,6 @@ class AdminPage extends Model
     protected $fillable = [
         'name',
         'code',
-        'subsystem_id',
     ];
 
     public function adminPageOptions()

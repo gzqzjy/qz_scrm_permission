@@ -13,7 +13,7 @@ class AdminRoleGroupAdd extends Core
         $model = AdminRoleGroup::withTrashed()
             ->firstOrCreate(Arr::whereNotNull([
                 'name' => $this->getName(),
-                'customer_subsystem_id' => $this->getCustomerSubsystemId(),
+                'customer_id' => $this->getCustomerId(),
             ]));
         if ($model->trashed()) {
             $model->restore();
@@ -76,26 +76,23 @@ class AdminRoleGroupAdd extends Core
         return $this;
     }
 
-    protected $customerSubsystemId;
+    protected $customerId;
 
     /**
      * @return mixed
      */
-    public function getCustomerSubsystemId()
+    public function getCustomerId()
     {
-        return $this->customerSubsystemId;
+        return $this->customerId;
     }
 
     /**
-     * @param mixed $customerSubsystemId
+     * @param mixed $customerId
      * @return AdminRoleGroupAdd
      */
-    public function setCustomerSubsystemId($customerSubsystemId)
+    public function setCustomerId($customerId)
     {
-        $this->customerSubsystemId = $customerSubsystemId;
+        $this->customerId = $customerId;
         return $this;
     }
-
-
-
 }

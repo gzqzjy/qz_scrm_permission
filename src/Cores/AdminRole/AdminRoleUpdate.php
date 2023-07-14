@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Cores\AdminRole;
-
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -16,7 +14,6 @@ use Qz\Admin\Permission\Models\AdminRoleMenu;
 use Qz\Admin\Permission\Models\AdminRolePageColumn;
 use Qz\Admin\Permission\Models\AdminRolePageOption;
 use Qz\Admin\Permission\Models\AdminRoleRequest;
-
 
 class AdminRoleUpdate extends Core
 {
@@ -74,8 +71,8 @@ class AdminRoleUpdate extends Core
             }
         }
 
-        if ($this->getAdminRoleRequest()){
-            foreach ($this->getAdminRoleRequest() as $item){
+        if ($this->getAdminRoleRequest()) {
+            foreach ($this->getAdminRoleRequest() as $item) {
                 AdminRoleRequestAdd::init()
                     ->setAdminRoleId($this->getId())
                     ->setAdminRequestId(Arr::get($item, 'admin_request_id'))
@@ -198,7 +195,6 @@ class AdminRoleUpdate extends Core
         return $this;
     }
 
-
     protected $adminRolePageOption;
 
     /**
@@ -238,5 +234,4 @@ class AdminRoleUpdate extends Core
         $this->adminRoleRequest = $adminRoleRequest;
         return $this;
     }
-
 }

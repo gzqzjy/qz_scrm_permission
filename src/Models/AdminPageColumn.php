@@ -15,8 +15,8 @@ class AdminPageColumn extends Model
         return $this->belongsTo(AdminPage::class);
     }
     
-    public function adminUserCustomerSubsystemPageColumns()
+    public function adminUserPageColumns()
     {
-        return $this->hasMany(AdminUserCustomerSubsystemPageColumn::class);
+        return $this->hasMany(AdminUserPageColumn::class);
     }
 }

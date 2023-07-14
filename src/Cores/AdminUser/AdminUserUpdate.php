@@ -2,12 +2,14 @@
 
 namespace Qz\Admin\Permission\Cores\AdminUser;
 
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\AdminUserCustomerSubsystemAdd;
+use Qz\Admin\Permission\Cores\AdminUserDepartment\AdminUserDepartmentSync;
+use Qz\Admin\Permission\Cores\AdminUserRole\AdminUserRoleSync;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
+use Qz\Admin\Permission\Models\AdminUserDepartment;
+use Qz\Admin\Permission\Models\AdminUserRole;
 
 class AdminUserUpdate extends Core
 {
@@ -23,14 +25,14 @@ class AdminUserUpdate extends Core
         ]));
         $model->save();
         $this->setId($model->getKey());
-        if ($this->getCustomerSubsystemId()) {
-            AdminUserCustomerSubsystemAdd::init()
-                ->setCustomerSubsystemId($this->getCustomerSubsystemId())
-                ->setAdminUserId($this->getId())
-                ->setAdminDepartments($this->getAdminDepartments())
-                ->setAdminRoleIds($this->getAdminRoleIds())
-                ->run();
-        }
+        AdminUserRoleSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminRoleIds($this->getAdminRoleIds())
+            ->run();
+        AdminUserDepartmentSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminUserDepartments($this->getAdminUserDepartments())
+            ->run();
     }
 
     protected $id;
@@ -68,7 +70,6 @@ class AdminUserUpdate extends Core
         return $this;
     }
 
-
     protected $name;
 
     /**
@@ -88,6 +89,7 @@ class AdminUserUpdate extends Core
         $this->name = $name;
         return $this;
     }
+
     protected $mobile;
 
     /**
@@ -107,6 +109,7 @@ class AdminUserUpdate extends Core
         $this->mobile = $mobile;
         return $this;
     }
+
     protected $status;
 
     /**
@@ -146,49 +149,6 @@ class AdminUserUpdate extends Core
         $this->sex = $sex;
         return $this;
     }
-
-    protected $customerSubsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getCustomerSubsystemId()
-    {
-        return $this->customerSubsystemId;
-    }
-
-    /**
-     * @param mixed $customerSubsystemId
-     * @return AdminUserUpdate
-     */
-    public function setCustomerSubsystemId($customerSubsystemId)
-    {
-        $this->customerSubsystemId = $customerSubsystemId;
-        return $this;
-    }
-
-
-    protected $adminDepartments;
-
-    /**
-     * @return mixed
-     */
-    public function getAdminDepartments()
-    {
-        return $this->adminDepartments;
-    }
-
-    /**
-     * @param mixed $adminDepartments
-     * @return AdminUserUpdate
-     */
-    public function setAdminDepartments($adminDepartments)
-    {
-        $this->adminDepartments = $adminDepartments;
-        return $this;
-    }
-
-
 
     protected $adminRoleIds;
 
@@ -270,5 +230,23 @@ class AdminUserUpdate extends Core
         return $this;
     }
 
+    protected $adminUserDepartments;
 
+    /**
+     * @return mixed
+     */
+    public function getAdminUserDepartments()
+    {
+        return $this->adminUserDepartments;
+    }
+
+    /**
+     * @param mixed $adminUserDepartments
+     * @return AdminUserUpdate
+     */
+    public function setAdminUserDepartments($adminUserDepartments)
+    {
+        $this->adminUserDepartments = $adminUserDepartments;
+        return $this;
+    }
 }

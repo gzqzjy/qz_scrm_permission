@@ -1,10 +1,9 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Models;
 
-
 use Illuminate\Support\Arr;
+use Qz\Admin\Permission\Scopes\CustomerIdScope;
 
 class AdminDepartment extends Model
 {
@@ -12,12 +11,12 @@ class AdminDepartment extends Model
         'name',
         'pid',
         'level',
-        'customer_subsystem_id'
+        'customer_id',
     ];
 
-    public function customerSubsystem()
+    protected static function booted()
     {
-        return $this->belongsTo(CustomerSubsystem::class);
+        static::addGlobalScope(new CustomerIdScope());
     }
 
     public function adminCategoryDepartments()
@@ -30,14 +29,26 @@ class AdminDepartment extends Model
         return $this->hasMany(AdminDepartmentRole::class);
     }
 
-    public function adminUserCustomerSubsystemDepartments()
+    public function adminUserDepartments()
     {
-        return $this->hasMany(AdminUserCustomerSubsystemDepartment::class);
+        return $this->hasMany(AdminUserDepartment::class);
     }
 
     public function child()
     {
-        return $this->hasMany(self::class, 'pid', 'id');
+        return $this->hasMany(self::class, 'pid', 'id')->with([
+            'adminUserDepartments',
+            'adminCategoryDepartments',
+            'adminDepartmentRoles',
+            'adminUserDepartments.adminUser',
+            'adminUserDepartments.adminUser.adminUserRoles',
+            'adminUserDepartments.adminUser.adminUserRoles.adminRole',
+            'adminUserDepartments.adminUser.adminUserDepartments',
+        ])->withCount([
+            'adminUserDepartments',
+            'adminCategoryDepartments',
+            'adminDepartmentRoles',
+        ]);
     }
 
     public function children()
@@ -46,7 +57,6 @@ class AdminDepartment extends Model
             'children'
         ]);
     }
-
 
     public function parent()
     {

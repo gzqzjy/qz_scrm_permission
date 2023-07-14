@@ -3,6 +3,7 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\Auth;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -11,7 +12,7 @@ use Qz\Admin\Permission\Cores\AdminPage\AdminPageIdGet;
 use Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionDelete;
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\GetPermissionByAdminUserCustomerSubsystemId;
+use Qz\Admin\Permission\Cores\AdminUser\GetPermissionByAdminUserId;
 use Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
@@ -20,9 +21,8 @@ use Qz\Admin\Permission\Models\AdminPage;
 use Qz\Admin\Permission\Models\AdminPageColumn;
 use Qz\Admin\Permission\Models\AdminPageOption;
 use Qz\Admin\Permission\Models\AdminUser;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemDepartment;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemPageOption;
+use Qz\Admin\Permission\Models\AdminUserDepartment;
+use Qz\Admin\Permission\Models\AdminUserPageOption;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -38,14 +38,8 @@ class AccessController extends AdminController
         $token = '';
         $model = AdminUser::query()
             ->where('mobile', $mobile)
-            ->whereHas('adminUserCustomerSubsystems', function (Builder $builder) {
-                $builder->where('status', AdminUserCustomerSubsystem::STATUS_NORMAL)
-                    ->whereHas('customerSubsystem', function (Builder $builder) {
-                        $builder->where('subsystem_id', SubsystemIdGet::init()
-                            ->run()
-                            ->getId());
-                    });
-            })
+            ->where('status', AdminUser::STATUS_WORKING)
+            ->orderBy('id')
             ->first();
         if (empty($model)) {
             return $this->response(compact('token', 'status', 'type'));
@@ -88,9 +82,9 @@ class AccessController extends AdminController
         $user = Auth::guard('admin')->user();
         $name = '';
         if ($user instanceof AdminUser) {
-            $id = Access::getAdminUserCustomerSubsystemId();
+            $id = Arr::get($user, 'id', '');
             $name = Arr::get($user, 'name', '');
-            $administrator = Access::getAdministrator();
+            $administrator = $this->isAdministrator();
         }
         return $this->success(compact('id', 'name', 'administrator'));
     }
@@ -108,7 +102,6 @@ class AccessController extends AdminController
     public function columns()
     {
         $pageId = AdminPageIdGet::init()
-            ->setSubsystemId(Access::getSubsystemId())
             ->setCode($this->getParam('page_code'))
             ->run()
             ->getId();
@@ -132,8 +125,8 @@ class AccessController extends AdminController
         $model = AdminPageColumn::query()
             ->whereIn('id', $pageColumnIds);
         if (!Access::getAdministrator()) {
-            $adminPageColumnIds = GetPermissionByAdminUserCustomerSubsystemId::init()
-                ->setAdminUserCustomerSubsystemId(Access::getAdminUserCustomerSubsystemId())
+            $adminPageColumnIds = GetPermissionByAdminUserId::init()
+                ->setAdminUserId(Access::getAdminUserId())
                 ->run()
                 ->getAdminPageColumnIds();
             $model->whereIn('id', array_intersect($pageColumnIds, $adminPageColumnIds));
@@ -154,8 +147,7 @@ class AccessController extends AdminController
             'page_code' => [
                 'required',
                 Rule::exists(AdminPage::class, 'code')
-                    ->withoutTrashed()
-                    ->where('subsystem_id', Access::getSubsystemId())
+                    ->withoutTrashed(),
             ],
             'option_code' => [
                 'required',
@@ -173,7 +165,6 @@ class AccessController extends AdminController
             throw new MessageException($validator->errors()->first());
         }
         $pageId = AdminPageIdGet::init()
-            ->setSubsystemId(Access::getSubsystemId())
             ->setCode($this->getParam('page_code'))
             ->run()
             ->getId();
@@ -193,8 +184,8 @@ class AccessController extends AdminController
             $access = true;
             return $this->response($access);
         }
-        $access = AdminUserCustomerSubsystemPageOption::query()
-            ->whereHas('adminUserCustomerSubsystem', function (Builder $builder) {
+        $access = AdminUserPageOption::query()
+            ->whereHas('adminUser', function (Builder $builder) {
                 $builder->where('admin_user_id', Auth::guard('admin')->id())
                     ->whereHas('customerSubsystem', function (Builder $builder) {
                         $builder->where('customer_id', Access::getCustomerId())
@@ -216,8 +207,7 @@ class AccessController extends AdminController
             'page_code' => [
                 'required',
                 Rule::exists(AdminPage::class, 'code')
-                    ->withoutTrashed()
-                    ->where('subsystem_id', Access::getSubsystemId())
+                    ->withoutTrashed(),
             ],
         ], [
             'page_code.required' => '页面标识不能为空',
@@ -227,7 +217,6 @@ class AccessController extends AdminController
             throw new MessageException($validator->errors()->first());
         }
         $pageId = AdminPageIdGet::init()
-            ->setSubsystemId(Access::getSubsystemId())
             ->setCode($this->getParam('page_code'))
             ->run()
             ->getId();
@@ -262,8 +251,8 @@ class AccessController extends AdminController
         $model = AdminPageOption::query()
             ->whereIn('id', $pageOptionIds);
         if (!Access::getAdministrator()) {
-            $adminPageOptionIds = GetPermissionByAdminUserCustomerSubsystemId::init()
-                ->setAdminUserCustomerSubsystemId(Access::getAdminUserCustomerSubsystemId())
+            $adminPageOptionIds = GetPermissionByAdminUserId::init()
+                ->setAdminUserId(Access::getAdminUserId())
                 ->run()
                 ->getAdminPageOptionIds();
             $model->whereIn('id', array_intersect($pageOptionIds, $adminPageOptionIds));
@@ -281,12 +270,12 @@ class AccessController extends AdminController
         $adminMenuIds = [];
         $menus = [];
         if (empty($administrator)) {
-            $adminMenuIds = GetPermissionByAdminUserCustomerSubsystemId::init()
-                ->setAdminUserCustomerSubsystemId(Access::getAdminUserCustomerSubsystemId())
+            $adminMenuIds = GetPermissionByAdminUserId::init()
+                ->setAdminUserId(Access::getAdminUserId())
                 ->run()
                 ->getAdminMenuIds();
-            $adminDepartmentIds = AdminUserCustomerSubsystemDepartment::query()
-                ->where('admin_user_customer_subsystem_id', Access::getAdminUserCustomerSubsystemId())
+            $adminDepartmentIds = AdminUserDepartment::query()
+                ->where('admin_user_id', Access::getAdminUserId())
                 ->where('administrator', 1)
                 ->pluck('admin_department_id')
                 ->toArray();

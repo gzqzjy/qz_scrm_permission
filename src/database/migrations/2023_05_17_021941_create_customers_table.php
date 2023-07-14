@@ -20,6 +20,7 @@ class CreateCustomersTable extends Migration
             $table->string('name')->default('')->comment('客户名');
             $table->timestamps();
             $table->softDeletes();
+            $table->unique(['name'], 'customers_unique');
         });
     }
 

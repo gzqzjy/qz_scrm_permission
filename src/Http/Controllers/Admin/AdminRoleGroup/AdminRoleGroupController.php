@@ -22,28 +22,26 @@ use Qz\Admin\Permission\Models\AdminRoleGroup;
 
 class AdminRoleGroupController extends AdminController
 {
-    public function get(){
-        $model = AdminRoleGroup::query()
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId());
-
+    public function get()
+    {
+        $model = AdminRoleGroup::query();
         $model = $this->filter($model);
-
         $model = $model
             ->selectRaw('id,name as admin_role_group_name,id admin_role_group_id,created_at')
             ->paginate($this->getPageSize());
         $filter = [];
-        if ($this->getParam('filter')){
+        if ($this->getParam('filter')) {
             $filter = $this->getChildFilter();
         }
         $model->load([
-            'adminRoles' => function (HasMany $hasMany) use ($filter){
+            'adminRoles' => function (HasMany $hasMany) use ($filter) {
                 $hasMany
                     ->selectRaw('name,id,admin_role_group_id,created_at')
                     ->withCount([
                         'departmentRoles',
-                        'adminUserCustomerSubsystemRoles'
+                        'adminUserRoles'
                     ]);
-                if ($adminRoles = Arr::get($filter, 'adminRoles')){
+                if ($adminRoles = Arr::get($filter, 'adminRoles')) {
                     $hasMany = Filter::init()
                         ->setModel($hasMany)
                         ->setParam($adminRoles)
@@ -52,19 +50,17 @@ class AdminRoleGroupController extends AdminController
                 }
             }
         ]);
-        foreach ($model->items() as $item){
+        foreach ($model->items() as $item) {
             $item->key = Arr::get($item, 'id');
             $item->delete_disabled = false;
-            if (Arr::get($item, 'adminRoles') && count(Arr::get($item, 'adminRoles'))){
+            if (Arr::get($item, 'adminRoles') && count(Arr::get($item, 'adminRoles'))) {
                 $item->delete_disabled = true;
-                foreach (Arr::get($item, 'adminRoles') as $value){
-                    $value->delete_disabled = Arr::get($value, 'department_roles_count') || Arr::get($value, 'admin_user_customer_subsystem_roles_count');
+                foreach (Arr::get($item, 'adminRoles') as $value) {
+                    $value->delete_disabled = Arr::get($value, 'department_roles_count') || Arr::get($value, 'admin_user_roles_count');
                     $value->key = Arr::get($item, 'id') . '-' . Arr::get($value, 'id');
                 }
             }
         }
-
-
         return $this->page($model);
     }
 
@@ -78,7 +74,6 @@ class AdminRoleGroupController extends AdminController
             'admin_role_group_name' => [
                 'required',
                 Rule::unique(AdminRoleGroup::class, 'name')
-                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
                     ->withoutTrashed(),
             ],
         ], [
@@ -88,7 +83,7 @@ class AdminRoleGroupController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $this->addParam('customer_subsystem_id', Access::getCustomerSubsystemId());
+        $this->addParam('customer_id', Access::getCustomerId());
         $this->addParam('name', $this->getParam('admin_role_group_name'));
         $id = AdminRoleGroupAdd::init()
             ->setParam($this->getParam())
@@ -107,8 +102,7 @@ class AdminRoleGroupController extends AdminController
             'admin_role_group_name' => [
                 Rule::unique(AdminRoleGroup::class, 'name')
                     ->withoutTrashed()
-                    ->ignore($this->getParam('id'))
-                    ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
+                    ->ignore($this->getParam('id')),
             ],
         ], [
             'admin_role_group_name.unique' => '角色组名称不能重复',
@@ -142,7 +136,7 @@ class AdminRoleGroupController extends AdminController
         $isExist = AdminRole::query()
             ->whereIn('admin_role_group_id', $id)
             ->exists();
-        if ($isExist){
+        if ($isExist) {
             throw new MessageException("角色组下有角色，不可删除！");
         }
         foreach ($id as $value) {
@@ -159,7 +153,6 @@ class AdminRoleGroupController extends AdminController
         $param = $this->getParam();
         $select = Arr::get($param, 'select', 'id as value, name as label');
         $model = AdminRoleGroup::query()
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId())
             ->selectRaw($select);
         $model = $this->filter($model);
         $model = $model->get();
@@ -169,18 +162,15 @@ class AdminRoleGroupController extends AdminController
     public function allByRole()
     {
         $param = $this->getParam();
-        $model = AdminRoleGroup::query()
-            ->where('customer_subsystem_id', Access::getCustomerSubsystemId());
+        $model = AdminRoleGroup::query();
         $model = $this->filter($model);
         $select = Arr::get($param, 'select', 'id as value, name as label,id');
         $model = $model
-            //->select(['id', 'name'])
             ->selectRaw($select)
             ->get();
         $model->load([
             'adminRoles:id as value,name as label,admin_role_group_id'
         ]);
-
         return $this->response($model);
     }
 }

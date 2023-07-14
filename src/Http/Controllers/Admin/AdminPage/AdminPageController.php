@@ -49,7 +49,6 @@ class AdminPageController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $this->addParam('subsystem_id', Access::getSubsystemId());
         $id = AdminPageAdd::init()
             ->setParam($this->getParam())
             ->run()
@@ -66,13 +65,13 @@ class AdminPageController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'name' => [
                 'sometimes',
-                Rule::unique('customers')->ignore($this->getParam('id'))
+                Rule::unique('admin_pages')->ignore($this->getParam('id'))
             ],
             'admin_user_mobile' => [
                 'sometimes',
             ],
         ], [
-            'name.unique' => '客户名已重复',
+            'name.unique' => '页面名已重复',
         ]);
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());

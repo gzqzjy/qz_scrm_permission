@@ -2,12 +2,13 @@
 
 namespace Qz\Admin\Permission\Cores\AdminUser;
 
-use Qz\Admin\Permission\Cores\AdminUserCustomerSubsystem\AdminUserCustomerSubsystemAdd;
+use Qz\Admin\Permission\Cores\AdminUserDepartment\AdminUserDepartmentSync;
+use Qz\Admin\Permission\Cores\AdminUserRole\AdminUserRoleSync;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystem;
+use Qz\Admin\Permission\Models\AdminUserDepartment;
 
 class AdminUserAdd extends Core
 {
@@ -16,6 +17,7 @@ class AdminUserAdd extends Core
         $model = AdminUser::withTrashed()
             ->updateOrCreate(Arr::whereNotNull([
                 'mobile' => $this->getMobile(),
+                'customer_id' => $this->getCustomerId(),
             ]), Arr::whereNotNull([
                 'name' => $this->getName(),
                 'status' => $this->getStatus(),
@@ -25,6 +27,14 @@ class AdminUserAdd extends Core
             $model->restore();
         }
         $this->setId($model->getKey());
+        AdminUserRoleSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminRoleIds($this->getAdminRoleIds())
+            ->run();
+        AdminUserDepartmentSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminUserDepartments($this->getAdminUserDepartments())
+            ->run();
     }
 
     protected $id;
@@ -162,23 +172,23 @@ class AdminUserAdd extends Core
         return $this;
     }
 
-    protected $adminDepartments;
+    protected $adminUserDepartments;
 
     /**
      * @return mixed
      */
-    public function getAdminDepartments()
+    public function getAdminUserDepartments()
     {
-        return $this->adminDepartments;
+        return $this->adminUserDepartments;
     }
 
     /**
-     * @param mixed $adminDepartments
+     * @param mixed $adminUserDepartments
      * @return AdminUserAdd
      */
-    public function setAdminDepartments($adminDepartments)
+    public function setAdminUserDepartments($adminUserDepartments)
     {
-        $this->adminDepartments = $adminDepartments;
+        $this->adminUserDepartments = $adminUserDepartments;
         return $this;
     }
 
@@ -262,7 +272,23 @@ class AdminUserAdd extends Core
         return $this;
     }
 
+    protected $customerId;
 
+    /**
+     * @return mixed
+     */
+    public function getCustomerId()
+    {
+        return $this->customerId;
+    }
 
-
+    /**
+     * @param mixed $customerId
+     * @return AdminUserAdd
+     */
+    public function setCustomerId($customerId)
+    {
+        $this->customerId = $customerId;
+        return $this;
+    }
 }

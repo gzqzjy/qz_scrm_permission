@@ -7,20 +7,18 @@ class AdminMenu extends Model
     protected $fillable = [
         'name',
         'path',
-        'subsystem_id',
         'parent_id',
         'sort',
         'admin_page_id',
-        'config',
     ];
 
     protected $casts = [
         'config' => 'array',
     ];
 
-    public function adminUserCustomerSubsystemMenus()
+    public function adminUserMenus()
     {
-        return $this->hasMany(AdminUserCustomerSubsystemMenu::class);
+        return $this->hasMany(AdminUserMenu::class);
     }
 
     public function parent()

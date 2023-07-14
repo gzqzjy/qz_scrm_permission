@@ -9,8 +9,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $connection = 'common';
-
+    public function __construct(array $attributes = [])
+    {
+        $this->setTable($this->getConnection()->getDatabaseName() . '.' . $this->getTable());
+        parent::__construct($attributes);
+    }
+    
     public function serializeDate($date)
     {
         return $date->format('Y-m-d H:i:s');

@@ -2,6 +2,7 @@
 
 namespace Qz\Admin\Permission\Models;
 
+use Qz\Admin\Permission\Scopes\CustomerIdScope;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -13,32 +14,41 @@ class AdminUser extends Model implements AuthenticatableContract, AuthorizableCo
 {
     use Authenticatable, Authorizable, HasApiTokens;
 
+    protected $connection = 'common';
+
     protected $fillable = [
         'name',
         'mobile',
-        'status',
         'sex',
+        'status',
+        'customer_id',
     ];
 
-    const STATUS_WORKING = 1;
-    const STATUS_LEAVING = 2;
-    const STATUS_LEAVED = 3;
+    protected static function booted()
+    {
+        static::addGlobalScope(new CustomerIdScope());
+    }
+
+    const STATUS_WORKING = 'work';
+    const STATUS_LEAVING = 'leaving';
+    const STATUS_LEAVED = 'leaved';
 
     const STATUS_DESC = [
         self::STATUS_WORKING => '在职',
         self::STATUS_LEAVING => '离职中',
         self::STATUS_LEAVED => '离职',
     ];
-
+    
     const SEX_UNKNOWN = 'unknown';
     const SEX_MAN = 'man';
     const SEX_WOMAN = 'woman';
-
     const SEX_DESC = [
         self::SEX_UNKNOWN => '未知',
         self::SEX_MAN => '男',
         self::SEX_WOMAN => '女',
     ];
+
+    protected $appends = ['statusDesc'];
 
     public function getStatusDescAttribute()
     {
@@ -47,10 +57,16 @@ class AdminUser extends Model implements AuthenticatableContract, AuthorizableCo
 
     public function getSexDescAttribute()
     {
-        return Arr::get(self::STATUS_DESC, $this->getOriginal('status'), '');
+        return Arr::get(self::STATUS_DESC, $this->getOriginal('sex'), '');
     }
-    public function adminUserCustomerSubsystems()
+
+    public function adminUserRoles()
     {
-        return $this->hasMany(AdminUserCustomerSubsystem::class);
+        return $this->hasMany(AdminUserRole::class);
+    }
+
+    public function adminUserDepartments()
+    {
+        return $this->hasMany(AdminUserDepartment::class);
     }
 }

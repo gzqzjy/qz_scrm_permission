@@ -16,9 +16,7 @@ class AdminPageColumnController extends AdminController
         $select = Arr::get($param, 'select', 'id as value, name as label');
         $model = AdminPageColumn::query()
             ->selectRaw($select)
-            ->whereHas('adminPage', function (Builder $builder) {
-                $builder->where('subsystem_id', Access::getSubsystemId());
-            });
+            ->whereHas('adminPage');
         $model = $this->filter($model);
         $model = $model->get();
         return $this->response($model);
