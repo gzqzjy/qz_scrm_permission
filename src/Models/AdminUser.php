@@ -69,4 +69,9 @@ class AdminUser extends Model implements AuthenticatableContract, AuthorizableCo
     {
         return $this->hasMany(AdminUserDepartment::class);
     }
+    
+    public function administrator()
+    {
+        return $this->hasOne(Administrator::class);
+    }
 }

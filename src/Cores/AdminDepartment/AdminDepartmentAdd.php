@@ -1,13 +1,13 @@
 <?php
+
 namespace Qz\Admin\Permission\Cores\AdminDepartment;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Cores\AdminCategoryDepartment\AdminCategoryDepartmentAdd;
-use Qz\Admin\Permission\Cores\AdminDepartmentRole\AdminDepartmentRoleAdd;
+use Qz\Admin\Permission\Cores\AdminCategoryDepartment\AdminCategoryDepartmentSync;
+use Qz\Admin\Permission\Cores\AdminDepartmentRole\AdminDepartmentRoleSync;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminDepartment;
-
 
 class AdminDepartmentAdd extends Core
 {
@@ -16,31 +16,23 @@ class AdminDepartmentAdd extends Core
         $model = AdminDepartment::withTrashed()
             ->firstOrCreate(Arr::whereNotNull([
                 'name' => $this->getName(),
+                'customer_id' => $this->getCustomerId(),
+            ]), Arr::whereNotNull([
                 'pid' => $this->getPid(),
                 'level' => $this->getLevel(),
-                'customer_subsystem_id' => $this->getCustomerSubsystemId(),
             ]));
         if ($model->trashed()) {
             $model->restore();
         }
         $this->setId($model->getKey());
-        if ($this->getCategoryIds()){
-            foreach ($this->getCategoryIds() as $categoryId){
-                AdminCategoryDepartmentAdd::init()
-                    ->setCategoryId($categoryId)
-                    ->setAdminDepartmentId($this->getId())
-                    ->run();
-            }
-        }
-
-        if ($this->getAdminRoleIds()){
-            foreach ($this->getAdminRoleIds() as $adminRoleId){
-                AdminDepartmentRoleAdd::init()
-                    ->setAdminRoleId($adminRoleId)
-                    ->setAdminDepartmentId($this->getId())
-                    ->run();
-            }
-        }
+        AdminCategoryDepartmentSync::init()
+            ->setCategoryIds($this->getCategoryIds())
+            ->setAdminDepartmentId($this->getId())
+            ->run();
+        AdminDepartmentRoleSync::init()
+            ->setAdminRoleIds($this->getAdminRoleIds())
+            ->setAdminDepartmentId($this->getId())
+            ->run();
     }
 
     protected $id;
@@ -143,7 +135,7 @@ class AdminDepartmentAdd extends Core
     /**
      * @return mixed
      */
-    public function getCustomerSubsystemId()
+    public function getCustomerId()
     {
         return $this->customerSubsystemId;
     }
@@ -152,7 +144,7 @@ class AdminDepartmentAdd extends Core
      * @param mixed $customerSubsystemId
      * @return AdminDepartmentAdd
      */
-    public function setCustomerSubsystemId($customerSubsystemId)
+    public function setCustomerId($customerSubsystemId)
     {
         $this->customerSubsystemId = $customerSubsystemId;
         return $this;

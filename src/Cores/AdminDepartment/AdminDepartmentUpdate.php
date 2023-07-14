@@ -1,15 +1,13 @@
 <?php
+
 namespace Qz\Admin\Permission\Cores\AdminDepartment;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Cores\AdminCategoryDepartment\AdminCategoryDepartmentAdd;
-use Qz\Admin\Permission\Cores\AdminDepartmentRole\AdminDepartmentRoleAdd;
+use Qz\Admin\Permission\Cores\AdminCategoryDepartment\AdminCategoryDepartmentSync;
+use Qz\Admin\Permission\Cores\AdminDepartmentRole\AdminDepartmentRoleSync;
 use Qz\Admin\Permission\Cores\Core;
-use Qz\Admin\Permission\Models\AdminCategoryDepartment;
 use Qz\Admin\Permission\Models\AdminDepartment;
-use Qz\Admin\Permission\Models\AdminDepartmentRole;
-
 
 class AdminDepartmentUpdate extends Core
 {
@@ -21,34 +19,18 @@ class AdminDepartmentUpdate extends Core
             'name' => $this->getName(),
             'pid' => $this->getPid(),
             'level' => $this->getLevel(),
-            'customer_subsystem_id' => $this->getCustomerSubsystemId(),
+            'customer_id' => $this->getCustomerId(),
         ]));
         $model->save();
         $this->setId($model->getKey());
-
-        AdminCategoryDepartment::query()
-            ->where('admin_department_id', $this->getId())
-            ->delete();
-        if ($this->getCategoryIds()){
-            foreach ($this->getCategoryIds() as $categoryId){
-                AdminCategoryDepartmentAdd::init()
-                    ->setCategoryId($categoryId)
-                    ->setAdminDepartmentId($this->getId())
-                    ->run();
-            }
-        }
-
-        AdminDepartmentRole::query()
-            ->where('admin_department_id', $this->getId())
-            ->delete();
-        if ($this->getAdminRoleIds()){
-            foreach ($this->getAdminRoleIds() as $adminRoleId){
-                AdminDepartmentRoleAdd::init()
-                    ->setAdminRoleId($adminRoleId)
-                    ->setAdminDepartmentId($this->getId())
-                    ->run();
-            }
-        }
+        AdminCategoryDepartmentSync::init()
+            ->setCategoryIds($this->getCategoryIds())
+            ->setAdminDepartmentId($this->getId())
+            ->run();
+        AdminDepartmentRoleSync::init()
+            ->setAdminRoleIds($this->getAdminRoleIds())
+            ->setAdminDepartmentId($this->getId())
+            ->run();
     }
 
     protected $id;
@@ -146,23 +128,23 @@ class AdminDepartmentUpdate extends Core
         return $this;
     }
 
-    protected $customerSubsystemId;
+    protected $customerId;
 
     /**
      * @return mixed
      */
-    public function getCustomerSubsystemId()
+    public function getCustomerId()
     {
-        return $this->customerSubsystemId;
+        return $this->customerId;
     }
 
     /**
-     * @param mixed $customerSubsystemId
+     * @param mixed $customerId
      * @return AdminDepartmentUpdate
      */
-    public function setCustomerSubsystemId($customerSubsystemId)
+    public function setCustomerId($customerId)
     {
-        $this->customerSubsystemId = $customerSubsystemId;
+        $this->customerId = $customerId;
         return $this;
     }
 

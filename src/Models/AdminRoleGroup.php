@@ -8,7 +8,7 @@ class AdminRoleGroup extends Model
 {
     protected $fillable = [
         'name',
-        'customer_id'
+        'customer_id',
     ];
 
     protected static function booted()

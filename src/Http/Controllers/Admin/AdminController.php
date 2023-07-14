@@ -78,4 +78,9 @@ class AdminController extends Controller
     {
         return Auth::guard('admin')->id();
     }
+    
+    protected function getCustomerId()
+    {
+        return Access::getCustomerId();
+    }
 }

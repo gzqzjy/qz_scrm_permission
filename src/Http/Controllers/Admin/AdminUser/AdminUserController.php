@@ -89,6 +89,17 @@ class AdminUserController extends AdminController
     public function store()
     {
         $this->addParam('customer_id', Access::getCustomerId());
+        $validator = Validator::make($this->getParam(), [
+            'mobile' => [
+                Rule::unique(AdminUser::class)
+                    ->withoutTrashed(),
+            ],
+        ], [
+            'mobile.unique' => '员工手机号不能重复',
+        ]);
+        if ($validator->fails()) {
+            throw new MessageException($validator->errors()->first());
+        }
         $id = AdminUserAdd::init()
             ->setParam($this->getParam())
             ->run()

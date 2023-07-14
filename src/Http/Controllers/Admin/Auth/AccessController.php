@@ -270,7 +270,7 @@ class AccessController extends AdminController
         $adminMenuIds = [];
         $menus = [];
         if (empty($administrator)) {
-            $adminMenuIds = GetPermissionByAdminUserId::init()
+            $adminMenuIds = (array) GetPermissionByAdminUserId::init()
                 ->setAdminUserId(Access::getAdminUserId())
                 ->run()
                 ->getAdminMenuIds();

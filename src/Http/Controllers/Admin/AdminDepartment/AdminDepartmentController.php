@@ -34,7 +34,8 @@ class AdminDepartmentController extends AdminController
         $model = AdminDepartment::query();
         if (!$this->isAdministrator()) {
             $model->whereHas('adminUserDepartments', function (Builder $builder) {
-                $builder->where('admin_user_id', $this->getLoginAdminUserId());
+                $builder->where('admin_user_id', $this->getLoginAdminUserId())
+                    ->where('administrator', true);
             });
         }
         $model = $this->filter($model);
@@ -45,7 +46,10 @@ class AdminDepartmentController extends AdminController
         $model = $model
             ->whereDoesntHave('parent', function (Builder $builder) {
                 if (!$this->isAdministrator()) {
-                    $builder->where('admin_user_id', $this->getLoginAdminUserId());
+                    $builder->whereHas('adminUserDepartments', function (Builder $builder) {
+                        $builder->where('admin_user_id', $this->getLoginAdminUserId())
+                            ->where('administrator', true);
+                    });
                 }
             })
             ->orderBy('level')
@@ -89,66 +93,6 @@ class AdminDepartmentController extends AdminController
         return $model;
     }
 
-    protected function item($value, $array, &$existDepartmentIds, $pid = 0)
-    {
-        if (in_array(Arr::get($value, 'id'), $existDepartmentIds)) {
-            return [];
-        }
-        $existDepartmentIds[] = Arr::get($value, 'id');
-        $value->category_ids = $value->adminCategoryDepartments->pluck('category_id');
-        $value->admin_role_ids = $value->adminDepartmentRoles->pluck('admin_role_id');
-        return $value;
-//        $data = Arr::except($value, ['admin_user_departments', 'admin_category_departments', 'admin_department_roles']);
-//        $data['category_ids'] = Arr::pluck(Arr::get($value, 'admin_category_departments'), 'category_id');
-//        $data['admin_role_ids'] = Arr::pluck(Arr::get($value, 'admin_department_roles'), 'admin_role_id');
-        if (Arr::get($value, 'admin_user_departments')) {
-            $adminUsers = [];
-            $statusDesc = AdminUser::STATUS_DESC;
-            foreach (Arr::get($value, 'admin_user_departments') as $item) {
-                if (empty(Arr::get($item, 'admin_user.admin_user'))) {
-                    continue;
-                }
-                $roles = Arr::get($item, 'admin_user.admin_user_roles');
-                $roleName = Arr::pluck(Arr::pluck($roles, 'admin_role'), 'name');
-                $roleId = Arr::pluck($roles, 'admin_role_id');
-                $adminDepartments = Arr::get($item, 'admin_user.admin_user_departments');
-                $adminDepartments = array_map(function ($value) {
-                    return [
-                        'id' => Arr::get($value, 'admin_department_id'),
-                        'administrator' => Arr::get($value, 'administrator')
-                    ];
-                }, $adminDepartments);
-
-                $adminDepartmentAdministrators = array_column($adminDepartments, null, 'id');
-                $adminUsers[] = [
-                    "id" => Arr::get($item, 'admin_user.id'),
-                    "name" => Arr::get($item, 'admin_user.admin_user.name'),
-                    "mobile" => Arr::get($item, 'admin_user.admin_user.mobile'),
-                    "sex" => Arr::get($item, 'admin_user.admin_user.sex'),
-                    "status" => Arr::get($item, 'admin_user.status'),
-                    "statusDesc" => $statusDesc[Arr::get($item, 'admin_user.status')],
-                    "adminRoleIds" => $roleId,
-                    "adminRoleNames" => implode(",", $roleName),
-                    "adminDepartments" => $adminDepartments,
-                    "administrator" => Arr::get($adminDepartmentAdministrators, Arr::get($item, 'admin_department_id') . '.administrator'),
-                    "created_at" => Arr::get($item, 'admin_user.created_at')
-                ];
-            }
-            $data['admin_users'] = $adminUsers;
-        }
-        $children = [];
-        foreach ($array as $item) {
-            if (Arr::get($item, 'pid') == $pid) {
-                if ($child = $this->item($item, $array, $existDepartmentIds, Arr::get($item, 'id'))) {
-                    $children[] = $child;
-                }
-            }
-        }
-        $data['children'] = $children;
-        $data['delete_disabled'] = Arr::get($data, 'admin_users') || Arr::get($data, 'children');
-        return $data;
-    }
-
     /**
      * @return JsonResponse
      * @throws MessageException
@@ -188,7 +132,7 @@ class AdminDepartmentController extends AdminController
             $this->addParam('pid', 0);
             $this->addParam('level', 1);
         }
-        $this->addParam('customer_id', Access::getCustomerId());
+        $this->addParam('customer_id', $this->getCustomerId());
         $id = AdminDepartmentAdd::init()
             ->setParam($this->getParam())
             ->run()
