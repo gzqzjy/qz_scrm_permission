@@ -16,7 +16,6 @@ class AdminMenuUpdate extends Core
         $model->fill(Arr::whereNotNull([
             'name' => $this->getName(),
             'path' => $this->getPath(),
-            'subsystem_id' => $this->getSubsystemId(),
             'parent_id' => $this->getParentId(),
             'sort' => $this->getSort(),
             'admin_page_id' => $this->getAdminPageId(),
@@ -98,26 +97,6 @@ class AdminMenuUpdate extends Core
     public function setPath($path)
     {
         $this->path = $path;
-        return $this;
-    }
-
-    protected $subsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getSubsystemId()
-    {
-        return $this->subsystemId;
-    }
-
-    /**
-     * @param mixed $subsystemId
-     * @return AdminMenuUpdate
-     */
-    public function setSubsystemId($subsystemId)
-    {
-        $this->subsystemId = $subsystemId;
         return $this;
     }
 

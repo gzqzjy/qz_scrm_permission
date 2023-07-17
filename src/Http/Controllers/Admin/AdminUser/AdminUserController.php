@@ -34,7 +34,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Qz\Admin\Permission\Models\AdminUserDepartment;
-use Qz\Admin\Permission\Models\AdminUserRequestDepartment;
+use Qz\Admin\Permission\Models\AdminUserRequest;
 use Qz\Admin\Permission\Models\AdminUserRequestEmployee;
 
 class AdminUserController extends AdminController
@@ -52,9 +52,7 @@ class AdminUserController extends AdminController
         }
         $model = $model->get();
         $model->load([
-            'adminUsers' => function (HasMany $hasMany) {
-                $hasMany->where('customer_subsystem_id', Access::getId());
-            },
+            'adminUsers',
             'adminUsers.adminUserDepartments',
             'adminUsers.adminUserRoles'
         ]);
@@ -177,7 +175,7 @@ class AdminUserController extends AdminController
             ->setDataPermission($this->getParam('data_permission'))
             ->run();
 
-        $adminUserRequestDepartments = $dataPermission->getAdminUserRequestDepartments();
+        $adminUserRequestDepartments = $dataPermission->getAdminUserRequests();
         $adminUserRequestEmployees = $dataPermission->getAdminUserRequestEmployees();
 
         $id = AdminUserUpdatePermission::init()
@@ -185,7 +183,7 @@ class AdminUserController extends AdminController
             ->setAdminMenu($adminMenus)
             ->setAdminPageColumn($adminPageColumns)
             ->setAdminPageOption($adminPageOptions)
-            ->setAdminUserRequestDepartments($adminUserRequestDepartments)
+            ->setAdminUserRequests($adminUserRequestDepartments)
             ->setAdminUserRequestEmployees($adminUserRequestEmployees)
             ->run()
             ->getId();
@@ -249,7 +247,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists(AdminMenu::class)
                     ->withoutTrashed()
             ]
         ], [
@@ -259,7 +257,6 @@ class AdminUserController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-
         if ($this->getParam('type') == 'data'){
             //数据权限
             $data = $this->getDataPermission($this->getParam('id'));
@@ -268,7 +265,6 @@ class AdminUserController extends AdminController
             $menus = $this->getFeaturePermission($this->getParam('id'));
             return $this->success($menus);
         }
-
     }
 
     protected function getFeaturePermission($adminUserId)
@@ -373,7 +369,7 @@ class AdminUserController extends AdminController
         //获取用户所有的数据权限
         //1、根据用户id、用户角色、返回所有数据权限(admin_request_id)
         $data = [];
-        $adminUserRequestDepartments = AdminUserRequestDepartment::query()
+        $adminUserRequestDepartments = AdminUserRequest::query()
             ->where('admin_user_id', $adminUserId)
             ->pluck('type', 'admin_request_id')
             ->toArray();
@@ -395,7 +391,7 @@ class AdminUserController extends AdminController
         if ($adminUserRequestDepartments){
             $adminRoleRequests = $adminRoleRequests->whereNotIn('admin_request_id', array_keys($adminUserRequestDepartments));
             foreach ($adminUserRequestDepartments as $key => $adminUserRequestDepartment){
-                $type = $adminUserRequestDepartment ? explode(AdminUserRequestDepartment::CHARACTER, $adminUserRequestDepartment) : [];
+                $type = $adminUserRequestDepartment ? explode(AdminUserRequest::CHARACTER, $adminUserRequestDepartment) : [];
                 $adminUserRequestDepartments[$key] = $type;
             }
         }

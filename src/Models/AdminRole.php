@@ -21,13 +21,8 @@ class AdminRole extends Model
     {
         return $this->belongsTo(AdminRoleGroup::class);
     }
-    
-    public function adminDepartmentRoles()
-    {
-        return $this->hasMany(AdminDepartmentRole::class);
-    }
 
-    public function departmentRoles()
+    public function adminDepartmentRoles()
     {
         return $this->hasMany(AdminDepartmentRole::class);
     }

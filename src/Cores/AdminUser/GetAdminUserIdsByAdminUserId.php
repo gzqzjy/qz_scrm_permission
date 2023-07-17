@@ -8,7 +8,7 @@ use Qz\Admin\Permission\Cores\AdminDepartment\GetInfoByAdminUserId;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRoleRequest;
 use Qz\Admin\Permission\Models\AdminUser;
-use Qz\Admin\Permission\Models\AdminUserRequestDepartment;
+use Qz\Admin\Permission\Models\AdminUserRequest;
 use Qz\Admin\Permission\Models\AdminUserRequestEmployee;
 
 class GetAdminUserIdsByAdminUserId extends Core
@@ -39,7 +39,7 @@ class GetAdminUserIdsByAdminUserId extends Core
                 $adminRequestEmpoyee = Arr::get($adminRequestEmpoyee, 0);
             }
         }
-        $adminRequestDepartment = AdminUserRequestDepartment::query()
+        $adminRequestDepartment = AdminUserRequest::query()
             ->where('admin_user_id', $this->getAdminUserCustomerSubSystemId())
             ->where(function (Builder $builder) {
                 if ($adminRequestId = $this->getAdminRequestId()) {
@@ -181,8 +181,8 @@ class GetAdminUserIdsByAdminUserId extends Core
                 ->pluck('admin_user_id')
                 ->toArray();
 
-            is_array($this->getDepartmentType()) && in_array(AdminUserRequestDepartment::UNDEFINED, $this->getDepartmentType()) && $adminUserIds[] = 0;
-            !is_array($this->getDepartmentType()) && strpos($this->getDepartmentType(), AdminUserRequestDepartment::UNDEFINED) !== false && $adminUserIds[] = 0;
+            is_array($this->getDepartmentType()) && in_array(AdminUserRequest::UNDEFINED, $this->getDepartmentType()) && $adminUserIds[] = 0;
+            !is_array($this->getDepartmentType()) && strpos($this->getDepartmentType(), AdminUserRequest::UNDEFINED) !== false && $adminUserIds[] = 0;
             return $adminUserIds;
         }
         return $this->adminUserIds;

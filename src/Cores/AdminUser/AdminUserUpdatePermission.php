@@ -5,7 +5,7 @@ namespace Qz\Admin\Permission\Cores\AdminUser;
 use Qz\Admin\Permission\Cores\AdminUserMenu\AdminUserMenuAdd;
 use Qz\Admin\Permission\Cores\AdminUserPageColumn\AdminUserPageColumnAdd;
 use Qz\Admin\Permission\Cores\AdminUserPageOption\AdminUserPageOptionAdd;
-use Qz\Admin\Permission\Cores\AdminUserRequestDepartment\AdminUserRequestDepartmentAdd;
+use Qz\Admin\Permission\Cores\AdminUserRequest\AdminUserRequestAdd;
 use Qz\Admin\Permission\Cores\AdminUserRequestEmployee\AdminUserRequestEmployeeAdd;
 use Qz\Admin\Permission\Cores\Core;
 use Illuminate\Support\Arr;
@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Qz\Admin\Permission\Models\AdminUserMenu;
 use Qz\Admin\Permission\Models\AdminUserPageColumn;
 use Qz\Admin\Permission\Models\AdminUserPageOption;
-use Qz\Admin\Permission\Models\AdminUserRequestDepartment;
+use Qz\Admin\Permission\Models\AdminUserRequest;
 use Qz\Admin\Permission\Models\AdminUserRequestEmployee;
 
 class AdminUserUpdatePermission extends Core
@@ -33,7 +33,7 @@ class AdminUserUpdatePermission extends Core
             ->where('admin_user_id', $this->getId())
             ->delete();
 
-        AdminUserRequestDepartment::query()
+        AdminUserRequest::query()
             ->where('admin_user_id', $this->getId())
             ->delete();
 
@@ -69,9 +69,9 @@ class AdminUserUpdatePermission extends Core
             }
         }
 
-        if ($this->getAdminUserRequestDepartments()){
-            foreach ($this->getAdminUserRequestDepartments() as $adminUserRequestDepartment){
-                AdminUserRequestDepartmentAdd::init()
+        if ($this->getAdminUserRequests()){
+            foreach ($this->getAdminUserRequests() as $adminUserRequestDepartment){
+                AdminUserRequestAdd::init()
                     ->setAdminUserId($this->getId())
                     ->setAdminRequestId(Arr::get($adminUserRequestDepartment, 'admin_request_id'))
                     ->setType(Arr::get($adminUserRequestDepartment, 'type'))
@@ -213,7 +213,7 @@ class AdminUserUpdatePermission extends Core
     /**
      * @return mixed
      */
-    public function getAdminUserRequestDepartments()
+    public function getAdminUserRequests()
     {
         return $this->adminUserRequestDepartments;
     }
@@ -222,7 +222,7 @@ class AdminUserUpdatePermission extends Core
      * @param mixed $adminUserRequestDepartments
      * @return AdminUserUpdatePermission
      */
-    public function setAdminUserRequestDepartments($adminUserRequestDepartments)
+    public function setAdminUserRequests($adminUserRequestDepartments)
     {
         $this->adminUserRequestDepartments = $adminUserRequestDepartments;
         return $this;

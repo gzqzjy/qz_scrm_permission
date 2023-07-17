@@ -14,7 +14,6 @@ class AdminMenuAdd extends Core
         $model = AdminMenu::withTrashed()
             ->firstOrCreate(Arr::whereNotNull([
                 'path' => $this->getPath(),
-                'subsystem_id' => $this->getSubsystemId(),
             ]), Arr::whereNotNull([
                 'name' => $this->getName(),
                 'parent_id' => $this->getParentId(),
@@ -100,26 +99,6 @@ class AdminMenuAdd extends Core
     public function setPath($path)
     {
         $this->path = $path;
-        return $this;
-    }
-
-    protected $subsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getSubsystemId()
-    {
-        return $this->subsystemId;
-    }
-
-    /**
-     * @param mixed $subsystemId
-     * @return AdminMenuAdd
-     */
-    public function setSubsystemId($subsystemId)
-    {
-        $this->subsystemId = $subsystemId;
         return $this;
     }
 

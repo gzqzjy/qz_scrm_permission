@@ -130,23 +130,23 @@ class AdminDepartmentAdd extends Core
         return $this;
     }
 
-    protected $customerSubsystemId;
+    protected $customerId;
 
     /**
      * @return mixed
      */
     public function getCustomerId()
     {
-        return $this->customerSubsystemId;
+        return $this->customerId;
     }
 
     /**
-     * @param mixed $customerSubsystemId
+     * @param mixed $customerId
      * @return AdminDepartmentAdd
      */
-    public function setCustomerId($customerSubsystemId)
+    public function setCustomerId($customerId)
     {
-        $this->customerSubsystemId = $customerSubsystemId;
+        $this->customerId = $customerId;
         return $this;
     }
 

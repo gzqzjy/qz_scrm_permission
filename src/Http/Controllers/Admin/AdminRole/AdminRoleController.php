@@ -35,7 +35,7 @@ class AdminRoleController extends AdminController
         $model = $model
             ->get();
         $model->loadCount([
-            'departmentRoles',
+            'adminDepartmentRoles',
             'adminUserRoles'
         ]);
         return $this->success($model->toArray());

@@ -16,7 +16,6 @@ class AdminPageUpdate extends Core
         $model->fill(Arr::whereNotNull([
             'name' => $this->getName(),
             'code' => $this->getCode(),
-            'subsystem_id' => $this->getSubsystemId(),
         ]));
         $model->save();
         $this->setId($model->getKey());
@@ -95,23 +94,5 @@ class AdminPageUpdate extends Core
     {
         $this->code = $code;
         return $this;
-    }
-
-    protected $subsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getSubsystemId()
-    {
-        return $this->subsystemId;
-    }
-
-    /**
-     * @param mixed $subsystemId
-     */
-    public function setSubsystemId($subsystemId)
-    {
-        $this->subsystemId = $subsystemId;
     }
 }

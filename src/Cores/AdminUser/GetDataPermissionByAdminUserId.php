@@ -7,7 +7,7 @@ use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminDepartment\GetInfoByAdminUserId;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRoleRequest;
-use Qz\Admin\Permission\Models\AdminUserRequestDepartment;
+use Qz\Admin\Permission\Models\AdminUserRequest;
 
 class GetDataPermissionByAdminUserId extends Core
 {
@@ -48,16 +48,16 @@ class GetDataPermissionByAdminUserId extends Core
                 if ($adminRoleRequestType != $actions) {
                     $adminUserRequestDepartments[] = [
                         "admin_request_id" => $adminRequestId,
-                        "type" => implode(AdminUserRequestDepartment::CHARACTER, $actions)
+                        "type" => implode(AdminUserRequest::CHARACTER, $actions)
                     ];
                 }
             } else {
                 $adminUserRequestDepartments[] = [
                     "admin_request_id" => $adminRequestId,
-                    "type" => implode(AdminUserRequestDepartment::CHARACTER, $actions)
+                    "type" => implode(AdminUserRequest::CHARACTER, $actions)
                 ];
             }
-            $actions = array_diff($actions, [AdminUserRequestDepartment::UNDEFINED]);//排除其他 不返回0
+            $actions = array_diff($actions, [AdminUserRequest::UNDEFINED]);//排除其他 不返回0
             $adminUserIds = GetAdminUserIdsByAdminUserIdAndType::init()
                 ->setAdminUserCustomerSubSystemId($adminUserId)
                 ->setDepartmentType($actions)
@@ -88,7 +88,7 @@ class GetDataPermissionByAdminUserId extends Core
                 $adminUserRequestEmployees = array_merge($adminUserRequestEmployees, $add);
             }
         }
-        $this->setAdminUserRequestDepartments($adminUserRequestDepartments);
+        $this->setAdminUserRequests($adminUserRequestDepartments);
         $this->setAdminUserRequestEmployees($adminUserRequestEmployees);
     }
 
@@ -137,7 +137,7 @@ class GetDataPermissionByAdminUserId extends Core
     /**
      * @return mixed
      */
-    public function getAdminUserRequestDepartments()
+    public function getAdminUserRequests()
     {
         return $this->adminUserRequestDepartments;
     }
@@ -146,7 +146,7 @@ class GetDataPermissionByAdminUserId extends Core
      * @param mixed $adminUserRequestDepartments
      * @return GetDataPermissionByAdminUserId
      */
-    protected function setAdminUserRequestDepartments($adminUserRequestDepartments)
+    protected function setAdminUserRequests($adminUserRequestDepartments)
     {
         $this->adminUserRequestDepartments = $adminUserRequestDepartments;
         return $this;

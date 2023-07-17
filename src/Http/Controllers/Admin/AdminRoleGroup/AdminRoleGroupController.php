@@ -38,8 +38,8 @@ class AdminRoleGroupController extends AdminController
                 $hasMany
                     ->selectRaw('name,id,admin_role_group_id,created_at')
                     ->withCount([
-                        'departmentRoles',
-                        'adminUserRoles'
+                        'adminDepartmentRoles',
+                        'adminUserRoles',
                     ]);
                 if ($adminRoles = Arr::get($filter, 'adminRoles')) {
                     $hasMany = Filter::init()
