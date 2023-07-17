@@ -11,10 +11,9 @@ class AdminRequestIdGet extends Core
 {
     protected function execute()
     {
-        if (!empty($this->getCode()) && !empty($this->getSubsystemId())) {
+        if (!empty($this->getCode())) {
             $model = AdminRequest::query()
                 ->where('code', $this->getCode())
-                ->where('subsystem_id', $this->getSubsystemId())
                 ->first();
             if (!empty($model)) {
                 $this->setId($model->getKey());
@@ -61,25 +60,4 @@ class AdminRequestIdGet extends Core
         $this->id = $id;
         return $this;
     }
-
-    protected $subsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getSubsystemId()
-    {
-        return $this->subsystemId;
-    }
-
-    /**
-     * @param mixed $subsystemId
-     * @return AdminRequestIdGet
-     */
-    public function setSubsystemId($subsystemId)
-    {
-        $this->subsystemId = $subsystemId;
-        return $this;
-    }
-
 }

@@ -15,10 +15,7 @@ class AdminPageOptionController extends AdminController
         $param = $this->getParam();
         $select = Arr::get($param, 'select', 'id as value, name as label');
         $model = AdminPageOption::query()
-            ->selectRaw($select)
-            ->whereHas('adminPage', function (Builder $builder) {
-                $builder->where('subsystem_id', Access::getSubsystemId());
-            });
+            ->selectRaw($select);
         $model = $this->filter($model);
         $model = $model->get();
         return $this->response($model);

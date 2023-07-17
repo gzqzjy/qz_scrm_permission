@@ -2,6 +2,8 @@
 
 namespace Qz\Admin\Permission\Models;
 
+use Illuminate\Support\Arr;
+
 class AdminUserDepartment extends Model
 {
     protected $fillable = [

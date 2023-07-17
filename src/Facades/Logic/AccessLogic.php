@@ -4,27 +4,6 @@ namespace Qz\Admin\Permission\Facades\Logic;
 
 class AccessLogic
 {
-    protected $customerSubsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getCustomerSubsystemId()
-    {
-        return $this->customerSubsystemId;
-    }
-
-    /**
-     * @param mixed $customerSubsystemId
-     * @return AccessLogic
-     */
-    public function setCustomerSubsystemId($customerSubsystemId)
-    {
-        $this->customerSubsystemId = $customerSubsystemId;
-        return $this;
-    }
-
-    
     protected $subsystemId;
 
     /**
@@ -81,46 +60,6 @@ class AccessLogic
         return $this;
     }
 
-    protected $adminUserCustomerSubsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getAdminUserCustomerSubsystemId()
-    {
-        return $this->adminUserCustomerSubsystemId;
-    }
-
-    /**
-     * @param mixed $adminUserCustomerSubsystemId
-     * @return AccessLogic
-     */
-    public function setAdminUserCustomerSubsystemId($adminUserCustomerSubsystemId)
-    {
-        $this->adminUserCustomerSubsystemId = $adminUserCustomerSubsystemId;
-        return $this;
-    }
-
-    protected $adminUserCustomerSubsystemIds;
-
-    /**
-     * @return mixed
-     */
-    public function getAdminUserCustomerSubsystemIds()
-    {
-        return $this->adminUserCustomerSubsystemIds;
-    }
-
-    /**
-     * @param mixed $adminUserCustomerSubsystemIds
-     * @return AccessLogic
-     */
-    public function setAdminUserCustomerSubsystemIds($adminUserCustomerSubsystemIds)
-    {
-        $this->adminUserCustomerSubsystemIds = $adminUserCustomerSubsystemIds;
-        return $this;
-    }
-    
     protected $adminUserId;
 
     /**
@@ -140,6 +79,4 @@ class AccessLogic
         $this->adminUserId = $adminUserId;
         return $this;
     }
-    
-    
 }

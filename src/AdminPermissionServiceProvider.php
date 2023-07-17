@@ -124,15 +124,6 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-users/department-permission', 'AdminUserController@departmentPermission');
                     Route::post('admin-users/department-admin-user-permission', 'AdminUserController@departmentAdminUserPermission');
                 });
-                Route::namespace('AdminUserCustomerSubsystem\V1')->group(function () {
-                    Route::post('admin-user-customer-subsystems/get', 'AdminUserCustomerSubsystemController@get');
-                    Route::post('admin-user-customer-subsystems/add', 'AdminUserCustomerSubsystemController@store');
-                    Route::post('admin-user-customer-subsystems/update', 'AdminUserCustomerSubsystemController@update');
-                    Route::post('admin-user-customer-subsystems/delete', 'AdminUserCustomerSubsystemController@destroy');
-                    Route::post('admin-user-customer-subsystems/all', 'AdminUserCustomerSubsystemController@all');
-                    Route::post('admin-user-customer-subsystems/add-menus', 'AdminUserCustomerSubsystemController@addMenus');
-                    Route::post('admin-user-customer-subsystems/all-status', 'AdminUserCustomerSubsystemController@allStatus');
-                });
                 Route::namespace('AdminRoleGroup\V1')->group(function () {
                     Route::post('admin-role-groups/get', 'AdminRoleGroupController@get');
                     Route::post('admin-role-groups/add', 'AdminRoleGroupController@store');

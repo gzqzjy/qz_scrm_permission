@@ -41,13 +41,7 @@ class AdminUserController extends AdminController
 {
     public function get()
     {
-        $model = AdminUser::query()
-            ->whereHas('adminUsers', function (Builder $builder) {
-                $builder->where('customer_subsystem_id', Access::getId());
-//                $builder->whereHas('customerSubsystem', function (Builder $builder) {
-//                    $builder->where('subsystem_id', Access::getSubsystemId());
-//                });
-            });
+        $model = AdminUser::query();
         $model = $this->filter($model);
         if ($this->getParam('admin_department_id')) {
             $model = $model->whereHas('adminUsers', function (Builder $builder) {
@@ -65,7 +59,6 @@ class AdminUserController extends AdminController
             'adminUsers.adminUserRoles'
         ]);
         $model->append(['statusDesc']);
-        //call_user_func([$model, 'append'], ['status_desc']);
         foreach ($model as &$item) {
             $adminDepartments = Arr::get($item, 'adminUsers.0.adminUserDepartments');
             $adminRoles = Arr::get($item, 'adminUsers.0.adminUserRoles');
@@ -223,11 +216,6 @@ class AdminUserController extends AdminController
         $param = $this->getParam();
         $select = Arr::get($param, 'select', 'id as value, name as label');
         $model = AdminUser::query()
-            ->whereHas('adminUsers', function (Builder $builder) {
-                $builder->whereHas('customerSubsystem', function (Builder $builder) {
-                    $builder->where('subsystem_id', Access::getSubsystemId());
-                });
-            })
             ->selectRaw($select);
         $model = $this->filter($model);
         $model = $model->get();

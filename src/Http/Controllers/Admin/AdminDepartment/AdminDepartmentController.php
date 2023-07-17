@@ -80,17 +80,38 @@ class AdminDepartmentController extends AdminController
                 $value->deleteDisabled = true;
             }
             if (!$value->adminUserDepartments->isEmpty()) {
+                $adminUsers = [];
                 foreach ($value->adminUserDepartments as $adminUserDepartment) {
+                    if (!$adminUserDepartment->adminUser) {
+                        continue;
+                    }
                     $adminUserDepartment->adminUser->adminRoleIds = $adminUserDepartment->adminUser->adminUserRoles->pluck('admin_role_id');
+                    if ($adminUserDepartment->adminUser->status != AdminUser::STATUS_LEAVED) {
+                        $adminUserDepartment->adminUser->delete_disabled = true;
+                    }
+                    $adminUsers[] = $adminUserDepartment->adminUser;
                 }
+                $value->adminUsers = $adminUsers;
             }
             $value->adminRoleIds = $value->adminDepartmentRoles->pluck('admin_role_id');
             $value->categoryIds = $value->adminCategoryDepartments->pluck('category_id');
             if (!$value->children->isEmpty()) {
                 $value->children = $this->format($value->children);
             }
+            $value->adminUserDepartmentsCount = $this->totalAdminUserDepartments($value);
         }
         return $model;
+    }
+
+    protected function totalAdminUserDepartments($adminDepartment)
+    {
+        $adminUserDepartments = (int) $adminDepartment->admin_user_departments_count;
+        if ($adminDepartment->children && !$adminDepartment->children->isEmpty()) {
+            foreach ($adminDepartment->children as $child) {
+                $adminUserDepartments += $this->totalAdminUserDepartments($child);
+            }
+        }
+        return $adminUserDepartments;
     }
 
     /**

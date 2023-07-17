@@ -13,7 +13,6 @@ use Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionDelete;
 use Qz\Admin\Permission\Cores\AdminUser\GetPermissionByAdminUserId;
-use Qz\Admin\Permission\Cores\Subsystem\SubsystemIdGet;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminMenu;
@@ -186,11 +185,7 @@ class AccessController extends AdminController
         }
         $access = AdminUserPageOption::query()
             ->whereHas('adminUser', function (Builder $builder) {
-                $builder->where('admin_user_id', Auth::guard('admin')->id())
-                    ->whereHas('customerSubsystem', function (Builder $builder) {
-                        $builder->where('customer_id', Access::getCustomerId())
-                            ->where('subsystem_id', Access::getSubsystemId());
-                    });
+                $builder->where('admin_user_id', Auth::guard('admin')->id());
             })
             ->where('admin_page_option_id', $pageOptionId)
             ->exists();

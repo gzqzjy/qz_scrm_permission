@@ -132,26 +132,6 @@ class AdminUserAdd extends Core
         return $this;
     }
 
-    protected $customerSubsystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getCustomerSubsystemId()
-    {
-        return $this->customerSubsystemId;
-    }
-
-    /**
-     * @param mixed $customerSubsystemId
-     * @return AdminUserAdd
-     */
-    public function setCustomerSubsystemId($customerSubsystemId)
-    {
-        $this->customerSubsystemId = $customerSubsystemId;
-        return $this;
-    }
-
     protected $sex;
 
     /**
