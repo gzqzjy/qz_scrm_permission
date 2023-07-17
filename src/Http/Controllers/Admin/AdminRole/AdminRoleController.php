@@ -93,7 +93,6 @@ class AdminRoleController extends AdminController
                 $this->addParam('admin_role_request', $adminRoleRequests);
             }
         }
-
         $id = AdminRoleAdd::init()
             ->setParam($this->getParam())
             ->run()

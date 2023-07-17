@@ -2,6 +2,7 @@
 
 namespace Qz\Admin\Permission\Http\Controllers\Admin\Auth;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -12,6 +13,7 @@ use Qz\Admin\Permission\Cores\AdminPage\AdminPageIdGet;
 use Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionDelete;
+use Qz\Admin\Permission\Cores\AdminUser\AdminMenuIdsByAdminUserIdGet;
 use Qz\Admin\Permission\Cores\AdminUser\GetPermissionByAdminUserId;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
@@ -265,23 +267,10 @@ class AccessController extends AdminController
         $adminMenuIds = [];
         $menus = [];
         if (empty($administrator)) {
-            $adminMenuIds = (array) GetPermissionByAdminUserId::init()
-                ->setAdminUserId(Access::getAdminUserId())
+            $adminMenuIds = (array) AdminMenuIdsByAdminUserIdGet::init()
+                ->setAdminUserId($this->getLoginAdminUserId())
                 ->run()
                 ->getAdminMenuIds();
-            $adminDepartmentIds = AdminUserDepartment::query()
-                ->where('admin_user_id', Access::getAdminUserId())
-                ->where('administrator', 1)
-                ->pluck('admin_department_id')
-                ->toArray();
-            if (!empty($adminDepartmentIds)) {
-                $addAdminMenuIds = AdminMenu::query()
-                    ->where('name', '部门管理')
-                    ->OrWhere('name', '系统设置')
-                    ->pluck('id')
-                    ->toArray();
-                $adminMenuIds = array_merge($adminMenuIds, $addAdminMenuIds);
-            }
         }
         $model = $model->orderByDesc('sort')
             ->get();

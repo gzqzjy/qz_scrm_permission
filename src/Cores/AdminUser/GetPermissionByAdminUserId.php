@@ -15,7 +15,6 @@ class GetPermissionByAdminUserId extends Core
 {
     protected function execute()
     {
-        Log::info("getAdminUserId:", [$this->getAdminUserId()]);
         $adminRoleIds = AdminUserRole::query()
             ->where('admin_user_id', $this->getAdminUserId())
             ->pluck('admin_role_id')
@@ -25,7 +24,8 @@ class GetPermissionByAdminUserId extends Core
         $adminPageOptionIds = [];
         if ($adminRoleIds) {
             $rolePermission = GetMenuByAdminRole::init()
-                ->setAdminRoleIds($adminRoleIds);
+                ->setAdminRoleIds($adminRoleIds)
+                ->run();
             $adminMenuIds = $rolePermission->getAdminMenuIds();
             $adminPageColumnIds = $rolePermission->getAdminPageColumnIds();
             $adminPageOptionIds = $rolePermission->getAdminPageOptionIds();
