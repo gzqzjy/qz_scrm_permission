@@ -235,6 +235,7 @@ class AdminUserController extends AdminController
     public function allSex()
     {
         $statusDesc = AdminUser::SEX_DESC;
+        Arr::forget($statusDesc, [AdminUser::SEX_UNKNOWN]);
         $data = [];
         foreach ($statusDesc as $value => $label) {
             $data[] = compact('value', 'label');
