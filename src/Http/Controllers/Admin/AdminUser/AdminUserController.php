@@ -231,7 +231,7 @@ class AdminUserController extends AdminController
             ->selectRaw($select);
         $model = $this->filter($model);
         $model = $model->get();
-        return $this->response($model);
+        return $this->json($model);
     }
 
     public function allStatus()
@@ -241,7 +241,7 @@ class AdminUserController extends AdminController
         foreach ($statusDesc as $value => $label) {
             $data[] = compact('value', 'label');
         }
-        return $this->response($data);
+        return $this->json($data);
     }
 
     public function allSex()
@@ -251,7 +251,7 @@ class AdminUserController extends AdminController
         foreach ($statusDesc as $value => $label) {
             $data[] = compact('value', 'label');
         }
-        return $this->response($data);
+        return $this->json($data);
     }
 
 

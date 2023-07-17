@@ -59,16 +59,16 @@ class Controller extends BaseController
         return response()->json($data);
     }
 
-    final protected function json($data = [])
-    {
-        $data = Arr::add($data, 'success', true);
-        $data = Arr::add($data, 'message', 'success');
-        return $this->response($this->camel($data));
-    }
-
     final protected function success($data = [], $message = 'success')
     {
-        return $this->json(compact('data', 'message'));
+        $success = true;
+        return $this->json(compact('success', 'data', 'message'));
+    }
+
+    final protected function error($message = 'error', $data = [])
+    {
+        $success = false;
+        return $this->json(compact('success', 'data', 'message'));
     }
 
     final protected function camel($array)

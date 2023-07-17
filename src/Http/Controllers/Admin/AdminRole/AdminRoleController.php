@@ -232,7 +232,7 @@ class AdminRoleController extends AdminController
         foreach ($model as $value) {
             $value->options = $value->adminRoles;
         }
-        return $this->response($model->toArray());
+        return $this->json($model->toArray());
     }
 
     protected function permission()

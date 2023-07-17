@@ -10,7 +10,13 @@ class AdminUserMenuSync extends Core
 {
     protected function execute()
     {
+        if (empty($this->getAdminUserId())) {
+            return;
+        }
         $adminMenuIds = $this->getAdminMenuIds();
+        if (is_null($adminMenuIds)) {
+            return;
+        }
         $deletes = AdminUserMenu::query()
             ->select('id')
             ->where('admin_user_id', $this->getAdminUserId())

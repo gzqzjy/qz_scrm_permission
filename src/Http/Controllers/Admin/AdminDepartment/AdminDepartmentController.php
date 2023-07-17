@@ -244,7 +244,7 @@ class AdminDepartmentController extends AdminController
                 ->pluck('admin_department_id')
                 ->toArray();
             if (empty($adminDepartmentIds)) {
-                return $this->response($data);
+                return $this->json($data);
             }
             $adminDepartmentIds = GetSubAdminDepartmentIdsByAdminDepartmentIds::init()
                 ->setAdminDepartmentIds($adminDepartmentIds)
@@ -256,7 +256,7 @@ class AdminDepartmentController extends AdminController
             ->orderBy('level')
             ->get();
         if ($model->isEmpty()) {
-            return $this->response($data);
+            return $this->json($data);
         }
         $model = $model->toArray();
 
@@ -264,7 +264,7 @@ class AdminDepartmentController extends AdminController
             ->setAdminDepartments($model)
             ->run()
             ->getTreeAdminDepartments();
-        return $this->response($data);
+        return $this->json($data);
     }
 
     public function allDepartment()
@@ -348,7 +348,7 @@ class AdminDepartmentController extends AdminController
                 $data[] = $item;
             }
         }
-        return $this->response($data);
+        return $this->json($data);
     }
 
     protected function allDepartmentItem($value, $adminDepartmentIds, $adminRoles, $adminDepartmentRoles, $adminUsers, $adminUserIds, $adminCategoryDepartments, $adminCategoryDepartmentIds, &$existDepartmentIds)

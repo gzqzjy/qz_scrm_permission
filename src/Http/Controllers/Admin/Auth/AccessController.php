@@ -42,7 +42,7 @@ class AccessController extends AdminController
             ->orderBy('id')
             ->first();
         if (empty($model)) {
-            return $this->response(compact('token', 'status', 'type'));
+            return $this->json(compact('token', 'status', 'type'));
         }
         if ($model instanceof AdminUser) {
             $model->setConnection(config('database.default'))->tokens()->delete();
@@ -51,7 +51,7 @@ class AccessController extends AdminController
                 $status = 'ok';
             }
         }
-        return $this->response(compact('token', 'status', 'type'));
+        return $this->json(compact('token', 'status', 'type'));
     }
 
     /**
@@ -133,7 +133,7 @@ class AccessController extends AdminController
         }
         $dataIndexes = $model
             ->pluck('code');
-        return $this->response(compact('dataIndexes'));
+        return $this->json(compact('dataIndexes'));
     }
 
     /**
@@ -169,7 +169,7 @@ class AccessController extends AdminController
             ->run()
             ->getId();
         if (empty($pageId)) {
-            return $this->response($access);
+            return $this->json($access);
         }
         $pageOptionId = AdminPageOptionAdd::init()
             ->setAdminPageId($pageId)
@@ -178,11 +178,11 @@ class AccessController extends AdminController
             ->run()
             ->getId();
         if (empty($pageOptionId)) {
-            return $this->response($access);
+            return $this->json($access);
         }
         if (Access::getAdministrator()) {
             $access = true;
-            return $this->response($access);
+            return $this->json($access);
         }
         $access = AdminUserPageOption::query()
             ->whereHas('adminUser', function (Builder $builder) {
@@ -194,7 +194,7 @@ class AccessController extends AdminController
             })
             ->where('admin_page_option_id', $pageOptionId)
             ->exists();
-        return $this->response($access);
+        return $this->json($access);
     }
 
     /**
@@ -259,7 +259,7 @@ class AccessController extends AdminController
         }
         $dataIndexes = $model
             ->pluck('code');
-        return $this->response(compact('dataIndexes'));
+        return $this->json(compact('dataIndexes'));
     }
 
     public function menu()
@@ -298,7 +298,7 @@ class AccessController extends AdminController
                 $menus[] = $menu;
             }
         }
-        return $this->response($menus);
+        return $this->json($menus);
     }
 
     protected function menuItem($value, $administrator, $adminMenuIds)

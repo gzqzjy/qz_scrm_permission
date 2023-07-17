@@ -156,7 +156,7 @@ class AdminRoleGroupController extends AdminController
             ->selectRaw($select);
         $model = $this->filter($model);
         $model = $model->get();
-        return $this->response($model);
+        return $this->json($model);
     }
 
     public function allByRole()
@@ -171,6 +171,6 @@ class AdminRoleGroupController extends AdminController
         $model->load([
             'adminRoles:id as value,name as label,admin_role_group_id'
         ]);
-        return $this->response($model);
+        return $this->json($model);
     }
 }

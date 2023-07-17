@@ -21,7 +21,7 @@ class AdminController extends Controller
             'pageSize' => $paginator->perPage(),
             'current' => $paginator->currentPage(),
         ];
-        return $this->response($this->camel($data));
+        return $this->json($this->camel($data));
     }
 
     final protected function getPageSize()

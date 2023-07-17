@@ -123,7 +123,7 @@ class AdminMenuController extends AdminController
             ->where('subsystem_id', Access::getSubsystemId());
         $model = $this->filter($model);
         $model = $model->get();
-        return $this->response($model);
+        return $this->json($model);
     }
 
     public function cascader()
@@ -146,7 +146,7 @@ class AdminMenuController extends AdminController
         foreach ($model as $value) {
             $menus[] = $this->cascaderItem($value);
         }
-        return $this->response($menus);
+        return $this->json($menus);
     }
 
     protected function cascaderItem($value)
