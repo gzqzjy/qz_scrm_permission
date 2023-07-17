@@ -15,7 +15,7 @@ class CreateAdminPagesTable extends Migration
     {
         Schema::create('admin_pages', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->default('')->index()->comment('页面名');
+            $table->string('name')->default('')->index('name_index')->comment('页面名');
             $table->string('code')->default('')->comment('页面标识');
             $table->timestamps();
             $table->softDeletes();

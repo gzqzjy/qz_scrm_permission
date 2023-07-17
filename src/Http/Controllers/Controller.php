@@ -59,6 +59,11 @@ class Controller extends BaseController
         return response()->json($data);
     }
 
+    final protected function json($data = [])
+    {
+        return $this->response($this->camel($data));
+    }
+
     final protected function success($data = [], $message = 'success')
     {
         $success = true;
