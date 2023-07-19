@@ -22,7 +22,7 @@ class CreateAdminMenusTable extends Migration
             $table->foreignId('admin_page_id')->default(0)->index()->comment('页面ID');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['name'], 'admin_menus_unique');
+            $table->unique(['name', 'parent_id'], 'admin_menus_unique');
         });
     }
 

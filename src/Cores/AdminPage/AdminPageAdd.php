@@ -13,7 +13,7 @@ class AdminPageAdd extends Core
     {
         $model = AdminPage::withTrashed()
             ->updateOrCreate(Arr::whereNotNull([
-                'code' => $this->getCode(),
+                'code' => Str::camel($this->getCode()),
             ]), Arr::whereNotNull([
                 'name' => $this->getName(),
             ]));

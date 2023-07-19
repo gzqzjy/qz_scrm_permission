@@ -8,7 +8,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Cores\AdminDepartment\GetInfoByAdminUserId;
 use Qz\Admin\Permission\Cores\AdminDepartment\GetTreeCheckDepartmentWithAdminUser;
 use Qz\Admin\Permission\Cores\AdminDepartment\GetTreeDepartmentList;
 use Qz\Admin\Permission\Cores\AdminMenu\GetTreeAdminMenusWithCheck;
@@ -36,6 +35,7 @@ use Illuminate\Validation\Rule;
 use Qz\Admin\Permission\Models\AdminUserDepartment;
 use Qz\Admin\Permission\Models\AdminUserRequest;
 use Qz\Admin\Permission\Models\AdminUserRequestEmployee;
+use Qz\Admin\Permission\Models\AdminUserRole;
 
 class AdminUserController extends AdminController
 {
@@ -382,9 +382,9 @@ class AdminUserController extends AdminController
             ->groupBy(['admin_request_id', 'type'])
             ->toArray();
 
-        $adminUserRoleIds = GetInfoByAdminUserId::init()
-            ->setAdminUserId($adminUserId)
-            ->getAdminUserRoleIds();
+        $adminUserRoleIds = AdminUserRole::query()
+            ->where('admin_user_id', $adminUserId)
+            ->pluck('admin_role_id');
 
         $adminRoleRequests = AdminRoleRequest::query()
             ->whereIn('admin_role_id', $adminUserRoleIds);
@@ -426,7 +426,6 @@ class AdminUserController extends AdminController
         if ($this->isAdministrator()){
             //超管所有部门、所有员工都可查看
             $adminDepartments = AdminDepartment::query()
-                ->where('customer_subsystem_id', Access::getId())
                 ->orderBy('level')
                 ->get()
                 ->toArray();
@@ -437,15 +436,13 @@ class AdminUserController extends AdminController
 
             $adminLoginUserRequestDepartmentAndUsers = AdminUserDepartment::query()
                 ->whereHas('adminDepartment', function (Builder $builder){
-                    $builder->where('customer_subsystem_id', Access::getId());
+                    $builder->where('customer_id', $this->getCustomerId());
                 })
-                //->whereIn('admin_user_id', Arr::pluck($adminLoginUserRequestEmoloyees, 'id'))
                 ->select(['admin_department_id', 'admin_user_id'])
                 ->get();
             if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
                 $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
-                    'adminUser:id,admin_user_id',
-                    'adminUser.adminUser:id,name'
+                    'adminUser:id,name',
                 ]);
                 $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->groupBy('admin_department_id')
                     ->toArray();
@@ -493,11 +490,9 @@ class AdminUserController extends AdminController
                     ->get();
                 if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
                     $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
-                        'adminUser:id,admin_user_id',
-                        'adminUser.adminUser:id,name'
+                        'adminUser:id,name',
                     ]);
                     $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->groupBy('admin_department_id');
-
                 }
 
                 $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->toArray();
@@ -531,7 +526,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists(AdminUser::class)
                     ->withoutTrashed()
             ],
             'actions' => [
@@ -601,8 +596,7 @@ class AdminUserController extends AdminController
             ->get();
         if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
             $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
-                'adminUser:id,admin_user_id',
-                'adminUser.adminUser:id,name'
+                'adminUser:id,name',
             ]);
             $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->groupBy('admin_department_id');
 
@@ -624,8 +618,7 @@ class AdminUserController extends AdminController
         ];
 
         return $this->success($data);
-
-
+        
     }
 
     public function departmentPermission()
@@ -633,7 +626,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists(AdminUser::class)
                     ->withoutTrashed()
             ],
             'actions' => [
@@ -676,7 +669,6 @@ class AdminUserController extends AdminController
         $id = $this->getParam('id');
         $adminUser = AdminUser::query()
             ->where('admin_user_id', $id)
-            ->where('customer_subsystem_id', Access::getId())
             ->first();
         if (empty($adminUser)) {
             return $this->success();

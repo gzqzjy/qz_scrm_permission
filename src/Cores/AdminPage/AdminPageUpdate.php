@@ -15,7 +15,7 @@ class AdminPageUpdate extends Core
             ->findOrFail($this->getId());
         $model->fill(Arr::whereNotNull([
             'name' => $this->getName(),
-            'code' => $this->getCode(),
+            'code' => $this->getCode() ?: Str::camel($this->getCode()),
         ]));
         $model->save();
         $this->setId($model->getKey());
