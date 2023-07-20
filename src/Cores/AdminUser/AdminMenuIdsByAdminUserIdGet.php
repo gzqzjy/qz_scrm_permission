@@ -39,8 +39,8 @@ class AdminMenuIdsByAdminUserIdGet extends Core
                 ->OrWhere('name', '系统设置')
                 ->pluck('id')
                 ->toArray();
-            foreach ($adminMenuIds as $adminMenuId) {
-                $this->adminMenuIds[] = $adminRoleMenu->admin_menu_id;
+            foreach ($addAdminMenuIds as $addAdminMenuId) {
+                $this->adminMenuIds[] = $addAdminMenuId;
             }
         }
         $this->setAdminMenuIds(array_unique((array) $this->adminMenuIds));
