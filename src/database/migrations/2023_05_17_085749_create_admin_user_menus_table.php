@@ -17,9 +17,10 @@ class CreateAdminUserMenusTable extends Migration
             $table->id();
             $table->foreignId('admin_user_id')->default(0)->index('admin_user_id')->comment('管理员ID');
             $table->foreignId('admin_menu_id')->default(0)->index('admin_menu_id')->comment('菜单ID');
+            $table->string('type')->default('')->comment('类型');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['admin_user_id', 'admin_menu_id'], 'admin_user_menus_unique');
+            $table->unique(['admin_user_id', 'admin_menu_id', 'typ'], 'admin_user_menus_unique');
         });
     }
 

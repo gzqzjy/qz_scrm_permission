@@ -140,7 +140,7 @@ class AdminUserController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_users')
+                Rule::exists(AdminUser::class)
                     ->withoutTrashed()
             ],
             'permission' => [
@@ -177,7 +177,6 @@ class AdminUserController extends AdminController
 
         $adminUserRequestDepartments = $dataPermission->getAdminUserRequests();
         $adminUserRequestEmployees = $dataPermission->getAdminUserRequestEmployees();
-
         $id = AdminUserUpdatePermission::init()
             ->setId($this->getParam('id'))
             ->setAdminMenu($adminMenus)
@@ -618,7 +617,7 @@ class AdminUserController extends AdminController
         ];
 
         return $this->success($data);
-        
+
     }
 
     public function departmentPermission()

@@ -17,9 +17,10 @@ class CreateAdminUserPageColumnsTable extends Migration
             $table->id();
             $table->foreignId('admin_user_id')->default(0)->comment('管理员ID');
             $table->foreignId('admin_page_column_id')->default(0)->index('admin_page_column_id')->comment('页面列ID');
+            $table->string('type')->default('')->comment('类型');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['admin_user_id', 'admin_page_column_id'], 'admin_user_page_columns_unique');
+            $table->unique(['admin_user_id', 'admin_page_column_id', 'type'], 'admin_user_page_columns_unique');
         });
     }
 

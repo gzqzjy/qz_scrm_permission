@@ -20,9 +20,8 @@ class CreateAdminUserRequestsTable extends Migration
             $table->string('type')->default('')->comment('类型');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['admin_user_id', 'admin_request_id'], 'admin_user_requests_unique');
+            $table->unique(['admin_user_id', 'admin_request_id', 'type'], 'admin_user_requests_unique');
             $table->index('admin_request_id');
-            $table->index('type');
         });
     }
 

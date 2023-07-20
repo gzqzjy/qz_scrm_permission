@@ -21,10 +21,9 @@ class CreateAdminUserRequestEmployeesTable extends Migration
             $table->string('type')->default('')->comment('类型');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['admin_user_id', 'admin_request_id', 'permission_admin_user_id'], 'admin_user_request_employees_unique');
+            $table->unique(['admin_user_id', 'admin_request_id', 'permission_admin_user_id', 'type'], 'admin_user_request_employees_unique');
             $table->index('admin_request_id');
             $table->index('permission_admin_user_id');
-            $table->index('type');
         });
     }
 

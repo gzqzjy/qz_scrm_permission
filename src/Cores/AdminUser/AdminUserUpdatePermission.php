@@ -2,93 +2,50 @@
 
 namespace Qz\Admin\Permission\Cores\AdminUser;
 
-use Qz\Admin\Permission\Cores\AdminUserMenu\AdminUserMenuAdd;
-use Qz\Admin\Permission\Cores\AdminUserPageColumn\AdminUserPageColumnAdd;
-use Qz\Admin\Permission\Cores\AdminUserPageOption\AdminUserPageOptionAdd;
-use Qz\Admin\Permission\Cores\AdminUserRequest\AdminUserRequestAdd;
-use Qz\Admin\Permission\Cores\AdminUserRequestEmployee\AdminUserRequestEmployeeAdd;
+use Qz\Admin\Permission\Cores\AdminUserMenu\AdminUserMenusSyncByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUserPageColumn\AdminUserPageColumnsSyncByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUserPageOption\AdminUserPageOptionsSyncByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUserRequest\AdminUserRequestsSyncByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUserRequestEmployee\AdminUserRequestEmployeesSyncByAdminUserId;
 use Qz\Admin\Permission\Cores\Core;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Models\AdminUserMenu;
-use Qz\Admin\Permission\Models\AdminUserPageColumn;
-use Qz\Admin\Permission\Models\AdminUserPageOption;
-use Qz\Admin\Permission\Models\AdminUserRequest;
-use Qz\Admin\Permission\Models\AdminUserRequestEmployee;
 
 class AdminUserUpdatePermission extends Core
 {
     protected function execute()
     {
-        if (empty($this->getId())){
+        if (empty($this->getId())) {
             return;
         }
-        AdminUserMenu::query()
-            ->where('admin_user_id', $this->getId())
-            ->delete();
-        AdminUserPageColumn::query()
-            ->where('admin_user_id', $this->getId())
-            ->delete();
-        AdminUserPageOption::query()
-            ->where('admin_user_id', $this->getId())
-            ->delete();
+        AdminUserMenusSyncByAdminUserId::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminUserMenus($this->getAdminMenu())
+            ->setAdminMenuIdKey('id')
+            ->run();
+        AdminUserPageColumnsSyncByAdminUserId::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminUserPageColumns($this->getAdminPageColumn())
+            ->setAdminPageColumnIdKey('id')
+            ->run();
+        AdminUserPageOptionsSyncByAdminUserId::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminUserPageOptions($this->getAdminPageOption())
+            ->setAdminPageOptionIdKey('id')
+            ->run();
 
-        AdminUserRequest::query()
-            ->where('admin_user_id', $this->getId())
-            ->delete();
+        AdminUserRequestsSyncByAdminUserId::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminUserRequests($this->getAdminUserRequests())
+            ->setAdminRequestIdKey('id')
+            ->run();
 
-        AdminUserRequestEmployee::query()
-            ->where('admin_user_id', $this->getId())
-            ->delete();
-
-        if ($this->getAdminMenu()){
-            foreach ($this->getAdminMenu() as $adminMenu){
-                AdminUserMenuAdd::init()
-                    ->setAdminUserId($this->getId())
-                    ->setAdminMenuId(Arr::get($adminMenu, 'id'))
-                    ->setType(Arr::get($adminMenu, 'type'))
-                    ->run();
-            }
-        }
-        if ($this->getAdminPageColumn()){
-            foreach ($this->getAdminPageColumn() as $adminPageColumn){
-                AdminUserPageColumnAdd::init()
-                    ->setAdminUserId($this->getId())
-                    ->setAdminPageColumnId(Arr::get($adminPageColumn, 'id'))
-                    ->setType(Arr::get($adminPageColumn, 'type'))
-                    ->run();
-            }
-        }
-        if ($this->getAdminPageOption()){
-            foreach ($this->getAdminPageOption() as $adminPageOption){
-                AdminUserPageOptionAdd::init()
-                    ->setAdminUserId($this->getId())
-                    ->setAdminPageOptionId(Arr::get($adminPageOption, 'id'))
-                    ->setType(Arr::get($adminPageOption, 'type'))
-                    ->run();
-            }
-        }
-
-        if ($this->getAdminUserRequests()){
-            foreach ($this->getAdminUserRequests() as $adminUserRequestDepartment){
-                AdminUserRequestAdd::init()
-                    ->setAdminUserId($this->getId())
-                    ->setAdminRequestId(Arr::get($adminUserRequestDepartment, 'admin_request_id'))
-                    ->setType(Arr::get($adminUserRequestDepartment, 'type'))
-                    ->run();
-            }
-        }
-
-        if ($this->getAdminUserRequestEmployees()){
-            foreach ($this->getAdminUserRequestEmployees() as $adminUserRequestEmployee){
-                AdminUserRequestEmployeeAdd::init()
-                    ->setAdminUserId($this->getId())
-                    ->setAdminRequestId(Arr::get($adminUserRequestEmployee, 'admin_request_id'))
-                    ->setPermissionAdminUserId(Arr::get($adminUserRequestEmployee, 'admin_user_id'))
-                    ->setType(Arr::get($adminUserRequestEmployee, 'type'))
-                    ->run();
-            }
-        }
+        AdminUserRequestEmployeesSyncByAdminUserId::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminRequestEmployees($this->getAdminUserRequestEmployees())
+            ->setAdminRequestIdKey('admin_request_id')
+            ->setPermissionAdminUserIdKey('admin_user_id')
+            ->run();
     }
 
     protected $id;
@@ -151,8 +108,6 @@ class AdminUserUpdatePermission extends Core
         $this->permission = $permission;
         return $this;
     }
-
-
 
     /**
      * @return mixed
@@ -247,7 +202,4 @@ class AdminUserUpdatePermission extends Core
         $this->adminUserRequestEmployees = $adminUserRequestEmployees;
         return $this;
     }
-
-
-
 }

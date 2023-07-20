@@ -17,9 +17,10 @@ class CreateAdminUserPageOptionsTable extends Migration
             $table->id();
             $table->foreignId('admin_user_id')->default(0)->comment('管理员ID');
             $table->foreignId('admin_page_option_id')->default(0)->index('admin_page_option_id')->comment('页面操作ID');
+            $table->string('type')->default('')->comment('类型');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['admin_user_id', 'admin_page_option_id'], 'admin_user_page_options_unique');
+            $table->unique(['admin_user_id', 'admin_page_option_id', 'type'], 'admin_user_page_options_unique');
         });
     }
 

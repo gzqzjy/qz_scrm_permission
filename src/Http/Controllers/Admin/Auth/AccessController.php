@@ -130,7 +130,7 @@ class AccessController extends AdminController
                 ->setAdminUserId(Access::getAdminUserId())
                 ->run()
                 ->getAdminPageColumnIds();
-            $model->whereIn('id', array_intersect($pageColumnIds, $adminPageColumnIds));
+            $model->whereIn('id', array_intersect($pageColumnIds, (array) $adminPageColumnIds));
         }
         $dataIndexes = $model
             ->pluck('code');
