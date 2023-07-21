@@ -15,12 +15,12 @@ class GetAdminUserIdsByAdminUserId extends Core
 {
     protected function execute()
     {
-        if (empty($this->getAdminUserCustomerSubSystemId())) {
+        if (empty($this->getAdminUserId())) {
             return;
         }
         $adminRequestId = $this->getAdminRequestId();
         $adminRequestEmpoyee = AdminUserRequestEmployee::query()
-            ->where('admin_user_id', $this->getAdminUserCustomerSubSystemId())
+            ->where('admin_user_id', $this->getAdminUserId())
             ->where(function (Builder $builder) use ($adminRequestId) {
                 if ($adminRequestId) {
                     $builder->where('admin_request_id', $adminRequestId)
@@ -40,7 +40,7 @@ class GetAdminUserIdsByAdminUserId extends Core
             }
         }
         $adminRequestDepartment = AdminUserRequest::query()
-            ->where('admin_user_id', $this->getAdminUserCustomerSubSystemId())
+            ->where('admin_user_id', $this->getAdminUserId())
             ->where(function (Builder $builder) {
                 if ($adminRequestId = $this->getAdminRequestId()) {
                     $builder->where('admin_request_id', $adminRequestId)
@@ -57,7 +57,7 @@ class GetAdminUserIdsByAdminUserId extends Core
         $adminRequestDepartmentId = Arr::get($adminRequestDepartment, 'admin_request_id');
         if (empty($adminRequestDepartment)) {
             $adminRoleIds = GetInfoByAdminUserId::init()
-                ->setAdminUserId($this->getAdminUserCustomerSubSystemId())
+                ->setAdminUserId($this->getAdminUserId())
                 ->getAdminUserRoleIds();
             if ($adminRoleIds) {
                 $adminRequestDepartment = AdminRoleRequest::query()
@@ -85,27 +85,27 @@ class GetAdminUserIdsByAdminUserId extends Core
                     $adminRequestDepartmentType = array_values(array_unique($adminRequestDepartmentType));
                 }
             } else {
-                $this->setAdminUserCustomerSubSystemIds(null);
+                $this->setAdminUserIds(null);
             }
         }
 
         $this->setDepartmentType($adminRequestDepartmentType);
 
-        $adminUserCustomerSubSystemIds = GetAdminUserIdsByAdminUserIdAndType::init()
-            ->setAdminUserCustomerSubSystemId($this->getAdminUserCustomerSubSystemId())
+        $adminUserIds = GetAdminUserIdsByAdminUserIdAndType::init()
+            ->setAdminUserId($this->getAdminUserId())
             ->setDepartmentType($adminRequestDepartmentType)
             ->run()
-            ->getAdminUserCustomerSubSystemIds();
+            ->getAdminUserIds();
 
         if ($adminRequestEmpoyee && Arr::get($adminRequestEmpoyee, 'add')) {
-            $adminUserCustomerSubSystemIds = array_values(array_unique(array_merge($adminUserCustomerSubSystemIds, Arr::pluck(Arr::get($adminRequestEmpoyee, 'add'), 'permission_admin_user_id'))));
+            $adminUserIds = array_values(array_unique(array_merge($adminUserIds, Arr::pluck(Arr::get($adminRequestEmpoyee, 'add'), 'permission_admin_user_id'))));
         }
 
         if ($adminRequestEmpoyee && Arr::get($adminRequestEmpoyee, 'delete')) {
-            $adminUserCustomerSubSystemIds = array_values(array_unique(array_diff($adminUserCustomerSubSystemIds, Arr::pluck(Arr::get($adminRequestEmpoyee, 'delete'), 'permission_admin_user_id'))));
+            $adminUserIds = array_values(array_unique(array_diff($adminUserIds, Arr::pluck(Arr::get($adminRequestEmpoyee, 'delete'), 'permission_admin_user_id'))));
         }
 
-        $this->setAdminUserCustomerSubSystemIds($adminUserCustomerSubSystemIds);
+        $this->setAdminUserIds($adminUserIds);
     }
 
     protected $adminRequestId;
@@ -128,46 +128,6 @@ class GetAdminUserIdsByAdminUserId extends Core
         return $this;
     }
 
-    protected $adminUserCustomerSubSystemIds;
-
-    /**
-     * @return mixed
-     */
-    public function getAdminUserCustomerSubSystemIds()
-    {
-        return $this->adminUserCustomerSubSystemIds;
-    }
-
-    /**
-     * @param mixed $adminUserCustomerSubSystemIds
-     * @return GetAdminUserIdsByAdminUserId
-     */
-    public function setAdminUserCustomerSubSystemIds($adminUserCustomerSubSystemIds)
-    {
-        $this->adminUserCustomerSubSystemIds = $adminUserCustomerSubSystemIds;
-        return $this;
-    }
-
-    protected $adminUserCustomerSubSystemId;
-
-    /**
-     * @return mixed
-     */
-    public function getAdminUserCustomerSubSystemId()
-    {
-        return $this->adminUserCustomerSubSystemId;
-    }
-
-    /**
-     * @param mixed $adminUserCustomerSubSystemId
-     * @return GetAdminUserIdsByAdminUserId
-     */
-    public function setAdminUserCustomerSubSystemId($adminUserCustomerSubSystemId)
-    {
-        $this->adminUserCustomerSubSystemId = $adminUserCustomerSubSystemId;
-        return $this;
-    }
-
     protected $adminUserIds;
 
     /**
@@ -175,16 +135,6 @@ class GetAdminUserIdsByAdminUserId extends Core
      */
     public function getAdminUserIds()
     {
-        if (!is_null($this->getAdminUserCustomerSubSystemIds())) {
-            $adminUserIds = AdminUser::query()
-                ->whereIn('id', $this->getAdminUserCustomerSubSystemIds())
-                ->pluck('admin_user_id')
-                ->toArray();
-
-            is_array($this->getDepartmentType()) && in_array(AdminUserRequest::UNDEFINED, $this->getDepartmentType()) && $adminUserIds[] = 0;
-            !is_array($this->getDepartmentType()) && strpos($this->getDepartmentType(), AdminUserRequest::UNDEFINED) !== false && $adminUserIds[] = 0;
-            return $adminUserIds;
-        }
         return $this->adminUserIds;
     }
 
@@ -195,6 +145,26 @@ class GetAdminUserIdsByAdminUserId extends Core
     public function setAdminUserIds($adminUserIds)
     {
         $this->adminUserIds = $adminUserIds;
+        return $this;
+    }
+
+    protected $adminUserId;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminUserId()
+    {
+        return $this->adminUserId;
+    }
+
+    /**
+     * @param mixed $adminUserId
+     * @return GetAdminUserIdsByAdminUserId
+     */
+    public function setAdminUserId($adminUserId)
+    {
+        $this->adminUserId = $adminUserId;
         return $this;
     }
 

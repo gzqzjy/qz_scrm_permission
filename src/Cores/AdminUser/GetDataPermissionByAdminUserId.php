@@ -59,10 +59,10 @@ class GetDataPermissionByAdminUserId extends Core
             }
             $actions = array_diff($actions, [AdminUserRequest::UNDEFINED]);//排除其他 不返回0
             $adminUserIds = GetAdminUserIdsByAdminUserIdAndType::init()
-                ->setAdminUserCustomerSubSystemId($adminUserId)
+                ->setAdminUserId($adminUserId)
                 ->setDepartmentType($actions)
                 ->run()
-                ->getAdminUserCustomerSubSystemIds();
+                ->getAdminUserIds();
 
             $adminUsers = Arr::get($permission, 'admin_users', []);
             $deleteAdminUserIds = array_diff($adminUserIds, $adminUsers);

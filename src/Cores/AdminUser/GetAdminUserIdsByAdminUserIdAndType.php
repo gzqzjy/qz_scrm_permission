@@ -13,11 +13,11 @@ class GetAdminUserIdsByAdminUserIdAndType extends Core
 {
     protected function execute()
     {
-        if (empty($this->getAdminUserCustomerSubSystemId()) || empty($this->getDepartmentType())) {
+        if (empty($this->getAdminUserId()) || empty($this->getDepartmentType())) {
             return;
         }
         $adminDepartmentIds = GetInfoByAdminUserId::init()
-            ->setAdminUserId($this->getAdminUserCustomerSubSystemId())
+            ->setAdminUserId($this->getAdminUserId())
             ->getAdminDepartmentIds();
 
         if (empty($adminDepartmentIds)) {
@@ -36,18 +36,18 @@ class GetAdminUserIdsByAdminUserIdAndType extends Core
     {
         switch ($type) {
             case AdminRoleRequest::SELF:
-                $this->addAdminUserCustomerSubSystemId($this->getAdminUserCustomerSubSystemId());
+                $this->addAdminUserId($this->getAdminUserId());
                 break;
             case AdminRoleRequest::UNDEFINED:
-                $this->addAdminUserCustomerSubSystemId(0);
+                $this->addAdminUserId(0);
                 break;
             case AdminRoleRequest::THIS:
                 $adminUserIds = AdminUserDepartment::query()
-                    ->where('admin_user_id', '!=', $this->getAdminUserCustomerSubSystemId())
+                    ->where('admin_user_id', '!=', $this->getAdminUserId())
                     ->whereIn('admin_department_id', $adminDepartmentIds)
                     ->pluck('admin_user_id')
                     ->toArray();
-                $this->addAdminUserCustomerSubSystemIds($adminUserIds);
+                $this->addAdminUserIds($adminUserIds);
                 break;
             case AdminRoleRequest::PEER:
                 //同级部门 同个上级的其他部门及其他部门的下级员工数据
@@ -67,11 +67,11 @@ class GetAdminUserIdsByAdminUserIdAndType extends Core
                             ->run()
                             ->getAllAdminDepartmentIds();
                         $adminUserIds = AdminUserDepartment::query()
-                            ->where('admin_user_id', '!=', $this->getAdminUserCustomerSubSystemId())
+                            ->where('admin_user_id', '!=', $this->getAdminUserId())
                             ->whereIn('admin_department_id', $adminDepartmentIds)
                             ->pluck('admin_user_id')
                             ->toArray();
-                        $this->addAdminUserCustomerSubSystemIds($adminUserIds);
+                        $this->addAdminUserIds($adminUserIds);
                     }
                 }
                 break;
@@ -87,49 +87,49 @@ class GetAdminUserIdsByAdminUserIdAndType extends Core
                     ->whereIn('admin_department_id', $childrenDepartmentIds)
                     ->pluck('admin_user_id')
                     ->toArray();
-                $this->addAdminUserCustomerSubSystemIds($adminUserIds);
+                $this->addAdminUserIds($adminUserIds);
                 break;
         }
         return;
     }
 
-    protected $adminUserCustomerSubSystemId;
+    protected $adminUserId;
 
     /**
      * @return mixed
      */
-    public function getAdminUserCustomerSubSystemId()
+    public function getAdminUserId()
     {
-        return $this->adminUserCustomerSubSystemId;
+        return $this->adminUserId;
     }
 
     /**
-     * @param mixed $adminUserCustomerSubSystemId
+     * @param mixed $adminUserId
      * @return GetAdminUserIdsByAdminUserIdAndType
      */
-    public function setAdminUserCustomerSubSystemId($adminUserCustomerSubSystemId)
+    public function setAdminUserId($adminUserId)
     {
-        $this->adminUserCustomerSubSystemId = $adminUserCustomerSubSystemId;
+        $this->adminUserId = $adminUserId;
         return $this;
     }
 
-    protected $adminUserCustomerSubSystemIds;
+    protected $adminUserIds;
 
     /**
      * @return mixed
      */
-    public function getAdminUserCustomerSubSystemIds()
+    public function getAdminUserIds()
     {
-        return is_null($this->adminUserCustomerSubSystemIds) ? [] : $this->adminUserCustomerSubSystemIds;
+        return is_null($this->adminUserIds) ? [] : $this->adminUserIds;
     }
 
     /**
-     * @param mixed $adminUserCustomerSubSystemIds
+     * @param mixed $adminUserIds
      * @return GetAdminUserIdsByAdminUserIdAndType
      */
-    public function setAdminUserCustomerSubSystemIds($adminUserCustomerSubSystemIds)
+    public function setAdminUserIds($adminUserIds)
     {
-        $this->adminUserCustomerSubSystemIds = $adminUserCustomerSubSystemIds;
+        $this->adminUserIds = $adminUserIds;
         return $this;
     }
 
@@ -153,14 +153,14 @@ class GetAdminUserIdsByAdminUserIdAndType extends Core
         return $this;
     }
 
-    protected function addAdminUserCustomerSubSystemIds($adminUserCustomerSubSystemIds)
+    protected function addAdminUserIds($adminUserIds)
     {
-        $this->setAdminUserCustomerSubSystemIds(array_merge((array) $this->adminUserCustomerSubSystemIds, $adminUserCustomerSubSystemIds));
+        $this->setAdminUserIds(array_merge((array) $this->adminUserIds, $adminUserIds));
     }
 
-    protected function addAdminUserCustomerSubSystemId($adminUserCustomerSubSystemId)
+    protected function addAdminUserId($adminUserId)
     {
-        $adminUserCustomerSubSystemIds = (array) $this->adminUserCustomerSubSystemIds;
-        $this->setAdminUserCustomerSubSystemIds(Arr::prepend($adminUserCustomerSubSystemIds, $adminUserCustomerSubSystemId));
+        $adminUserIds = (array) $this->adminUserIds;
+        $this->setAdminUserIds(Arr::prepend($adminUserIds, $adminUserId));
     }
 }

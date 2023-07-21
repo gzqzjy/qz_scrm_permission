@@ -450,10 +450,10 @@ class AdminUserController extends AdminController
 
         foreach ($adminRequests as $adminRequestId => $actions){
             $adminRequestEmployees = GetAdminUserIdsByAdminUserIdAndType::init()
-                ->setAdminUserCustomerSubSystemId($adminUserId)
+                ->setAdminUserId($adminUserId)
                 ->setDepartmentType($actions)
                 ->run()
-                ->getAdminUserCustomerSubSystemIds();
+                ->getAdminUserIds();
 
             if (Arr::get($adminUserRequestEmployees, $adminRequestId)){
                 Arr::get($adminUserRequestEmployees, $adminRequestId. '.add') && $adminRequestEmployees = array_merge($adminRequestEmployees, Arr::pluck(Arr::get($adminUserRequestEmployees, $adminRequestId. '.add'), 'permission_admin_user_id'));
@@ -547,10 +547,10 @@ class AdminUserController extends AdminController
         $actions = $this->getParam('actions');
 
         $adminLoginUserRequestEmoloyees = GetAdminUserIdsByAdminUserId::init()
-            ->setAdminUserCustomerSubSystemId(Access::getAdminUserId())
+            ->setAdminUserId(Access::getAdminUserId())
             ->setAdminRequestId($adminRequestId)
             ->run()
-            ->getAdminUserCustomerSubSystemIds();
+            ->getAdminUserIds();
 
         $adminDepartments = AdminDepartment::query();
         //登录员工当前可查看的部门
@@ -580,10 +580,10 @@ class AdminUserController extends AdminController
 
         //员工可选择记录
         $adminRequestEmployees = GetAdminUserIdsByAdminUserIdAndType::init()
-            ->setAdminUserCustomerSubSystemId($this->getParam('id'))
+            ->setAdminUserId($this->getParam('id'))
             ->setDepartmentType($actions)
             ->run()
-            ->getAdminUserCustomerSubSystemIds();
+            ->getAdminUserIds();
 
         //$adminUserIds = Arr::prepend($adminLoginUserRequestEmoloyees, Access::getAdminUserId());
         $adminLoginUserRequestDepartmentAndUsers = AdminUserDepartment::query();
@@ -643,10 +643,10 @@ class AdminUserController extends AdminController
             return $this->success([]);
         }
         $adminUserIds = GetAdminUserIdsByAdminUserIdAndType::init()
-            ->setAdminUserCustomerSubSystemId($this->getParam('id'))
+            ->setAdminUserId($this->getParam('id'))
             ->setDepartmentType($this->getParam('actions'))
             ->run()
-            ->getAdminUserCustomerSubSystemIds();
+            ->getAdminUserIds();
         if (empty($adminUserIds)){
             return $this->success([]);
         }
