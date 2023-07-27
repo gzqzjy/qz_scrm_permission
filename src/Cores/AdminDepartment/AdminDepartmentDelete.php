@@ -7,7 +7,6 @@ use Qz\Admin\Permission\Models\AdminCategoryDepartment;
 use Qz\Admin\Permission\Models\AdminDepartment;
 use Qz\Admin\Permission\Models\AdminDepartmentRole;
 
-
 class AdminDepartmentDelete extends Core
 {
     protected function execute()

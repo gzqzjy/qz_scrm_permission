@@ -240,7 +240,6 @@ class AdminUserController extends AdminController
         return $this->json($data);
     }
 
-
     public function permission()
     {
         $validator = Validator::make($this->getParam(), [
@@ -256,11 +255,11 @@ class AdminUserController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        if ($this->getParam('type') == 'data'){
+        if ($this->getParam('type') == 'data') {
             //数据权限
             $data = $this->getDataPermission($this->getParam('id'));
             return $this->success($data);
-        }else{
+        } else {
             $menus = $this->getFeaturePermission($this->getParam('id'));
             return $this->success($menus);
         }
@@ -282,16 +281,7 @@ class AdminUserController extends AdminController
             $adminPageColumnIds = $permission->getAdminPageColumnIds();
             $model->whereIn('id', $adminMenuIds);
         } else {
-            $excludeMenuId = AdminMenu::query()
-                ->where('name', '系统设置')
-                ->where('parent_id', 0)
-                ->value('id');//系统设置不显示
-            $model = $model->where('parent_id', 0)
-                ->where(function (Builder $builder) use ($excludeMenuId){
-                    if ($excludeMenuId){
-                        $builder->where('id', '<>', $excludeMenuId);
-                    }
-                });
+            $model = $model->where('parent_id', 0);
         }
         $model = $model->get();
         $model->load([
@@ -353,7 +343,6 @@ class AdminUserController extends AdminController
                 if ($item = $this->item($child, $adminMenuIds, $adminPageOptionIds, $adminPageColumnIds, $existMenuIds)) {
                     $routes[] = $item;
                 }
-
             }
             if (!empty($routes)) {
                 Arr::set($data, 'children', $routes);
@@ -364,7 +353,8 @@ class AdminUserController extends AdminController
         return $data;
     }
 
-    protected function getDataPermission($adminUserId){
+    protected function getDataPermission($adminUserId)
+    {
         //获取用户所有的数据权限
         //1、根据用户id、用户角色、返回所有数据权限(admin_request_id)
         $data = [];
@@ -387,9 +377,9 @@ class AdminUserController extends AdminController
 
         $adminRoleRequests = AdminRoleRequest::query()
             ->whereIn('admin_role_id', $adminUserRoleIds);
-        if ($adminUserRequestDepartments){
+        if ($adminUserRequestDepartments) {
             $adminRoleRequests = $adminRoleRequests->whereNotIn('admin_request_id', array_keys($adminUserRequestDepartments));
-            foreach ($adminUserRequestDepartments as $key => $adminUserRequestDepartment){
+            foreach ($adminUserRequestDepartments as $key => $adminUserRequestDepartment) {
                 $type = $adminUserRequestDepartment ? explode(AdminUserRequest::CHARACTER, $adminUserRequestDepartment) : [];
                 $adminUserRequestDepartments[$key] = $type;
             }
@@ -400,11 +390,11 @@ class AdminUserController extends AdminController
             ->get()
             ->groupBy('admin_request_id')
             ->toArray();
-        if ($adminRoleRequests){
+        if ($adminRoleRequests) {
             $adminRoleRequestGroups = [];
-            foreach ($adminRoleRequests as $adminRequestId => $adminRoleRequest){
+            foreach ($adminRoleRequests as $adminRequestId => $adminRoleRequest) {
                 $adminRoleRequestTypes = [];
-                foreach ($adminRoleRequest as $item){
+                foreach ($adminRoleRequest as $item) {
                     $type = Arr::get($item, 'type') ? explode(AdminRoleRequest::CHARACTER, Arr::get($item, 'type')) : [];
                     $adminRoleRequestTypes = array_merge($adminRoleRequestTypes, $type);
                 }
@@ -414,7 +404,7 @@ class AdminUserController extends AdminController
         }
         $adminRequests = $adminRoleRequests + $adminUserRequestDepartments;
 
-        if (empty($adminRequests)){
+        if (empty($adminRequests)) {
             //未设置权限
             $adminRequests = [[]];
         }
@@ -422,7 +412,7 @@ class AdminUserController extends AdminController
         $adminDepartments = [];
         $adminLoginUserRequestDepartmentAndUsers = [];
         //登录用户所有的数据权限
-        if ($this->isAdministrator()){
+        if ($this->isAdministrator()) {
             //超管所有部门、所有员工都可查看
             $adminDepartments = AdminDepartment::query()
                 ->orderBy('level')
@@ -434,12 +424,12 @@ class AdminUserController extends AdminController
                 ->getTreeAdminDepartments();
 
             $adminLoginUserRequestDepartmentAndUsers = AdminUserDepartment::query()
-                ->whereHas('adminDepartment', function (Builder $builder){
+                ->whereHas('adminDepartment', function (Builder $builder) {
                     $builder->where('customer_id', $this->getCustomerId());
                 })
                 ->select(['admin_department_id', 'admin_user_id'])
                 ->get();
-            if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
+            if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()) {
                 $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
                     'adminUser:id,name',
                 ]);
@@ -448,19 +438,19 @@ class AdminUserController extends AdminController
             }
         }
 
-        foreach ($adminRequests as $adminRequestId => $actions){
+        foreach ($adminRequests as $adminRequestId => $actions) {
             $adminRequestEmployees = GetAdminUserIdsByAdminUserIdAndType::init()
                 ->setAdminUserId($adminUserId)
                 ->setDepartmentType($actions)
                 ->run()
                 ->getAdminUserIds();
 
-            if (Arr::get($adminUserRequestEmployees, $adminRequestId)){
-                Arr::get($adminUserRequestEmployees, $adminRequestId. '.add') && $adminRequestEmployees = array_merge($adminRequestEmployees, Arr::pluck(Arr::get($adminUserRequestEmployees, $adminRequestId. '.add'), 'permission_admin_user_id'));
-                Arr::get($adminUserRequestEmployees, $adminRequestId. '.delete') && $adminRequestEmployees = array_diff($adminRequestEmployees, Arr::pluck(Arr::get($adminUserRequestEmployees, $adminRequestId. '.delete'), 'permission_admin_user_id'));
+            if (Arr::get($adminUserRequestEmployees, $adminRequestId)) {
+                Arr::get($adminUserRequestEmployees, $adminRequestId . '.add') && $adminRequestEmployees = array_merge($adminRequestEmployees, Arr::pluck(Arr::get($adminUserRequestEmployees, $adminRequestId . '.add'), 'permission_admin_user_id'));
+                Arr::get($adminUserRequestEmployees, $adminRequestId . '.delete') && $adminRequestEmployees = array_diff($adminRequestEmployees, Arr::pluck(Arr::get($adminUserRequestEmployees, $adminRequestId . '.delete'), 'permission_admin_user_id'));
             }
             //登录员工能看到的权限列表
-            if (empty($this->isAdministrator())){
+            if (empty($this->isAdministrator())) {
                 //登录员工当前可查看的部门
                 $adminDepartmentIds = AdminUserDepartment::query()
                     ->where('admin_user_id', Access::getAdminUserId())
@@ -487,7 +477,7 @@ class AdminUserController extends AdminController
                     ->whereIn('admin_department_id', $adminDepartmentIds)
                     ->select(['admin_department_id', 'admin_user_id'])
                     ->get();
-                if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
+                if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()) {
                     $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
                         'adminUser:id,name',
                     ]);
@@ -504,13 +494,11 @@ class AdminUserController extends AdminController
             $department = $department->run()
                 ->getTreeAdminDepartments();
 
-
             $data[] = [
                 "adminRequestId" => $adminRequestId,
                 "actions" => $actions,
                 "department" => $department
             ];
-
         }
         return $data;
     }
@@ -554,7 +542,7 @@ class AdminUserController extends AdminController
 
         $adminDepartments = AdminDepartment::query();
         //登录员工当前可查看的部门
-        if (empty($this->isAdministrator())){
+        if (empty($this->isAdministrator())) {
             $adminDepartmentIds = AdminUserDepartment::query()
                 ->where('admin_user_id', Access::getAdminUserId())
                 ->where('administrator', 1)
@@ -576,8 +564,6 @@ class AdminUserController extends AdminController
             ->run()
             ->getTreeAdminDepartments();
 
-
-
         //员工可选择记录
         $adminRequestEmployees = GetAdminUserIdsByAdminUserIdAndType::init()
             ->setAdminUserId($this->getParam('id'))
@@ -587,18 +573,17 @@ class AdminUserController extends AdminController
 
         //$adminUserIds = Arr::prepend($adminLoginUserRequestEmoloyees, Access::getAdminUserId());
         $adminLoginUserRequestDepartmentAndUsers = AdminUserDepartment::query();
-        if (empty($this->isAdministrator())){
+        if (empty($this->isAdministrator())) {
             $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->whereIn('admin_department_id', $adminDepartmentIds);
         }
-        $adminLoginUserRequestDepartmentAndUsers =  $adminLoginUserRequestDepartmentAndUsers
+        $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers
             ->select(['admin_department_id', 'admin_user_id'])
             ->get();
-        if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()){
+        if ($adminLoginUserRequestDepartmentAndUsers->isNotEmpty()) {
             $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->load([
                 'adminUser:id,name',
             ]);
             $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->groupBy('admin_department_id');
-
         }
 
         $adminLoginUserRequestDepartmentAndUsers = $adminLoginUserRequestDepartmentAndUsers->toArray();
@@ -617,7 +602,6 @@ class AdminUserController extends AdminController
         ];
 
         return $this->success($data);
-
     }
 
     public function departmentPermission()
@@ -639,7 +623,7 @@ class AdminUserController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        if (empty($this->getParam('actions'))){
+        if (empty($this->getParam('actions'))) {
             return $this->success([]);
         }
         $adminUserIds = GetAdminUserIdsByAdminUserIdAndType::init()
@@ -647,21 +631,20 @@ class AdminUserController extends AdminController
             ->setDepartmentType($this->getParam('actions'))
             ->run()
             ->getAdminUserIds();
-        if (empty($adminUserIds)){
+        if (empty($adminUserIds)) {
             return $this->success([]);
         }
         $data = [];
         $adminUserCustomerDepartments = AdminUserDepartment::query()
             ->whereIn('admin_user_id', $adminUserIds)
-            ->select(['admin_department_id','admin_user_id'])
+            ->select(['admin_department_id', 'admin_user_id'])
             ->get()
             ->toArray();
-        foreach ($adminUserCustomerDepartments as $adminUserCustomerDepartment){
-            $data[] = "department_" . Arr::get($adminUserCustomerDepartment, 'admin_department_id'). '-' . Arr::get($adminUserCustomerDepartment, 'admin_user_id');
+        foreach ($adminUserCustomerDepartments as $adminUserCustomerDepartment) {
+            $data[] = "department_" . Arr::get($adminUserCustomerDepartment, 'admin_department_id') . '-' . Arr::get($adminUserCustomerDepartment, 'admin_user_id');
         }
         return $this->success($data);
     }
-
 
     public function addMenus()
     {
@@ -680,5 +663,4 @@ class AdminUserController extends AdminController
             ->run();
         return $this->success();
     }
-
 }

@@ -74,6 +74,7 @@ class AdminRoleGroupController extends AdminController
             'admin_role_group_name' => [
                 'required',
                 Rule::unique(AdminRoleGroup::class, 'name')
+                    ->where('customer_id', $this->getCustomerId())
                     ->withoutTrashed(),
             ],
         ], [
@@ -83,7 +84,7 @@ class AdminRoleGroupController extends AdminController
         if ($validator->fails()) {
             throw new MessageException($validator->errors()->first());
         }
-        $this->addParam('customer_id', Access::getCustomerId());
+        $this->addParam('customer_id', $this->getCustomerId());
         $this->addParam('name', $this->getParam('admin_role_group_name'));
         $id = AdminRoleGroupAdd::init()
             ->setParam($this->getParam())
@@ -101,6 +102,7 @@ class AdminRoleGroupController extends AdminController
         $validator = Validator::make($this->getParam(), [
             'admin_role_group_name' => [
                 Rule::unique(AdminRoleGroup::class, 'name')
+                    ->where('customer_id', $this->getCustomerId())
                     ->withoutTrashed()
                     ->ignore($this->getParam('id')),
             ],

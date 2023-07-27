@@ -15,23 +15,27 @@ class AdminDepartmentRoleSync extends Core
         if (is_null($this->getAdminRoleIds())) {
             return;
         }
-        $adminDepartmentRoles = AdminDepartmentRole::query()
-            ->select(['id'])
+        // 删除多余数据
+        AdminDepartmentCategory::query()
             ->where('admin_department_id', $this->getAdminDepartmentId())
-            ->get();
-        foreach ($adminDepartmentRoles as $adminDepartmentRole) {
-            AdminDepartmentRoleDelete::init()
-                ->setId(Arr::get($adminDepartmentRoles, 'id'))
-                ->run();
-        }
-        $adminRoleIds = $this->getAdminRoleIds();
-        if (!empty($adminRoleIds)) {
-            foreach ($adminRoleIds as $adminRoleId) {
-                AdminDepartmentRoleAdd::init()
-                    ->setAdminDepartmentId($this->getAdminDepartmentId())
-                    ->setAdminRoleId($adminRoleId)
-                    ->run();
-            }
+            ->whereNotIn('admin_role_id', $this->getAdminRoleIds())
+            ->delete();
+        // 恢复已删除数据
+        AdminDepartmentCategory::onlyTrashed()
+            ->where('admin_department_id', $this->getAdminDepartmentId())
+            ->whereIn('admin_role_id', $this->getAdminRoleIds())
+            ->restore();
+        // 添加新数据
+        $oldIds = AdminDepartmentCategory::query()
+            ->where('admin_department_id', $this->getAdminDepartmentId())
+            ->pluck('admin_role_id')
+            ->toArray();
+        $addIds = array_diff($this->getAdminRoleIds(), $oldIds);
+        foreach ($addIds as $addId) {
+            AdminDepartmentCategory::query()->create([
+                'admin_role_id' => $addId,
+                'admin_department_id' => $this->getAdminDepartmentId(),
+            ]);
         }
     }
 

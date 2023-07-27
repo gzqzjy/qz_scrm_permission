@@ -9,14 +9,16 @@ class AdminPageIdGet extends Core
 {
     protected function execute()
     {
-        if (!empty($this->getCode())) {
-            $model = AdminPage::query()
-                ->where('code', $this->getCode())
-                ->first();
-            if (!empty($model)) {
-                $this->setId($model->getKey());
-            }
+        if (empty($this->getCode())) {
+            return;
         }
+        $model = AdminPage::query()
+            ->where('code', $this->getCode())
+            ->first();
+        if (empty($model)) {
+            return;
+        }
+        $this->setId($model->getKey());
     }
 
     protected $code;

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Cores\AdminMenu;
-
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;

@@ -7,6 +7,8 @@ use Qz\Admin\Permission\Scopes\CustomerIdScope;
 
 class AdminDepartment extends Model
 {
+    protected $connection = 'common';
+
     protected $fillable = [
         'name',
         'pid',

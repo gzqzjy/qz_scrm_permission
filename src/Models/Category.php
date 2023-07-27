@@ -6,6 +6,8 @@ use Qz\Admin\Permission\Scopes\CustomerIdScope;
 
 class Category extends Model
 {
+    protected $connection = 'common';
+    
     protected $fillable = [
         'customer_id',
         'name',

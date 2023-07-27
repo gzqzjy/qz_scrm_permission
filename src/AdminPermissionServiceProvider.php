@@ -95,20 +95,13 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-pages/update', 'AdminPageController@update');
                     Route::post('admin-pages/delete', 'AdminPageController@destroy');
                     Route::post('admin-pages/all', 'AdminPageController@all');
+                    Route::post('admin-pages/permission', 'AdminPageController@permission');
                 });
                 Route::namespace('AdminPageOption\V1')->group(function () {
                     Route::post('admin-page-options/all', 'AdminPageOptionController@all');
                 });
                 Route::namespace('AdminPageColumn\V1')->group(function () {
                     Route::post('admin-page-columns/all', 'AdminPageColumnController@all');
-                });
-                Route::namespace('AdminMenu\V1')->group(function () {
-                    Route::post('admin-menus/get', 'AdminMenuController@get');
-                    Route::post('admin-menus/add', 'AdminMenuController@store');
-                    Route::post('admin-menus/update', 'AdminMenuController@update');
-                    Route::post('admin-menus/delete', 'AdminMenuController@destroy');
-                    Route::post('admin-menus/all', 'AdminMenuController@all');
-                    Route::post('admin-menus/cascader', 'AdminMenuController@cascader');
                 });
                 Route::namespace('AdminUser\V1')->group(function () {
                     Route::post('admin-users/get', 'AdminUserController@get');
@@ -139,6 +132,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     Route::post('admin-roles/delete', 'AdminRoleController@destroy');
                     Route::post('admin-roles/all', 'AdminRoleController@all');
                     Route::post('admin-roles/permission', 'AdminRoleController@permission');
+                    Route::post('admin-roles/page-permission', 'AdminRoleController@pagePermission');
                 });
                 Route::namespace('AdminDepartment\V1')->group(function () {
                     Route::post('admin-departments/get', 'AdminDepartmentController@get');

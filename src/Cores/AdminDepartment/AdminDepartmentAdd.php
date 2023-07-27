@@ -189,7 +189,4 @@ class AdminDepartmentAdd extends Core
         $this->adminRoleIds = $adminRoleIds;
         return $this;
     }
-
-
-
 }

@@ -8,7 +8,7 @@ use Qz\Admin\Permission\Models\AdminRoleMenu;
 use Qz\Admin\Permission\Models\AdminRolePageColumn;
 use Qz\Admin\Permission\Models\AdminRolePageOption;
 use Qz\Admin\Permission\Models\AdminRole;
-use Qz\Admin\Permission\Models\AdminUserCustomerSubsystemRole;
+use Qz\Admin\Permission\Models\AdminUserRole;
 
 
 class AdminRoleDelete extends Core
@@ -22,7 +22,7 @@ class AdminRoleDelete extends Core
         AdminDepartmentRole::query()
             ->where('admin_role_id', $this->getId())
             ->delete();
-        AdminUserCustomerSubsystemRole::query()
+        AdminUserRole::query()
             ->where('admin_role_id', $this->getId())
             ->delete();
         AdminRoleMenu::query()

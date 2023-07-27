@@ -1,7 +1,6 @@
 <?php
 namespace Qz\Admin\Permission\Cores\AdminCategoryDepartment;
 
-use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminCategoryDepartment;
 
@@ -15,23 +14,27 @@ class AdminCategoryDepartmentSync extends Core
         if (is_null($this->getCategoryIds())) {
             return;
         }
-        $adminCategoryDepartments = AdminCategoryDepartment::query()
-            ->select(['id'])
+        // 删除多余数据
+        AdminCategoryDepartment::query()
             ->where('admin_department_id', $this->getAdminDepartmentId())
-            ->get();
-        foreach ($adminCategoryDepartments as $adminCategoryDepartment) {
-            AdminCategoryDepartmentDelete::init()
-                ->setId(Arr::get($adminCategoryDepartment, 'id'))
-                ->run();
-        }
-        $categoryIds = $this->getCategoryIds();
-        if (!empty($categoryIds)) {
-            foreach ($categoryIds as $categoryId) {
-                AdminCategoryDepartmentAdd::init()
-                    ->setAdminDepartmentId($this->getAdminDepartmentId())
-                    ->setCategoryId($categoryId)
-                    ->run();
-            }
+            ->whereNotIn('category_id', $this->getCategoryIds())
+            ->delete();
+        // 恢复已删除数据
+        AdminCategoryDepartment::onlyTrashed()
+            ->where('admin_department_id', $this->getAdminDepartmentId())
+            ->whereIn('category_id', $this->getCategoryIds())
+            ->restore();
+        // 添加新数据
+        $oldIds = AdminCategoryDepartment::query()
+            ->where('admin_department_id', $this->getAdminDepartmentId())
+            ->pluck('category_id')
+            ->toArray();
+        $addIds = array_diff($this->getCategoryIds(), $oldIds);
+        foreach ($addIds as $addId) {
+            AdminCategoryDepartment::query()->create([
+                'category_id' => $addId,
+                'admin_department_id' => $this->getAdminDepartmentId(),
+            ]);
         }
     }
 

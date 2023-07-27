@@ -28,21 +28,6 @@ class AdminMenuIdsByAdminUserIdGet extends Core
                 $this->adminMenuIds[] = $adminRoleMenu->admin_menu_id;
             }
         }
-        $adminDepartmentIds = AdminUserDepartment::query()
-            ->where('admin_user_id', $this->getAdminUserId())
-            ->where('administrator', true)
-            ->pluck('admin_department_id')
-            ->toArray();
-        if (!empty($adminDepartmentIds)) {
-            $addAdminMenuIds = AdminMenu::query()
-                ->where('path', '/admin-department')
-                ->OrWhere('name', '系统设置')
-                ->pluck('id')
-                ->toArray();
-            foreach ($addAdminMenuIds as $addAdminMenuId) {
-                $this->adminMenuIds[] = $addAdminMenuId;
-            }
-        }
         $this->setAdminMenuIds(array_unique((array) $this->adminMenuIds));
     }
 

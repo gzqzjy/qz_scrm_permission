@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateAdminDepartmentsTable extends Migration
 {
+    protected $connection = 'common';
+    
     /**
      * Run the migrations.
      *

@@ -9,6 +9,7 @@ use Qz\Admin\Permission\Cores\AdminPage\AdminPageUpdate;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
+use Qz\Admin\Permission\Models\AdminMenu;
 use Qz\Admin\Permission\Models\AdminPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -113,5 +114,19 @@ class AdminPageController extends AdminController
         $model = $this->filter($model);
         $model = $model->get();
         return $this->response($model);
+    }
+
+    public function permission()
+    {
+        $model = AdminMenu::query()
+            ->where('parent_id', 0)
+            ->orderByDesc('sort')
+            ->get();
+        $model->load([
+            'children',
+            'adminPageOptions',
+            'adminPageColumns',
+        ]);
+        return $this->success($model);
     }
 }

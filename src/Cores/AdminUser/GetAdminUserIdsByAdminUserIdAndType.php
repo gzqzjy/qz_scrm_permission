@@ -28,11 +28,11 @@ class GetAdminUserIdsByAdminUserIdAndType extends Core
             $types = explode(AdminRoleRequest::CHARACTER, $this->getDepartmentType());
         }
         foreach ($types as $type) {
-            $this->getAdminUserCustomerSystemByTypeAndDepartment($type, $adminDepartmentIds);
+            $this->getAdminUserByTypeAndDepartment($type, $adminDepartmentIds);
         }
     }
 
-    protected function getAdminUserCustomerSystemByTypeAndDepartment($type, $adminDepartmentIds)
+    protected function getAdminUserByTypeAndDepartment($type, $adminDepartmentIds)
     {
         switch ($type) {
             case AdminRoleRequest::SELF:

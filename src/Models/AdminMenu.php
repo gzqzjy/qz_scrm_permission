@@ -43,15 +43,26 @@ class AdminMenu extends Model
     {
         return $this->child()->with([
             'children',
-            'adminPage',
-            'adminPage.adminPageOptions',
-            'adminPage.adminPageColumns',
+            'adminPageOptions',
+            'adminPageColumns',
         ]);
     }
 
     public function adminPage()
     {
         return $this->belongsTo(AdminPage::class);
+    }
+
+    public function adminPageOptions()
+    {
+        return $this->hasMany(AdminPageOption::class, 'admin_page_id', 'admin_page_id')
+            ->where('admin_page_id', '>', 0);
+    }
+
+    public function adminPageColumns()
+    {
+        return $this->hasMany(AdminPageColumn::class, 'admin_page_id', 'admin_page_id')
+            ->where('admin_page_id', '>', 0);
     }
 
     public function childrenRequest()
@@ -62,5 +73,10 @@ class AdminMenu extends Model
             'adminPage.adminPageOptions',
             'adminPage.adminPageOptions.adminRequests',
         ]);
+    }
+
+    public function adminRoleMenus()
+    {
+        return $this->hasMany(AdminRoleMenu::class);
     }
 }

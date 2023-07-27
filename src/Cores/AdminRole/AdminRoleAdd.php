@@ -4,10 +4,9 @@ namespace Qz\Admin\Permission\Cores\AdminRole;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Cores\AdminRoleMenu\AdminRoleMenuAdd;
-use Qz\Admin\Permission\Cores\AdminRolePageColumn\AdminRolePageColumnAdd;
-use Qz\Admin\Permission\Cores\AdminRolePageOption\AdminRolePageOptionAdd;
-use Qz\Admin\Permission\Cores\AdminRoleRequest\AdminRoleRequestAdd;
+use Qz\Admin\Permission\Cores\AdminRoleMenu\AdminRoleMenuSync;
+use Qz\Admin\Permission\Cores\AdminRolePageColumn\AdminRolePageColumnSync;
+use Qz\Admin\Permission\Cores\AdminRolePageOption\AdminRolePageOptionSync;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRole;
 
@@ -25,43 +24,18 @@ class AdminRoleAdd extends Core
             $model->restore();
         }
         $this->setId($model->getKey());
-
-        if ($this->getAdminRoleMenu()) {
-            foreach ($this->getAdminRoleMenu() as $adminMenuId) {
-                AdminRoleMenuAdd::init()
-                    ->setAdminRoleId($this->getId())
-                    ->setAdminMenuId($adminMenuId)
-                    ->run();
-            }
-        }
-
-        if ($this->getAdminRolePageColumn()) {
-            foreach ($this->getAdminRolePageColumn() as $adminPageColumnId) {
-                AdminRolePageColumnAdd::init()
-                    ->setAdminRoleId($this->getId())
-                    ->setAdminPageColumnId($adminPageColumnId)
-                    ->run();
-            }
-        }
-
-        if ($this->getAdminRolePageOption()) {
-            foreach ($this->getAdminRolePageOption() as $adminPageOptionId) {
-                AdminRolePageOptionAdd::init()
-                    ->setAdminRoleId($this->getId())
-                    ->setAdminPageOptionId($adminPageOptionId)
-                    ->run();
-            }
-        }
-
-        if ($this->getAdminRoleRequest()) {
-            foreach ($this->getAdminRoleRequest() as $item) {
-                AdminRoleRequestAdd::init()
-                    ->setAdminRoleId($this->getId())
-                    ->setAdminRequestId(Arr::get($item, 'admin_request_id'))
-                    ->setType(Arr::get($item, 'type'))
-                    ->run();
-            }
-        }
+        AdminRoleMenuSync::init()
+            ->setAdminRoleId($this->getId())
+            ->setAdminMenuIds($this->getAdminMenuIds())
+            ->run();
+        AdminRolePageColumnSync::init()
+            ->setAdminRoleId($this->getId())
+            ->setAdminPageColumnIds($this->getAdminPageColumnIds())
+            ->run();
+        AdminRolePageOptionSync::init()
+            ->setAdminRoleId($this->getId())
+            ->setAdminPageOptionIds($this->getAdminPageOptionIds())
+            ->run();
     }
 
     protected $id;
@@ -159,83 +133,63 @@ class AdminRoleAdd extends Core
         return $this;
     }
 
-    protected $adminRoleMenu;
+    protected $adminMenuIds;
 
     /**
      * @return mixed
      */
-    public function getAdminRoleMenu()
+    public function getAdminMenuIds()
     {
-        return $this->adminRoleMenu;
+        return $this->adminMenuIds;
     }
 
     /**
-     * @param mixed $adminRoleMenu
+     * @param mixed $adminMenuIds
      * @return AdminRoleAdd
      */
-    public function setAdminRoleMenu($adminRoleMenu)
+    public function setAdminMenuIds($adminMenuIds)
     {
-        $this->adminRoleMenu = $adminRoleMenu;
+        $this->adminMenuIds = $adminMenuIds;
         return $this;
     }
 
-    protected $adminRolePageColumn;
+    protected $adminPageOptionIds;
 
     /**
      * @return mixed
      */
-    public function getAdminRolePageColumn()
+    public function getAdminPageOptionIds()
     {
-        return $this->adminRolePageColumn;
+        return $this->adminPageOptionIds;
     }
 
     /**
-     * @param mixed $adminRolePageColumn
+     * @param mixed $adminPageOptionIds
      * @return AdminRoleAdd
      */
-    public function setAdminRolePageColumn($adminRolePageColumn)
+    public function setAdminPageOptionIds($adminPageOptionIds)
     {
-        $this->adminRolePageColumn = $adminRolePageColumn;
+        $this->adminPageOptionIds = $adminPageOptionIds;
         return $this;
     }
 
-    protected $adminRolePageOption;
+    protected $adminPageColumnIds;
 
     /**
      * @return mixed
      */
-    public function getAdminRolePageOption()
+    public function getAdminPageColumnIds()
     {
-        return $this->adminRolePageOption;
+        return $this->adminPageColumnIds;
     }
 
     /**
-     * @param mixed $adminRolePageOption
+     * @param mixed $adminPageColumnIds
      * @return AdminRoleAdd
      */
-    public function setAdminRolePageOption($adminRolePageOption)
+    public function setAdminPageColumnIds($adminPageColumnIds)
     {
-        $this->adminRolePageOption = $adminRolePageOption;
-        return $this;
-    }
-
-    protected $adminRoleRequest;
-
-    /**
-     * @return mixed
-     */
-    public function getAdminRoleRequest()
-    {
-        return $this->adminRoleRequest;
-    }
-
-    /**
-     * @param mixed $adminRoleRequest
-     * @return AdminRoleAdd
-     */
-    public function setAdminRoleRequest($adminRoleRequest)
-    {
-        $this->adminRoleRequest = $adminRoleRequest;
+        $this->adminPageColumnIds = $adminPageColumnIds;
         return $this;
     }
 }

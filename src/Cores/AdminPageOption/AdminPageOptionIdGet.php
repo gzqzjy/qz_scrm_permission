@@ -9,16 +9,18 @@ class AdminPageOptionIdGet extends Core
 {
     protected function execute()
     {
-        if (!empty($this->getCode())) {
-            $model = AdminPageOption::query()
-                ->withoutGlobalScope('isShow')
-                ->where('admin_page_id', $this->getAdminPageId())
-                ->where('code', $this->getCode())
-                ->first();
-            if (!empty($model)) {
-                $this->setId($model->getKey());
-            }
+        if (empty($this->getCode()) || empty($this->getAdminPageId())) {
+           return;
         }
+        $model = AdminPageOption::query()
+            ->withoutGlobalScope('isShow')
+            ->where('admin_page_id', $this->getAdminPageId())
+            ->where('code', $this->getCode())
+            ->first();
+        if (empty($model)) {
+            return;
+        }
+        $this->setId($model->getKey());
     }
 
     protected $code;

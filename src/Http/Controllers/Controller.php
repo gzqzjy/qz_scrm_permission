@@ -2,6 +2,7 @@
 
 namespace Qz\Admin\Permission\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -66,6 +67,9 @@ class Controller extends BaseController
 
     final protected function success($data = [], $message = 'success')
     {
+        if ($data instanceof Collection) {
+            $data = $data->toArray();
+        }
         $success = true;
         return $this->json(compact('success', 'data', 'message'));
     }

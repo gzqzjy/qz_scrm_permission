@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentAdd;
 use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentDelete;
@@ -124,7 +125,7 @@ class AdminDepartmentController extends AdminController
             'name' => [
                 'required',
                 Rule::unique(AdminDepartment::class)
-                    ->where('customer_id', Access::getCustomerId())
+                    ->where('customer_id', $this->getCustomerId())
                     ->withoutTrashed(),
             ],
             'pid' => [
@@ -176,7 +177,7 @@ class AdminDepartmentController extends AdminController
             'name' => [
                 'required',
                 Rule::unique(AdminDepartment::class)
-                    ->where('customer_id', Access::getCustomerId())
+                    ->where('customer_id', $this->getCustomerId())
                     ->ignore($this->getParam('id'))
                     ->withoutTrashed(),
             ],

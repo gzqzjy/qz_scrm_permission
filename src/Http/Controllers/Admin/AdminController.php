@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Qz\Admin\Permission\Cores\Auth\CategoryIdsGet;
 use Qz\Admin\Permission\Cores\Common\Filter;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Controller;
@@ -78,9 +79,17 @@ class AdminController extends Controller
     {
         return Auth::guard('admin')->id();
     }
-    
+
     protected function getCustomerId()
     {
         return Access::getCustomerId();
+    }
+
+    protected function getLoginCategoryIdes()
+    {
+        return (array) CategoryIdsGet::init()
+            ->setAdminUserId($this->getLoginAdminUserId())
+            ->run()
+            ->getIds();
     }
 }
