@@ -1,7 +1,6 @@
 <?php
 namespace Qz\Admin\Permission\Cores\AdminRoleMenu;
 
-use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRoleMenu;
 
@@ -15,19 +14,10 @@ class AdminRoleMenuSync extends Core
         if (is_null($this->getAdminMenuIds())) {
             return;
         }
-        $deleteIds = AdminRoleMenu::query()
+        AdminRoleMenu::query()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->where('admin_role_id', '>', 0)
             ->whereNotIn('admin_menu_id', $this->getAdminMenuIds())
-            ->pluck('id')
-            ->toArray();
-        if (!empty($deleteIds)) {
-            foreach ($deleteIds as $deleteId) {
-                AdminRoleMenuDelete::init()
-                    ->setId($deleteId)
-                    ->run();
-            }
-        }
+            ->delete();
         $ids = $this->getAdminMenuIds();
         if (!empty($ids)) {
             foreach ($ids as $id) {

@@ -3,9 +3,7 @@
 namespace Qz\Admin\Permission\Cores\Auth;
 
 use Illuminate\Support\Arr;
-use Qz\Admin\Permission\Cores\AdminUser\GetSubAdminDepartmentIdsByAdminDepartmentIds;
 use Qz\Admin\Permission\Cores\Core;
-use Qz\Admin\Permission\Models\AdminDepartment;
 use Qz\Admin\Permission\Models\AdminRoleRequest;
 use Qz\Admin\Permission\Models\AdminUser;
 use Qz\Admin\Permission\Models\AdminUserDepartment;
@@ -79,24 +77,7 @@ class AdminUserIdsGet extends Core
                 }
                 break;
             case AdminRoleRequest::CHILDREN:
-                $adminDepartmentIds = AdminUserDepartment::query()
-                    ->where('admin_user_id', '=', $this->getAdminUserId())
-                    ->pluck('admin_department_id')
-                    ->toArray();
-                $childrenDepartmentIds = GetSubAdminDepartmentIdsByAdminDepartmentIds::init()
-                    ->setAdminDepartmentIds($adminDepartmentIds)
-                    ->run()
-                    ->getSubAdminDepartmentIds();
-                if (empty($childrenDepartmentIds)) {
-                    break;
-                }
-                $adminUserIds = AdminUserDepartment::query()
-                    ->whereIn('admin_department_id', $childrenDepartmentIds)
-                    ->pluck('admin_user_id')
-                    ->toArray();
-                if (!empty($adminUserIds)) {
-                    $this->ids[] = array_merge($this->ids, $adminUserIds);
-                }
+
                 break;
         }
     }

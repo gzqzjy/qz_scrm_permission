@@ -32,13 +32,11 @@ class AdminUser extends Model implements AuthenticatableContract, AuthorizableCo
     const STATUS_WORKING = 'work';
     const STATUS_LEAVING = 'leaving';
     const STATUS_LEAVED = 'leaved';
-
     const STATUS_DESC = [
         self::STATUS_WORKING => '在职',
         self::STATUS_LEAVING => '离职中',
         self::STATUS_LEAVED => '离职',
     ];
-    
     const SEX_UNKNOWN = 'unknown';
     const SEX_MAN = 'man';
     const SEX_WOMAN = 'woman';
@@ -69,9 +67,29 @@ class AdminUser extends Model implements AuthenticatableContract, AuthorizableCo
     {
         return $this->hasMany(AdminUserDepartment::class);
     }
-    
+
     public function administrator()
     {
         return $this->hasOne(Administrator::class);
+    }
+
+    public function adminUserMenus()
+    {
+        return $this->hasMany(AdminUserMenu::class);
+    }
+
+    public function adminUserPageOptions()
+    {
+        return $this->hasMany(AdminUserPageOption::class);
+    }
+
+    public function adminUserPageColumns()
+    {
+        return $this->hasMany(AdminUserPageColumn::class);
+    }
+
+    public function adminUserRequests()
+    {
+        return $this->hasMany(AdminUserRequest::class);
     }
 }

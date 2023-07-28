@@ -2,26 +2,25 @@
 
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminRoleGroup;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupAdd;
 use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupDelete;
 use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupUpdate;
 use Qz\Admin\Permission\Cores\Common\Filter;
 use Qz\Admin\Permission\Exceptions\MessageException;
-use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminRoleGroup;
 
 class AdminRoleGroupController extends AdminController
 {
+    /**
+     * @return JsonResponse
+     */
     public function get()
     {
         $model = AdminRoleGroup::query();
@@ -121,6 +120,10 @@ class AdminRoleGroupController extends AdminController
         return $this->success(compact('id'));
     }
 
+    /**
+     * @return JsonResponse
+     * @throws MessageException
+     */
     public function destroy()
     {
         $validator = Validator::make($this->getParam(), [

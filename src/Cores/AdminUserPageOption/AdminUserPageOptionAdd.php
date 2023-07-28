@@ -12,9 +12,10 @@ class AdminUserPageOptionAdd extends Core
     protected function execute()
     {
         $model = AdminUserPageOption::withTrashed()
-            ->firstOrCreate(Arr::whereNotNull([
+            ->updateOrCreate(Arr::whereNotNull([
                 'admin_user_id' => $this->getAdminUserId(),
                 'admin_page_option_id' => $this->getAdminPageOptionId(),
+            ]), Arr::whereNotNull([
                 'type' => $this->getType(),
             ]));
         if ($model->trashed()) {
@@ -98,7 +99,6 @@ class AdminUserPageOptionAdd extends Core
         return $this;
     }
 
-
     protected $type;
 
     /**
@@ -118,5 +118,4 @@ class AdminUserPageOptionAdd extends Core
         $this->type = $type;
         return $this;
     }
-
 }

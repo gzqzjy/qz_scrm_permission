@@ -6,32 +6,26 @@ use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUserRequest;
 use Illuminate\Support\Arr;
 
-class AdminUserRequestsSyncByAdminUserId extends Core
+class AdminUserRequestSync extends Core
 {
     protected function execute()
     {
         if (empty($this->getAdminUserId())) {
             return;
         }
-        $adminUserRequests = $this->getAdminUserRequests();
-        if (is_null($adminUserRequests)) {
+        $adminRequests = $this->getAdminRequests();
+        if (is_null($adminRequests)) {
             return;
         }
-        $deletes = AdminUserRequest::query()
-            ->select('id')
+        AdminUserRequest::query()
             ->where('admin_user_id', $this->getAdminUserId())
-            ->whereNotIn('admin_request_id', Arr::pluck($adminUserRequests, $this->getAdminRequestIdKey()))
-            ->get();
-        foreach ($deletes as $delete) {
-            AdminUserRequestDelete::init()
-                ->setId(Arr::get($delete, 'id'))
-                ->run();
-        }
-        if (!empty($adminUserRequests)) {
-            foreach ($adminUserRequests as $adminUserRequest) {
+            ->whereNotIn('admin_request_id', Arr::pluck($adminRequests, $this->getAdminRequestIdKey()))
+            ->delete();
+        if (!empty($adminRequests)) {
+            foreach ($adminRequests as $adminRequest) {
                 AdminUserRequestAdd::init()
-                    ->setAdminRequestId(Arr::get($adminUserRequest, $this->getAdminRequestIdKey()))
-                    ->setType(Arr::get($adminUserRequest, 'type'))
+                    ->setAdminRequestId(Arr::get($adminRequest, $this->getAdminRequestIdKey()))
+                    ->setType(implode(AdminUserRequest::CHARACTER, Arr::get($adminRequest, 'types')))
                     ->setAdminUserId($this->getAdminUserId())
                     ->run();
             }
@@ -58,26 +52,6 @@ class AdminUserRequestsSyncByAdminUserId extends Core
         return $this;
     }
 
-    protected $adminUserRequests;
-
-    /**
-     * @return mixed
-     */
-    public function getAdminUserRequests()
-    {
-        return $this->adminUserRequests;
-    }
-
-    /**
-     * @param mixed $adminUserRequests
-     * @return AdminUserRequestsSyncByAdminUserId
-     */
-    public function setAdminUserRequests($adminUserRequests)
-    {
-        $this->adminUserRequests = $adminUserRequests;
-        return $this;
-    }
-
     protected $adminRequests;
 
     /**
@@ -90,7 +64,7 @@ class AdminUserRequestsSyncByAdminUserId extends Core
 
     /**
      * @param mixed $adminRequests
-     * @return AdminUserRequestsSyncByAdminUserId
+     * @return AdminUserRequestSync
      */
     public function setAdminRequests($adminRequests)
     {
@@ -110,7 +84,7 @@ class AdminUserRequestsSyncByAdminUserId extends Core
 
     /**
      * @param string $adminRequestIdKey
-     * @return AdminUserRequestsSyncByAdminUserId
+     * @return AdminUserRequestSync
      */
     public function setAdminRequestIdKey($adminRequestIdKey)
     {

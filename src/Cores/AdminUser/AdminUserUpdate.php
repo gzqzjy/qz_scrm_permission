@@ -3,28 +3,33 @@
 namespace Qz\Admin\Permission\Cores\AdminUser;
 
 use Qz\Admin\Permission\Cores\AdminUserDepartment\AdminUserDepartmentSync;
+use Qz\Admin\Permission\Cores\AdminUserMenu\AdminUserMenuSync;
+use Qz\Admin\Permission\Cores\AdminUserPageColumn\AdminUserPageColumnSync;
+use Qz\Admin\Permission\Cores\AdminUserPageOption\AdminUserPageOptionSync;
+use Qz\Admin\Permission\Cores\AdminUserRequest\AdminUserRequestSync;
 use Qz\Admin\Permission\Cores\AdminUserRole\AdminUserRoleSync;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Models\AdminUserDepartment;
-use Qz\Admin\Permission\Models\AdminUserRole;
 
 class AdminUserUpdate extends Core
 {
     protected function execute()
     {
-        $model = AdminUser::withTrashed()
-            ->findOrFail($this->getId());
-        $model->fill(Arr::whereNotNull([
+        $update = Arr::whereNotNull([
             'name' => $this->getName(),
             'mobile' => $this->getMobile(),
             'status' => $this->getStatus(),
             'sex' => $this->getSex(),
-        ]));
-        $model->save();
-        $this->setId($model->getKey());
+        ]);
+        if (!empty($update)) {
+            $model = AdminUser::withTrashed()
+                ->findOrFail($this->getId());
+            $model->fill($update);
+            $model->save();
+            $this->setId($model->getKey());
+        }
         AdminUserRoleSync::init()
             ->setAdminUserId($this->getId())
             ->setAdminRoleIds($this->getAdminRoleIds())
@@ -32,6 +37,22 @@ class AdminUserUpdate extends Core
         AdminUserDepartmentSync::init()
             ->setAdminUserId($this->getId())
             ->setAdminUserDepartments($this->getAdminUserDepartments())
+            ->run();
+        AdminUserMenuSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminMenuIds($this->getAdminMenuIds())
+            ->run();
+        AdminUserPageColumnSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminPageColumnIds($this->getAdminPageColumnIds())
+            ->run();
+        AdminUserPageOptionSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminPageOptionIds($this->getAdminPageOptionIds())
+            ->run();
+        AdminUserRequestSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminRequests($this->getAdminRequests())
             ->run();
     }
 
@@ -247,6 +268,86 @@ class AdminUserUpdate extends Core
     public function setAdminUserDepartments($adminUserDepartments)
     {
         $this->adminUserDepartments = $adminUserDepartments;
+        return $this;
+    }
+
+    protected $adminMenuIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminMenuIds()
+    {
+        return $this->adminMenuIds;
+    }
+
+    /**
+     * @param mixed $adminMenuIds
+     * @return AdminUserUpdate
+     */
+    public function setAdminMenuIds($adminMenuIds)
+    {
+        $this->adminMenuIds = $adminMenuIds;
+        return $this;
+    }
+
+    protected $adminPageOptionIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageOptionIds()
+    {
+        return $this->adminPageOptionIds;
+    }
+
+    /**
+     * @param mixed $adminPageOptionIds
+     * @return AdminUserUpdate
+     */
+    public function setAdminPageOptionIds($adminPageOptionIds)
+    {
+        $this->adminPageOptionIds = $adminPageOptionIds;
+        return $this;
+    }
+
+    protected $adminPageColumnIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageColumnIds()
+    {
+        return $this->adminPageColumnIds;
+    }
+
+    /**
+     * @param mixed $adminPageColumnIds
+     * @return AdminUserUpdate
+     */
+    public function setAdminPageColumnIds($adminPageColumnIds)
+    {
+        $this->adminPageColumnIds = $adminPageColumnIds;
+        return $this;
+    }
+
+    protected $adminRequests;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminRequests()
+    {
+        return $this->adminRequests;
+    }
+
+    /**
+     * @param mixed $adminRequests
+     * @return AdminUserUpdate
+     */
+    public function setAdminRequests($adminRequests)
+    {
+        $this->adminRequests = $adminRequests;
         return $this;
     }
 }

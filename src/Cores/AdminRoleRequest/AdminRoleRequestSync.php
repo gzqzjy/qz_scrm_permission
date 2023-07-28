@@ -12,28 +12,20 @@ class AdminRoleRequestSync extends Core
         if (empty($this->getAdminRoleId())) {
             return;
         }
-        if (is_null($this->getAdminRequestIds())) {
+        if (is_null($this->getAdminRequests())) {
             return;
         }
-        $deleteIds = AdminRoleRequest::query()
+        AdminRoleRequest::query()
             ->select(['id'])
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->where('admin_role_id', '>', 0)
-            ->pluck('id')
-            ->toArray();
-        if (!empty($deleteIds)) {
-            foreach ($deleteIds as $deleteId) {
-                AdminRoleRequestDelete::init()
-                    ->setId($deleteId)
-                    ->run();
-            }
-        }
-        $ids = $this->getAdminRequestIds();
-        if (!empty($ids)) {
-            foreach ($ids as $id) {
+            ->delete();
+        $adminRequests = $this->getAdminRequests();
+        if (!empty($adminRequests)) {
+            foreach ($adminRequests as $adminRequest) {
                 AdminRoleRequestAdd::init()
                     ->setAdminRoleId($this->getAdminRoleId())
-                    ->setAdminRequestId($id)
+                    ->setType(implode(AdminRoleRequest::CHARACTER, Arr::get($adminRequest, 'types')))
+                    ->setAdminRequestId(Arr::get($adminRequest, 'admin_request_id'))
                     ->run();
             }
         }
@@ -59,23 +51,23 @@ class AdminRoleRequestSync extends Core
         return $this;
     }
 
-    protected $adminRequestIds;
+    protected $adminRequests;
 
     /**
      * @return mixed
      */
-    public function getAdminRequestIds()
+    public function getAdminRequests()
     {
-        return $this->adminRequestIds;
+        return $this->adminRequests;
     }
 
     /**
-     * @param mixed $adminRequestIds
+     * @param mixed $adminRequests
      * @return AdminRoleRequestSync
      */
-    public function setAdminRequestIds($adminRequestIds)
+    public function setAdminRequests($adminRequests)
     {
-        $this->adminRequestIds = $adminRequestIds;
+        $this->adminRequests = $adminRequests;
         return $this;
     }
 }

@@ -1,9 +1,7 @@
 <?php
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminRequest;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminUser\AdminPageOptionIdsGetByAdminUserId;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
@@ -47,6 +45,16 @@ class AdminRequestController extends AdminController
                 "label" => $name,
                 "value" => Arr::get($value, 'id')
             ];
+        }
+        return $this->response($data);
+    }
+
+    public function types()
+    {
+        $types = AdminRequest::TYPE_BASE_DESC;
+        $data = [];
+        foreach ($types as $value => $label) {
+            $data[] = compact('label', 'value');
         }
         return $this->response($data);
     }

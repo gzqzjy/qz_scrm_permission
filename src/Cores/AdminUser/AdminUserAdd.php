@@ -3,12 +3,15 @@
 namespace Qz\Admin\Permission\Cores\AdminUser;
 
 use Qz\Admin\Permission\Cores\AdminUserDepartment\AdminUserDepartmentSync;
+use Qz\Admin\Permission\Cores\AdminUserMenu\AdminUserMenuSync;
+use Qz\Admin\Permission\Cores\AdminUserPageColumn\AdminUserPageColumnSync;
+use Qz\Admin\Permission\Cores\AdminUserPageOption\AdminUserPageOptionSync;
+use Qz\Admin\Permission\Cores\AdminUserRequest\AdminUserRequestSync;
 use Qz\Admin\Permission\Cores\AdminUserRole\AdminUserRoleSync;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Models\AdminUserDepartment;
 
 class AdminUserAdd extends Core
 {
@@ -34,6 +37,22 @@ class AdminUserAdd extends Core
         AdminUserDepartmentSync::init()
             ->setAdminUserId($this->getId())
             ->setAdminUserDepartments($this->getAdminUserDepartments())
+            ->run();
+        AdminUserMenuSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminMenuIds($this->getAdminMenuIds())
+            ->run();
+        AdminUserPageColumnSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminPageColumnIds($this->getAdminPageColumnIds())
+            ->run();
+        AdminUserPageOptionSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminPageOptionIds($this->getAdminPageOptionIds())
+            ->run();
+        AdminUserRequestSync::init()
+            ->setAdminUserId($this->getId())
+            ->setAdminRequests($this->getAdminRequests())
             ->run();
     }
 
@@ -269,6 +288,86 @@ class AdminUserAdd extends Core
     public function setCustomerId($customerId)
     {
         $this->customerId = $customerId;
+        return $this;
+    }
+
+    protected $adminMenuIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminMenuIds()
+    {
+        return $this->adminMenuIds;
+    }
+
+    /**
+     * @param mixed $adminMenuIds
+     * @return AdminUserAdd
+     */
+    public function setAdminMenuIds($adminMenuIds)
+    {
+        $this->adminMenuIds = $adminMenuIds;
+        return $this;
+    }
+
+    protected $adminPageOptionIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageOptionIds()
+    {
+        return $this->adminPageOptionIds;
+    }
+
+    /**
+     * @param mixed $adminPageOptionIds
+     * @return AdminUserAdd
+     */
+    public function setAdminPageOptionIds($adminPageOptionIds)
+    {
+        $this->adminPageOptionIds = $adminPageOptionIds;
+        return $this;
+    }
+
+    protected $adminPageColumnIds;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageColumnIds()
+    {
+        return $this->adminPageColumnIds;
+    }
+
+    /**
+     * @param mixed $adminPageColumnIds
+     * @return AdminUserAdd
+     */
+    public function setAdminPageColumnIds($adminPageColumnIds)
+    {
+        $this->adminPageColumnIds = $adminPageColumnIds;
+        return $this;
+    }
+
+    protected $adminRequests;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminRequests()
+    {
+        return $this->adminRequests;
+    }
+
+    /**
+     * @param mixed $adminRequests
+     * @return AdminUserAdd
+     */
+    public function setAdminRequests($adminRequests)
+    {
+        $this->adminRequests = $adminRequests;
         return $this;
     }
 }

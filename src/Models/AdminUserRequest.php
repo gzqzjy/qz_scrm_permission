@@ -10,6 +10,8 @@ class AdminUserRequest extends Model
         'type'
     ];
 
+    protected $appends = ['types'];
+
     const CHARACTER = '+';
     const SELF = 'SELF'; //自己
     const THIS = 'THIS'; //本部门
@@ -37,5 +39,10 @@ class AdminUserRequest extends Model
     public function adminRequest()
     {
         return $this->belongsTo(AdminRequest::class);
+    }
+
+    public function getTypesAttribute()
+    {
+        return explode(self::CHARACTER, $this->getOriginal('type'));
     }
 }

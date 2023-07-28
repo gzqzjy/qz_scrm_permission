@@ -1,7 +1,6 @@
 <?php
 namespace Qz\Admin\Permission\Cores\AdminRolePageColumn;
 
-use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRolePageColumn;
 
@@ -12,22 +11,14 @@ class AdminRolePageColumnSync extends Core
         if (empty($this->getAdminRoleId())) {
             return;
         }
-        if (is_null($this->getAdminPageColumnIds())) {
+        $ids = $this->getAdminPageColumnIds();
+        if (is_null($ids)) {
             return;
         }
-        $deleteIds = AdminRolePageColumn::query()
+        AdminRolePageColumn::query()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->where('admin_role_id', '>', 0)
-            ->pluck('id')
-            ->toArray();
-        if (!empty($deleteIds)) {
-            foreach ($deleteIds as $deleteId) {
-                AdminRolePageColumnDelete::init()
-                    ->setId($deleteId)
-                    ->run();
-            }
-        }
-        $ids = $this->getAdminPageColumnIds();
+            ->whereNotIn('admin_page_column_id', $ids)
+            ->delete();
         if (!empty($ids)) {
             foreach ($ids as $id) {
                 AdminRolePageColumnAdd::init()

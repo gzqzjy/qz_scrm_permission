@@ -17,6 +17,10 @@ use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminDepartmentRole;
 use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminRoleGroup;
+use Qz\Admin\Permission\Models\AdminRoleMenu;
+use Qz\Admin\Permission\Models\AdminRolePageColumn;
+use Qz\Admin\Permission\Models\AdminRolePageOption;
+use Qz\Admin\Permission\Models\AdminRoleRequest;
 use Qz\Admin\Permission\Models\AdminUserRole;
 
 class AdminRoleController extends AdminController
@@ -66,8 +70,9 @@ class AdminRoleController extends AdminController
             ->setCustomerId($this->getCustomerId())
             ->setParam($this->getParam())
             ->setAdminMenuIds($this->getParam('permission.admin_menu_ids'))
-            ->setAdminPageOptionIds($this->getParam('permission.admin_option_ids'))
-            ->setAdminPageColumnIds($this->getParam('permission.admin_column_ids'))
+            ->setAdminPageOptionIds($this->getParam('permission.admin_page_option_ids'))
+            ->setAdminPageColumnIds($this->getParam('permission.admin_page_column_ids'))
+            ->setAdminRequests($this->getParam('permission.admin_requests'))
             ->run()
             ->getId();
         return $this->success(compact('id'));
@@ -114,13 +119,18 @@ class AdminRoleController extends AdminController
             ->setId($this->getParam('id'))
             ->setParam($this->getParam())
             ->setAdminMenuIds($this->getParam('permission.admin_menu_ids'))
-            ->setAdminPageOptionIds($this->getParam('permission.admin_option_ids'))
-            ->setAdminPageColumnIds($this->getParam('permission.admin_column_ids'))
+            ->setAdminPageOptionIds($this->getParam('permission.admin_page_option_ids'))
+            ->setAdminPageColumnIds($this->getParam('permission.admin_page_column_ids'))
+            ->setAdminRequests($this->getParam('permission.admin_requests'))
             ->run()
             ->getId();
         return $this->success(compact('id'));
     }
 
+    /**
+     * @return JsonResponse
+     * @throws MessageException
+     */
     public function destroy()
     {
         $validator = Validator::make($this->getParam(), [
@@ -187,8 +197,46 @@ class AdminRoleController extends AdminController
         return $this->json($model->toArray());
     }
 
+    public function pagePermission()
+    {
+        $param = $this->getParam();
+        $id = Arr::get($param, 'admin_role_id');
+        $adminMenuIds = AdminRoleMenu::query()
+            ->where('admin_role_id', $id)
+            ->where('admin_role_id', '>', 0)
+            ->pluck('admin_menu_id')
+            ->toArray();
+        $adminPageColumnIds = AdminRolePageColumn::query()
+            ->where('admin_role_id', $id)
+            ->where('admin_role_id', '>', 0)
+            ->pluck('admin_page_column_id')
+            ->toArray();
+        $adminPageOptionIds = AdminRolePageOption::query()
+            ->where('admin_role_id', $id)
+            ->where('admin_role_id', '>', 0)
+            ->pluck('admin_page_option_id')
+            ->toArray();
+        return $this->success(compact('adminMenuIds', 'adminPageOptionIds', 'adminPageColumnIds'));
+    }
+
     public function requestPermission()
     {
-        $this->success();
+        $param = $this->getParam();
+        $id = Arr::get($param, 'admin_role_id');
+        $adminRequests = AdminRoleRequest::query()
+            ->select(['admin_request_id', 'type'])
+            ->where('admin_role_id', $id)
+            ->orderBy('admin_request_id')
+            ->get()
+            ->toArray();
+        if (empty($adminRequests)) {
+            $adminRequests = AdminRoleRequest::query()
+                ->select(['admin_request_id', 'type'])
+                ->where('admin_role_id', 0)
+                ->orderBy('admin_request_id')
+                ->get()
+                ->toArray();
+        }
+        return $this->success(compact('adminRequests'));
     }
 }

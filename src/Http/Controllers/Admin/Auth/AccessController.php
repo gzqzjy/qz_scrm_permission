@@ -2,10 +2,7 @@
 
 namespace Qz\Admin\Permission\Http\Controllers\Admin\Auth;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
@@ -14,7 +11,8 @@ use Qz\Admin\Permission\Cores\AdminPageColumn\AdminPageColumnAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionAdd;
 use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionDelete;
 use Qz\Admin\Permission\Cores\AdminUser\AdminMenuIdsByAdminUserIdGet;
-use Qz\Admin\Permission\Cores\AdminUser\GetPermissionByAdminUserId;
+use Qz\Admin\Permission\Cores\AdminUser\AdminPageColumnIdsByAdminUserIdGet;
+use Qz\Admin\Permission\Cores\AdminUser\AdminPageOptionIdsByAdminUserIdGet;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminMenu;
@@ -22,7 +20,6 @@ use Qz\Admin\Permission\Models\AdminPage;
 use Qz\Admin\Permission\Models\AdminPageColumn;
 use Qz\Admin\Permission\Models\AdminPageOption;
 use Qz\Admin\Permission\Models\AdminUser;
-use Qz\Admin\Permission\Models\AdminUserDepartment;
 use Qz\Admin\Permission\Models\AdminUserPageOption;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -125,9 +122,9 @@ class AccessController extends AdminController
         }
         $model = AdminPageColumn::query()
             ->whereIn('id', $pageColumnIds);
-        if (!Access::getAdministrator()) {
-            $adminPageColumnIds = GetPermissionByAdminUserId::init()
-                ->setAdminUserId(Access::getAdminUserId())
+        if (!$this->isAdministrator()) {
+            $adminPageColumnIds = AdminPageColumnIdsByAdminUserIdGet::init()
+                ->setAdminUserId($this->getLoginAdminUserId())
                 ->run()
                 ->getAdminPageColumnIds();
             $model->whereIn('id', array_intersect($pageColumnIds, (array) $adminPageColumnIds));
@@ -248,8 +245,8 @@ class AccessController extends AdminController
         $model = AdminPageOption::query()
             ->whereIn('id', $pageOptionIds);
         if (!Access::getAdministrator()) {
-            $adminPageOptionIds = GetPermissionByAdminUserId::init()
-                ->setAdminUserId(Access::getAdminUserId())
+            $adminPageOptionIds = AdminPageOptionIdsByAdminUserIdGet::init()
+                ->setAdminUserId($this->getLoginAdminUserId())
                 ->run()
                 ->getAdminPageOptionIds();
             $model->whereIn('id', array_intersect($pageOptionIds, $adminPageOptionIds));

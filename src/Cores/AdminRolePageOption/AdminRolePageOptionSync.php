@@ -1,7 +1,6 @@
 <?php
 namespace Qz\Admin\Permission\Cores\AdminRolePageOption;
 
-use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRolePageOption;
 
@@ -15,19 +14,10 @@ class AdminRolePageOptionSync extends Core
         if (is_null($this->getAdminPageOptionIds())) {
             return;
         }
-        $deleteIds = AdminRolePageOption::query()
-            ->select(['id'])
+        AdminRolePageOption::query()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->where('admin_role_id', '>', 0)
-            ->pluck('id')
-            ->toArray();
-        if (!empty($deleteIds)) {
-            foreach ($deleteIds as $deleteId) {
-                AdminRolePageOptionDelete::init()
-                    ->setId($deleteId)
-                    ->run();
-            }
-        }
+            ->whereNotIn('admin_page_option_id', $this->getAdminPageOptionIds())
+            ->delete();
         $ids = $this->getAdminPageOptionIds();
         if (!empty($ids)) {
             foreach ($ids as $id) {

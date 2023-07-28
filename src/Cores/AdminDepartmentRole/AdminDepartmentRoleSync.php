@@ -1,7 +1,6 @@
 <?php
 namespace Qz\Admin\Permission\Cores\AdminDepartmentRole;
 
-use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminDepartmentRole;
 
@@ -16,23 +15,23 @@ class AdminDepartmentRoleSync extends Core
             return;
         }
         // 删除多余数据
-        AdminDepartmentCategory::query()
+        AdminDepartmentRole::query()
             ->where('admin_department_id', $this->getAdminDepartmentId())
             ->whereNotIn('admin_role_id', $this->getAdminRoleIds())
             ->delete();
         // 恢复已删除数据
-        AdminDepartmentCategory::onlyTrashed()
+        AdminDepartmentRole::onlyTrashed()
             ->where('admin_department_id', $this->getAdminDepartmentId())
             ->whereIn('admin_role_id', $this->getAdminRoleIds())
             ->restore();
         // 添加新数据
-        $oldIds = AdminDepartmentCategory::query()
+        $oldIds = AdminDepartmentRole::query()
             ->where('admin_department_id', $this->getAdminDepartmentId())
             ->pluck('admin_role_id')
             ->toArray();
         $addIds = array_diff($this->getAdminRoleIds(), $oldIds);
         foreach ($addIds as $addId) {
-            AdminDepartmentCategory::query()->create([
+            AdminDepartmentRole::query()->create([
                 'admin_role_id' => $addId,
                 'admin_department_id' => $this->getAdminDepartmentId(),
             ]);

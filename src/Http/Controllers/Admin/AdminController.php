@@ -53,15 +53,13 @@ class AdminController extends Controller
     protected function getChildFilter()
     {
         $filter = [];
-        if ($this->getParam('filter')){
-            foreach ($this->getParam('filter') as $item){
+        if ($this->getParam('filter')) {
+            foreach ($this->getParam('filter') as $item) {
                 $field = Str::snake(Arr::get($item, 'field'));
                 if (strpos($field, '.') !== false) {
                     $firstField = Str::beforeLast($field, '.');
                     $otherField = Str::afterLast($field, '.');
                     $firstField = Str::camel($firstField);
-                    $option = Arr::get($item, 'option');
-                    $value = Arr::get($item, 'value');
                     $item['field'] = $otherField;
                     $filter[$firstField][] = $item;
                 }

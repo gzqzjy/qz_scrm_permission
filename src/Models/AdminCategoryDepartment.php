@@ -2,8 +2,6 @@
 
 namespace Qz\Admin\Permission\Models;
 
-use Qz\Admin\Permission\Scopes\CustomerIdScope;
-
 class AdminCategoryDepartment extends Model
 {
     protected $fillable = [
@@ -15,7 +13,7 @@ class AdminCategoryDepartment extends Model
     {
         return $this->belongsTo(AdminDepartment::class);
     }
-    
+
     public function category()
     {
         return $this->belongsTo(Category::class);

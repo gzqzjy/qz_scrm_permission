@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Cores\AdminDepartment;
-
 
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
@@ -11,22 +9,22 @@ class GetTreeDepartmentList extends Core
 {
     protected function execute()
     {
-        if (empty($this->getAdminDepartments())){
+        if (empty($this->getAdminDepartments())) {
             return;
         }
         $data = [];
         $existDepartmentIds = [];
         foreach ($this->getAdminDepartments() as $value) {
-            if ($item = $this->item($value,$this->getAdminDepartments(), $existDepartmentIds, Arr::get($value, 'id'))){
+            if ($item = $this->item($value, $this->getAdminDepartments(), $existDepartmentIds, Arr::get($value, 'id'))) {
                 $data[] = $item;
             }
         }
         $this->setTreeAdminDepartments($data);
     }
 
-    protected function item($value,$array, &$existDepartmentIds, $pid = 0)
+    protected function item($value, $array, &$existDepartmentIds, $pid = 0)
     {
-        if (in_array(Arr::get($value, 'id'), $existDepartmentIds)){
+        if (in_array(Arr::get($value, 'id'), $existDepartmentIds)) {
             return [];
         }
         $existDepartmentIds[] = Arr::get($value, 'id');
@@ -44,7 +42,6 @@ class GetTreeDepartmentList extends Core
         }
         $data['children'] = $children;
         return $data;
-
     }
 
     protected $adminDepartments;
@@ -86,5 +83,4 @@ class GetTreeDepartmentList extends Core
         $this->treeAdminDepartments = $treeAdminDepartments;
         return $this;
     }
-
 }

@@ -12,9 +12,10 @@ class AdminUserMenuAdd extends Core
     protected function execute()
     {
         $model = AdminUserMenu::withTrashed()
-            ->firstOrCreate(Arr::whereNotNull([
+            ->updateOrCreate(Arr::whereNotNull([
                 'admin_user_id' => $this->getAdminUserId(),
                 'admin_menu_id' => $this->getAdminMenuId(),
+            ]), Arr::whereNotNull([
                 'type' => $this->getType(),
             ]));
         if ($model->trashed()) {
@@ -117,5 +118,4 @@ class AdminUserMenuAdd extends Core
         $this->type = $type;
         return $this;
     }
-
 }

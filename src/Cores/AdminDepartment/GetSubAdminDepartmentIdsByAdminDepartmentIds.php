@@ -1,6 +1,6 @@
 <?php
 
-namespace Qz\Admin\Permission\Cores\AdminUser;
+namespace Qz\Admin\Permission\Cores\AdminDepartment;
 
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminDepartment;

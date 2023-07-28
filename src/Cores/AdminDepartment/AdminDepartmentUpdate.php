@@ -13,16 +13,19 @@ class AdminDepartmentUpdate extends Core
 {
     protected function execute()
     {
-        $model = AdminDepartment::withTrashed()
-            ->findOrFail($this->getId());
-        $model->fill(Arr::whereNotNull([
+        $update = Arr::whereNotNull([
             'name' => $this->getName(),
             'pid' => $this->getPid(),
             'level' => $this->getLevel(),
             'customer_id' => $this->getCustomerId(),
-        ]));
-        $model->save();
-        $this->setId($model->getKey());
+        ]);
+        if (!empty($update)) {
+            $model = AdminDepartment::withTrashed()
+                ->findOrFail($this->getId());
+            $model->fill($update);
+            $model->save();
+            $this->setId($model->getKey());
+        }
         AdminCategoryDepartmentSync::init()
             ->setCategoryIds($this->getCategoryIds())
             ->setAdminDepartmentId($this->getId())

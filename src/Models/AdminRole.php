@@ -46,4 +46,10 @@ class AdminRole extends Model
     {
         return $this->hasMany(AdminRolePageOption::class);
     }
+
+    public function adminRoleRequests()
+    {
+        return $this->hasMany(AdminRoleRequest::class);
+    }
+
 }

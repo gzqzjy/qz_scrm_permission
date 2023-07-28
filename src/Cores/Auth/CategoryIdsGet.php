@@ -2,11 +2,10 @@
 
 namespace Qz\Admin\Permission\Cores\Auth;
 
-use App\Cores\Core;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminCategoryDepartment;
-use Qz\Admin\Permission\Models\AdminDepartment;
 use Qz\Admin\Permission\Models\AdminUser;
 use Qz\Admin\Permission\Models\Category;
 

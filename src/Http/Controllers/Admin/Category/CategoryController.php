@@ -3,8 +3,6 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\Category;
 
 use Illuminate\Database\Eloquent\Builder;
-use Qz\Admin\Permission\Cores\AdminDepartment\GetInfoByAdminUserId;
-use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\Category;
 
@@ -17,7 +15,7 @@ class CategoryController extends AdminController
             $model->whereHas('adminCategoryDepartment', function (Builder $builder) {
                 $builder->whereHas('adminDepartment', function (Builder $builder) {
                     $builder->whereHas('adminUserDepartments', function (Builder $builder) {
-                        $builder->where('admin_user_id', $this->getAdminUserId());
+                        $builder->where('admin_user_id', $this->getLoginAdminUserId());
                     });
                 });
             });

@@ -2,9 +2,9 @@
 
 namespace Qz\Admin\Permission\Cores\AdminUserMenu;
 
+use Qz\Admin\Permission\Cores\AdminUser\AdminMenuIdsByAdminUserIdGet;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminUserMenu;
-use Illuminate\Support\Arr;
 
 class AdminUserMenuSync extends Core
 {
@@ -17,20 +17,28 @@ class AdminUserMenuSync extends Core
         if (is_null($adminMenuIds)) {
             return;
         }
-        $deletes = AdminUserMenu::query()
-            ->select('id')
+        AdminUserMenu::query()
             ->where('admin_user_id', $this->getAdminUserId())
             ->whereNotIn('admin_menu_id', $adminMenuIds)
-            ->get();
-        foreach ($deletes as $delete) {
-            AdminUserMenuDelete::init()
-                ->setId(Arr::get($delete, 'id'))
+            ->delete();
+        $oldAdminMenuIds = AdminMenuIdsByAdminUserIdGet::init()
+            ->setAdminUserId($this->getAdminUserId())
+            ->run()
+            ->getAdminMenuIds();
+        $addIds = array_diff($adminMenuIds, $oldAdminMenuIds);
+        foreach ($addIds as $addId) {
+            AdminUserMenuAdd::init()
+                ->setAdminMenuId($addId)
+                ->setAdminUserId($this->getAdminUserId())
+                ->setType(AdminUserMenu::TYPE_ADD)
                 ->run();
         }
-        foreach ($adminMenuIds as $adminMenuId) {
+        $deleteIds = array_diff($oldAdminMenuIds, $adminMenuIds);
+        foreach ($deleteIds as $deleteId) {
             AdminUserMenuAdd::init()
-                ->setAdminMenuId($adminMenuId)
+                ->setAdminMenuId($deleteId)
                 ->setAdminUserId($this->getAdminUserId())
+                ->setType(AdminUserMenu::TYPE_DELETE)
                 ->run();
         }
     }

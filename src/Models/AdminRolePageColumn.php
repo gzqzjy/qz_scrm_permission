@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Qz\Admin\Permission\Models;
-
 
 class AdminRolePageColumn extends Model
 {

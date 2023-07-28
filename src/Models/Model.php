@@ -14,7 +14,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $this->setTable($this->getConnection()->getDatabaseName() . '.' . $this->getTable());
         parent::__construct($attributes);
     }
-    
+
     public function serializeDate($date)
     {
         return $date->format('Y-m-d H:i:s');

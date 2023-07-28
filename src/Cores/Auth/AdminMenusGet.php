@@ -2,8 +2,8 @@
 
 namespace Qz\Admin\Permission\Cores\Auth;
 
-use App\Cores\Core;
 use Illuminate\Database\Eloquent\Builder;
+use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminMenu;
 
 class AdminMenusGet extends Core

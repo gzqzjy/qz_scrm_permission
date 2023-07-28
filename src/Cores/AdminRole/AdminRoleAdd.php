@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Qz\Admin\Permission\Cores\AdminRoleMenu\AdminRoleMenuSync;
 use Qz\Admin\Permission\Cores\AdminRolePageColumn\AdminRolePageColumnSync;
 use Qz\Admin\Permission\Cores\AdminRolePageOption\AdminRolePageOptionSync;
+use Qz\Admin\Permission\Cores\AdminRoleRequest\AdminRoleRequestSync;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminRole;
 
@@ -35,6 +36,10 @@ class AdminRoleAdd extends Core
         AdminRolePageOptionSync::init()
             ->setAdminRoleId($this->getId())
             ->setAdminPageOptionIds($this->getAdminPageOptionIds())
+            ->run();
+        AdminRoleRequestSync::init()
+            ->setAdminRoleId($this->getId())
+            ->setAdminRequests($this->getAdminRequests())
             ->run();
     }
 
@@ -190,6 +195,26 @@ class AdminRoleAdd extends Core
     public function setAdminPageColumnIds($adminPageColumnIds)
     {
         $this->adminPageColumnIds = $adminPageColumnIds;
+        return $this;
+    }
+    
+    protected $adminRequests;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminRequests()
+    {
+        return $this->adminRequests;
+    }
+
+    /**
+     * @param mixed $adminRequests
+     * @return AdminRoleAdd
+     */
+    public function setAdminRequests($adminRequests)
+    {
+        $this->adminRequests = $adminRequests;
         return $this;
     }
 }

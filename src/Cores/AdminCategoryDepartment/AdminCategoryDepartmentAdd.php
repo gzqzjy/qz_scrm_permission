@@ -19,7 +19,7 @@ class AdminCategoryDepartmentAdd extends Core
         }
         $this->setId($model->getKey());
     }
-    
+
     protected $id;
 
     /**
@@ -39,8 +39,6 @@ class AdminCategoryDepartmentAdd extends Core
         $this->id = $id;
         return $this;
     }
-    
-    
 
     protected $categoryId;
 
@@ -81,6 +79,4 @@ class AdminCategoryDepartmentAdd extends Core
         $this->adminDepartmentId = $adminDepartmentId;
         return $this;
     }
-
-
 }

@@ -12,9 +12,10 @@ class AdminUserPageColumnAdd extends Core
     protected function execute()
     {
         $model = AdminUserPageColumn::withTrashed()
-            ->firstOrCreate(Arr::whereNotNull([
+            ->updateOrCreate(Arr::whereNotNull([
                 'admin_user_id' => $this->getAdminUserId(),
                 'admin_page_column_id' => $this->getAdminPageColumnId(),
+            ]), Arr::whereNotNull([
                 'type' => $this->getType(),
             ]));
         if ($model->trashed()) {

@@ -9,12 +9,12 @@ class AdminPageColumn extends Model
         'name',
         'code',
     ];
-    
+
     public function adminPage()
     {
         return $this->belongsTo(AdminPage::class);
     }
-    
+
     public function adminUserPageColumns()
     {
         return $this->hasMany(AdminUserPageColumn::class);

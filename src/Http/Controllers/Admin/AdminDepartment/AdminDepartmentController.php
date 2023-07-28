@@ -3,30 +3,22 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminDepartment;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentAdd;
 use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentDelete;
 use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentUpdate;
+use Qz\Admin\Permission\Cores\AdminDepartment\GetSubAdminDepartmentIdsByAdminDepartmentIds;
 use Qz\Admin\Permission\Cores\AdminDepartment\GetTreeDepartmentList;
-use Qz\Admin\Permission\Cores\AdminUser\GetSubAdminDepartmentIdsByAdminDepartmentIds;
-use Qz\Admin\Permission\Cores\Common\Filter;
 use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
-use Qz\Admin\Permission\Models\AdminCategoryDepartment;
 use Qz\Admin\Permission\Models\AdminDepartment;
-use Qz\Admin\Permission\Models\AdminDepartmentRole;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminUser;
 use Qz\Admin\Permission\Models\AdminUserDepartment;
-use Qz\Admin\Permission\Models\Category;
 
 class AdminDepartmentController extends AdminController
 {
@@ -74,7 +66,7 @@ class AdminDepartmentController extends AdminController
         return $this->success($model->toArray());
     }
 
-    protected function format($model)
+    protected function format(Collection $model)
     {
         foreach ($model as $value) {
             if (!$value->adminUserDepartments->isEmpty() || !$value->children->isEmpty()) {
@@ -221,6 +213,10 @@ class AdminDepartmentController extends AdminController
         return $this->success(compact('id'));
     }
 
+    /**
+     * @return JsonResponse
+     * @throws MessageException
+     */
     public function destroy()
     {
         $id = $this->getParam('id');
@@ -248,11 +244,8 @@ class AdminDepartmentController extends AdminController
 
     public function all()
     {
-        $param = $this->getParam();
-        // $select = Arr::get($param, 'select', 'id as value, name as label');
         $model = AdminDepartment::query();
         $model = $this->filter($model);
-        $adminDepartmentIds = [];
         $data = [];
         $administrator = $this->isAdministrator();
         if (empty($administrator)) {
@@ -287,122 +280,5 @@ class AdminDepartmentController extends AdminController
             ->run()
             ->getTreeAdminDepartments();
         return $this->json($data);
-    }
-
-    public function allDepartment()
-    {
-        $param = $this->getParam();
-        $model = AdminDepartment::query();
-        $model = $this->filter($model);
-        $adminDepartmentIds = [];
-        $administrator = $this->isAdministrator();
-        $adminDepartmentRoleModel = AdminDepartmentRole::query();
-        $adminDepartmentUserModel = AdminUserDepartment::query();
-        $adminCategoryDepartmentModel = AdminCategoryDepartment::query();
-
-        if (empty($administrator)) {
-            $adminDepartmentIds = AdminUserDepartment::query()
-                ->where('admin_user_id', Access::getAdminUserId())
-                ->where('administrator', 1)
-                ->pluck('admin_department_id')
-                ->toArray();
-            if (empty($adminDepartmentIds)) {
-                return $this->success([]);
-            }
-            $model->whereIn('id', $adminDepartmentIds);
-            $adminDepartmentRoleModel->whereIn('admin_department_id', $adminDepartmentIds);
-            $adminDepartmentUserModel->whereIn('admin_department_id', $adminDepartmentIds);
-            $adminCategoryDepartmentModel->whereIn('admin_department_id', $adminDepartmentIds);
-        } else {
-            $model->where('pid', 0);
-        }
-
-        $adminDepartmentRoles = $adminDepartmentRoleModel->get()
-            ->groupBy('admin_department_id')
-            ->toArray();
-
-        $adminDepartmentRoleIds = $adminDepartmentRoleModel
-            ->groupBy('admin_role_id')
-            ->pluck('admin_role_id')
-            ->toArray();
-
-        $adminCategoryDepartments = $adminCategoryDepartmentModel->get()
-            ->groupBy('admin_department_id')
-            ->toArray();
-
-        $adminCategoryDepartmentIds = $adminCategoryDepartmentModel
-            ->groupBy('category_id')
-            ->pluck('category_id')
-            ->toArray();
-
-        $adminUsers = $adminDepartmentUserModel->get()
-            ->groupBy('admin_department_id')
-            ->toArray();
-
-        $adminUserIds = $adminDepartmentUserModel
-            ->pluck('admin_user_id', 'admin_user_id')
-            ->toArray();
-
-        $adminRoles = AdminRole::query()
-            ->whereIn('id', $adminDepartmentRoleIds)
-            ->pluck('name', 'id')
-            ->toArray();
-
-        $adminCategories = Category::query()
-            ->whereIn('id', $adminCategoryDepartmentIds)
-            ->pluck('name', 'id')
-            ->toArray();
-        $adminUsers = AdminUser::query()
-            ->whereIn('id', array_values($adminUserIds))
-            ->get()
-            ->groupBy('id')
-            ->toArray();
-        $model = $model
-            ->get();
-        $model->load([
-            'children'
-        ]);
-        $model = $model->toArray();
-        $data = [];
-        $existDepartmentIds = [];
-        foreach ($model as $value) {
-            if ($item = $this->allDepartmentItem($value, $adminDepartmentIds, $adminRoles, $adminDepartmentRoles, $adminUsers, $adminUserIds, $adminCategoryDepartments, $adminCategoryDepartmentIds, $existDepartmentIds)) {
-                $data[] = $item;
-            }
-        }
-        return $this->json($data);
-    }
-
-    protected function allDepartmentItem($value, $adminDepartmentIds, $adminRoles, $adminDepartmentRoles, $adminUsers, $adminUserIds, $adminCategoryDepartments, $adminCategoryDepartmentIds, &$existDepartmentIds)
-    {
-        if (empty($this->isAdministrator()) && (!in_array(Arr::get($value, 'id'), $adminDepartmentIds) || in_array(Arr::get($value, 'id'), $existDepartmentIds))) {
-            return [];
-        }
-        $existDepartmentIds[] = Arr::get($value, 'id');
-        $data = Arr::except($value, 'children');
-        //部门角色
-        $data['admin_role_ids'] = Arr::get($adminDepartmentRoles, Arr::get($value, 'id')) ? Arr::pluck(Arr::get($adminDepartmentRoles, Arr::get($value, 'id')), 'id') : [];
-        //部门品类
-        $data['category_ids'] = Arr::get($adminCategoryDepartments, Arr::get($value, 'id')) ? Arr::pluck(Arr::get($adminCategoryDepartments, Arr::get($value, 'id')), 'id') : [];
-        //部门员工
-        $adminUser = Arr::get($adminUsers, Arr::get($value, 'id')) ? Arr::pluck(Arr::get($adminUsers, Arr::get($value, 'id')), 'id') : [];
-
-        $data['adminDepartmentRolesCount'] = count($data['admin_role_ids']);
-        $data['adminCategoryDepartmentsCount'] = count($data['category_ids']);
-        $data['adminUserDepartmentsCount'] = count($adminUser);
-
-        if (Arr::get($value, 'children')) {
-            $routes = [];
-            $children = Arr::get($value, 'children');
-            foreach ($children as $child) {
-                if ($item = $this->allDepartmentItem($value, $adminDepartmentIds, $adminRoles, $adminDepartmentRoles, $adminUsers, $adminUserIds, $adminCategoryDepartments, $adminCategoryDepartmentIds, $existDepartmentIds)) {
-                    $routes[] = $item;
-                }
-            }
-            if (!empty($routes)) {
-                Arr::set($data, 'children', $routes);
-            }
-        }
-        return $data;
     }
 }

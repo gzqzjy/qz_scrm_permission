@@ -2,36 +2,55 @@
 
 namespace Qz\Admin\Permission\Cores\AdminUser;
 
+use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
-use Qz\Admin\Permission\Models\AdminMenu;
-use Qz\Admin\Permission\Models\AdminUserDepartment;
-use Qz\Admin\Permission\Models\AdminUserRole;
+use Qz\Admin\Permission\Models\AdminUser;
+use Qz\Admin\Permission\Models\AdminUserMenu;
 
 class AdminMenuIdsByAdminUserIdGet extends Core
 {
     protected function execute()
     {
-        $model = AdminUserRole::query()
-            ->where('admin_user_id', $this->getAdminUserId())
-            ->get();
+        if (empty($this->getAdminUserId())) {
+            return;
+        }
+        $model = AdminUser::query()
+            ->select(['id'])
+            ->find($this->getAdminUserId());
+        if (empty($model)) {
+            return;
+        }
         $model->load([
-            'adminRole',
-            'adminRole.adminRoleMenus'
+            'adminUserRoles',
+            'adminUserRoles.adminRole',
+            'adminUserRoles.adminRole.adminRoleMenus',
+            'adminUserMenus',
         ]);
-        foreach ($model as $value) {
-            $adminRole = $value->adminRole;
+        $adminUserRoles = Arr::get($model, 'adminUserRoles');
+        foreach ($adminUserRoles as $adminUserRole) {
+            $adminRole = Arr::get($adminUserRole, 'adminRole');
             if (empty($adminRole)) {
                 continue;
             }
-            $adminRoleMenus = $adminRole->adminRoleMenus;
+            $adminRoleMenus = Arr::get($adminRole, 'adminRoleMenus');
             foreach ($adminRoleMenus as $adminRoleMenu) {
-                $this->adminMenuIds[] = $adminRoleMenu->admin_menu_id;
+                $this->adminMenuIds[] = Arr::get($adminRoleMenu, 'admin_menu_id');
             }
         }
-        $this->setAdminMenuIds(array_unique((array) $this->adminMenuIds));
+        $adminUserMenus = Arr::get($model, 'adminUserMenus');
+        foreach ($adminUserMenus as $adminUserMenu) {
+            if (Arr::get($adminUserMenu, 'type') != AdminUserMenu::TYPE_DELETE) {
+                $this->adminMenuIds[] = Arr::get($adminUserMenu, 'admin_menu_id');
+            } else {
+                $this->adminMenuIds = Arr::where($this->adminMenuIds, function ($adminMenuId) use ($adminUserMenu) {
+                    return $adminMenuId != Arr::get($adminUserMenu, 'admin_menu_id');
+                });
+            }
+        }
+        $this->adminMenuIds = array_unique(array_values($this->adminMenuIds));
     }
 
-    protected $adminMenuIds;
+    protected $adminMenuIds = [];
 
     /**
      * @return mixed
@@ -43,7 +62,7 @@ class AdminMenuIdsByAdminUserIdGet extends Core
 
     /**
      * @param mixed $adminMenuIds
-     * @return AdminMenuIdsByAdminUserIdGet
+     * @return $this
      */
     public function setAdminMenuIds($adminMenuIds)
     {

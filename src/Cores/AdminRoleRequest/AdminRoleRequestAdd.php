@@ -15,7 +15,7 @@ class AdminRoleRequestAdd extends Core
                 'admin_role_id' => $this->getAdminRoleId(),
                 'admin_request_id' => $this->getAdminRequestId()
             ]), Arr::whereNotNull([
-                'type' => $this->getType()
+                'type' => $this->getType(),
             ]));
 
         if ($model->trashed()) {
@@ -118,8 +118,4 @@ class AdminRoleRequestAdd extends Core
         $this->type = $type;
         return $this;
     }
-
-
-
-
 }
