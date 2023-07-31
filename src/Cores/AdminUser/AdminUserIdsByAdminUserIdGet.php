@@ -96,6 +96,7 @@ class AdminUserIdsByAdminUserIdGet extends Core
                     ->run()
                     ->getIds();
                 $ids = AdminUserDepartment::query()
+                    ->where('admin_user_id', '!=', $this->getAdminUserId())
                     ->whereIn('admin_department_id', $adminDepartmentIds)
                     ->pluck('admin_user_id')
                     ->toArray();
@@ -106,6 +107,7 @@ class AdminUserIdsByAdminUserIdGet extends Core
                     ->run()
                     ->getIds();
                 $ids = AdminUserDepartment::query()
+                    ->where('admin_user_id', '!=', $this->getAdminUserId())
                     ->whereHas('adminDepartment', function (Builder $builder) use ($adminDepartmentIds) {
                         $builder->whereIn('pid', $adminDepartmentIds);
                     })
@@ -120,12 +122,13 @@ class AdminUserIdsByAdminUserIdGet extends Core
                 $adminDepartments = AdminDepartment::query()
                     ->select(['id', 'pid'])
                     ->with('children')
-                    ->whereIn('id', $adminDepartmentIds)
+                    ->whereIn('pid', $adminDepartmentIds)
                     ->get();
                 $adminDepartmentIds = [];
                 $adminDepartmentIds = $this->getAllAdminDepartmentIds($adminDepartments, $adminDepartmentIds);
                 $ids = AdminUserDepartment::query()
                     ->whereIn('admin_department_id', $adminDepartmentIds)
+                    ->where('admin_user_id', '!=', $this->getAdminUserId())
                     ->pluck('admin_user_id')
                     ->toArray();
                 $this->ids = array_unique(array_merge($this->ids, $ids));
