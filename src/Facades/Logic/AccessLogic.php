@@ -82,23 +82,23 @@ class AccessLogic
         return $this;
     }
 
-    protected $adminPageRequestId;
+    protected $adminPageId;
 
     /**
      * @return mixed
      */
-    public function getAdminPageRequestId()
+    public function getAdminPageId()
     {
-        return $this->adminPageRequestId;
+        return $this->adminPageId;
     }
 
     /**
-     * @param mixed $adminPageRequestId
+     * @param mixed $adminPageId
      * @return AccessLogic
      */
-    public function setAdminPageRequestId($adminPageRequestId)
+    public function setAdminPageId($adminPageId)
     {
-        $this->adminPageRequestId = $adminPageRequestId;
+        $this->adminPageId = $adminPageId;
         return $this;
     }
 

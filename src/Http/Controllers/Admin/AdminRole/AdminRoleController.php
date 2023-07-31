@@ -36,9 +36,9 @@ class AdminRoleController extends AdminController
         ]);
         foreach ($model as $value) {
             $value->deleteDisabled = false;
-            if (Arr::get($value, 'adminDepartmentRolesCount')) {
+            if (Arr::get($value, 'admin_department_roles_count')) {
                 $value->deleteDisabled = true;
-            } elseif (Arr::get($value, 'adminUserRolesCount')) {
+            } elseif (Arr::get($value, 'admin_user_roles_count')) {
                 $value->deleteDisabled = true;
             }
         }

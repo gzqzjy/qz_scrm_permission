@@ -71,16 +71,14 @@ class Controller extends BaseController
         if ($data instanceof Collection) {
             $data = $data->toArray();
         }
-        $requestId = (string) RequestId::get();
         $success = true;
-        return $this->json(compact('success', 'data', 'message', 'requestId'));
+        return $this->json(compact('success', 'data', 'message'));
     }
 
     final protected function error($message = 'error', $data = [])
     {
-        $requestId = (string) RequestId::get();
         $success = false;
-        return $this->json(compact('success', 'data', 'message', 'requestId'));
+        return $this->json(compact('success', 'data', 'message'));
     }
 
     final protected function camel($array)

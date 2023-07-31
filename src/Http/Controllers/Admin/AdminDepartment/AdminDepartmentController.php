@@ -4,6 +4,7 @@ namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminDepartment;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentAdd;
 use Qz\Admin\Permission\Cores\AdminDepartment\AdminDepartmentDelete;
@@ -45,7 +46,9 @@ class AdminDepartmentController extends AdminController
             ->get();
         $model->load([
             'children',
-            'adminUserDepartments',
+            'adminUserDepartments' => function (HasMany $hasMany) {
+                $hasMany->where('admin_user_id', '!=', $this->getLoginAdminUserId());
+            },
             'adminUserDepartments.adminUser',
             'adminUserDepartments.adminUser.adminUserRoles',
             'adminUserDepartments.adminUser.adminUserRoles.adminRole',

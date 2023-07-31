@@ -35,7 +35,7 @@ class AccessMiddleware
             ->setCode(Arr::get($param, 'optionCode'))
             ->run()
             ->getId();
-        if (empty($pageOptionId) && Arr::get($param, 'optionCode') && Arr::get($param, 'optionName')) {
+        if (empty($adminPageOptionId) && Arr::get($param, 'optionCode') && Arr::get($param, 'optionName')) {
             $adminPageOptionId = AdminPageOptionAdd::init()
                 ->setAdminPageId($adminPageId)
                 ->setCode(Arr::get($param, 'optionCode'))

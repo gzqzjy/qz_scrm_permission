@@ -13,7 +13,6 @@ use Qz\Admin\Permission\Cores\AdminPageOption\AdminPageOptionDelete;
 use Qz\Admin\Permission\Cores\AdminUser\AdminMenuIdsByAdminUserIdGet;
 use Qz\Admin\Permission\Cores\AdminUser\AdminPageColumnIdsByAdminUserIdGet;
 use Qz\Admin\Permission\Cores\AdminUser\AdminPageOptionIdsByAdminUserIdGet;
-use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminMenu;
 use Qz\Admin\Permission\Models\AdminPage;
@@ -175,13 +174,13 @@ class AccessController extends AdminController
         if (empty($pageOptionId)) {
             return $this->json($access);
         }
-        if (Access::getAdministrator()) {
+        if ($this->isAdministrator()) {
             $access = true;
             return $this->json($access);
         }
         $access = AdminUserPageOption::query()
             ->whereHas('adminUser', function (Builder $builder) {
-                $builder->where('admin_user_id', Auth::guard('admin')->id());
+                $builder->where('admin_user_id',$this->getLoginAdminUserId());
             })
             ->where('admin_page_option_id', $pageOptionId)
             ->exists();
@@ -240,7 +239,7 @@ class AccessController extends AdminController
         }
         $model = AdminPageOption::query()
             ->whereIn('id', $pageOptionIds);
-        if (!Access::getAdministrator()) {
+        if (!$this->isAdministrator()) {
             $adminPageOptionIds = AdminPageOptionIdsByAdminUserIdGet::init()
                 ->setAdminUserId($this->getLoginAdminUserId())
                 ->run()

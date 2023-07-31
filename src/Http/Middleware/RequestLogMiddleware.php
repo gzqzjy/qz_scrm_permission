@@ -22,16 +22,14 @@ class RequestLogMiddleware
         $requestId = now()->format('YmdHis') . Str::random(18);
         RequestId::set($requestId);
         $this->setRequestTime(now());
-        return $next($request);
-    }
-
-    public function terminate(Request $request, $response): void
-    {
+        $response = $next($request);
+        $response->header('requestId', RequestId::get());
         try {
             $this->setResponseTime(now());
             Log::info('请求日志', [
                 'requestId' => RequestId::get(),
                 'ip' => $request->ip(),
+                'path' => $request->path(),
                 '请求时间' => $this->getRequestTime(),
                 '响应时间' => $this->getResponseTime(),
                 '耗时(s)' => !empty($this->getResponseTime()) && !empty($this->getRequestTime()) ? $this->getResponseTime()->diffInSeconds($this->getRequestTime()) : 0,
@@ -44,6 +42,7 @@ class RequestLogMiddleware
                 $exception->getMessage(),
             ]);
         }
+        return $response;
     }
 
     protected $requestTime;
