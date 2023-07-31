@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminDepartment;
+use Qz\Admin\Permission\Models\AdminRoleRequest;
 use Qz\Admin\Permission\Models\AdminUser;
 use Qz\Admin\Permission\Models\AdminUserDepartment;
 use Qz\Admin\Permission\Models\AdminUserRequest;
@@ -36,50 +37,54 @@ class AdminUserIdsByAdminUserIdGet extends Core
             }
             return;
         }
-        // 获取用户接口权限
-        $adminUser->load([
-            'adminUserRoles',
-            'adminUserRoles.adminRole',
-            'adminUserRoles.adminRole.adminRoleRequests' => function (HasMany $hasMany) {
-                if ($this->getAdminRequestId()) {
-                    $hasMany->where('admin_request_id', $this->getAdminRequestId());
-                }
-                return $hasMany;
-            },
-            'adminUserRequests' => function (HasMany $hasMany) {
-                if ($this->getAdminRequestId()) {
-                    $hasMany->where('admin_request_id', $this->getAdminRequestId());
-                }
-                return $hasMany;
-            },
-        ]);
-        $adminUserRoles = Arr::get($adminUser, 'adminUserRoles');
-        foreach ($adminUserRoles as $adminUserRole) {
-            $adminRole = Arr::get($adminUserRole, 'adminRole');
-            if (empty($adminRole)) {
-                continue;
-            }
-            $adminRoleRequests = Arr::get($adminRole, 'adminRoleRequests');
-            foreach ($adminRoleRequests as $adminRoleRequest) {
-                if (Arr::get($adminRoleRequest, 'admin_request_id') != $this->getAdminRequestId()) {
-                    continue;
-                }
-                $types = Arr::get($adminRoleRequest, 'types');
-                $this->types = array_unique(array_merge($this->types, $types));
-            }
-        }
-        $adminUserRequests = Arr::get($adminUserRoles, 'adminUserRequests');
-        foreach ($adminUserRequests as $adminUserRequest) {
-            if (Arr::get($adminUserRequest, 'admin_request_id') != $this->getAdminRequestId()) {
-                continue;
-            }
-            $types = Arr::get($adminUserRequest, 'types');
-            $this->types = array_unique(array_merge($this->types, $types));
-        }
-        if (empty($this->getTypes())) {
+        $adminUserRequest = AdminUserRequest::query()
+            ->select(['type'])
+            ->where('admin_user_id', $this->getAdminUserId())
+            ->where('admin_request_id', $this->getAdminRequestId())
+            ->first();
+        if ($adminUserRequest) {
+            $this->getIdsByTypes(Arr::get($adminUserRequest, 'types'));
             return;
         }
-        $types = $this->getTypes();
+        $adminRoleRequests = AdminRoleRequest::query()
+            ->select(['type'])
+            ->where('admin_request_id', $this->getAdminRequestId())
+            ->whereHas('adminRole', function (Builder $builder) {
+                $builder->whereHas('adminUserRoles', function (Builder $builder) {
+                    $builder->where('admin_user_id', $this->getAdminUserId());
+                });
+            })->get();
+        if (!empty($adminRoleRequests) && count($adminRoleRequests)) {
+            $types = [];
+            foreach ($adminRoleRequests as $adminRoleRequest) {
+                $types = array_merge($types, Arr::get($adminUserRequest, 'types'));
+            }
+            $this->getIdsByTypes(Arr::get($adminUserRequest, 'types'));
+            return;
+        }
+        $adminUserRequest = AdminUserRequest::query()
+            ->select(['type'])
+            ->where('admin_user_id', $this->getAdminUserId())
+            ->where('admin_request_id', 0)
+            ->first();
+        if ($adminUserRequest) {
+            $this->getIdsByTypes(Arr::get($adminUserRequest, 'types'));
+            return;
+        }
+        $adminUserRequest = AdminUserRequest::query()
+            ->select(['type'])
+            ->where('admin_user_id', 0)
+            ->where('admin_request_id', 0)
+            ->first();
+        if ($adminUserRequest) {
+            $this->getIdsByTypes(Arr::get($adminUserRequest, 'types'));
+            return;
+        }
+    }
+
+    protected function getIdsByTypes($types = [])
+    {
+        $types = array_unique($types);
         foreach ($types as $type) {
             if ($type == AdminUserRequest::SELF) {
                 $this->ids[] = $this->getAdminUserId();
@@ -126,7 +131,6 @@ class AdminUserIdsByAdminUserIdGet extends Core
                 $this->ids = array_unique(array_merge($this->ids, $ids));
             }
         }
-        $this->ids = array_unique($this->ids);
     }
 
     protected function getAllAdminDepartmentIds($items, $ids = [])
