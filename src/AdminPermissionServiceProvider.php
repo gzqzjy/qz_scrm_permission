@@ -70,6 +70,7 @@ class AdminPermissionServiceProvider extends ServiceProvider
             ->middleware([
                 'auth:admin',
                 'access',
+                'request:log',
             ])
             ->namespace('Qz\Admin\Permission\Http\Controllers\Admin')
             ->group(function () {
