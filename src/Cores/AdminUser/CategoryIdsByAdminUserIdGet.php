@@ -1,6 +1,6 @@
 <?php
 
-namespace Qz\Admin\Permission\Cores\Auth;
+namespace Qz\Admin\Permission\Cores\AdminUser;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -9,7 +9,7 @@ use Qz\Admin\Permission\Models\AdminCategoryDepartment;
 use Qz\Admin\Permission\Models\AdminUser;
 use Qz\Admin\Permission\Models\Category;
 
-class CategoryIdsGet extends Core
+class CategoryIdsByAdminUserIdGet extends Core
 {
     protected function execute()
     {
@@ -44,6 +44,7 @@ class CategoryIdsGet extends Core
         if (!empty($ids)) {
             $this->ids = array_merge($this->ids, $ids);
         }
+        $this->ids = array_unique($this->ids);
     }
 
     protected $adminUserId;
@@ -58,7 +59,7 @@ class CategoryIdsGet extends Core
 
     /**
      * @param mixed $adminUserId
-     * @return CategoryIdsGet
+     * @return $this
      */
     public function setAdminUserId($adminUserId)
     {
@@ -78,7 +79,7 @@ class CategoryIdsGet extends Core
 
     /**
      * @param array $ids
-     * @return CategoryIdsGet
+     * @return $this
      */
     public function setIds($ids)
     {

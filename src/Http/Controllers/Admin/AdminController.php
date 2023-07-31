@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Qz\Admin\Permission\Cores\Auth\CategoryIdsGet;
+use Qz\Admin\Permission\Cores\AdminUser\AdminUserIdsByAdminUserIdGet;
+use Qz\Admin\Permission\Cores\AdminUser\CategoryIdsByAdminUserIdGet;
 use Qz\Admin\Permission\Cores\Common\Filter;
 use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Controller;
@@ -85,8 +86,22 @@ class AdminController extends Controller
 
     protected function getLoginCategoryIdes()
     {
-        return (array) CategoryIdsGet::init()
+        return (array) CategoryIdsByAdminUserIdGet::init()
             ->setAdminUserId($this->getLoginAdminUserId())
+            ->run()
+            ->getIds();
+    }
+
+    protected function getAdminRequestId()
+    {
+        return Access::getAdminRequestId();
+    }
+
+    protected function getAccessAdminUserIds()
+    {
+        return  AdminUserIdsByAdminUserIdGet::init()
+            ->setAdminUserId($this->getLoginAdminUserId())
+            ->setAdminRequestId($this->getAdminRequestId())
             ->run()
             ->getIds();
     }

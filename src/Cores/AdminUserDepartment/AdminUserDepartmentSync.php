@@ -16,15 +16,10 @@ class AdminUserDepartmentSync extends Core
         if (is_null($this->getAdminUserDepartments())) {
             return;
         }
-        $adminUserDepartments = AdminUserDepartment::query()
-            ->select(['id'])
+        AdminUserDepartment::query()
             ->where('admin_user_id', $this->getAdminUserId())
-            ->get();
-        foreach ($adminUserDepartments as $adminUserDepartment) {
-            AdminUserDepartmentDelete::init()
-                ->setId(Arr::get($adminUserDepartment, 'id'))
-                ->run();
-        }
+            ->whereNotIn('admin_department_id', $this->getAdminUserDepartments())
+            ->delete();
         $adminUserDepartments = $this->getAdminUserDepartments();
         if (!empty($adminUserDepartments)) {
             foreach ($adminUserDepartments as $adminUserDepartment) {

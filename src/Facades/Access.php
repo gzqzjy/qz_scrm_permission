@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static int getCustomerId()
  * @method static void setAdministrator($administrator)
  * @method static boolean getAdministrator()
+ * @method static void setAdminPageOptionId($id)
+ * @method static int getAdminPageOptionId()
+ * @method static void setAdminPageId($id)
+ * @method static int getAdminPageId()
+ * @method static void setAdminRequestId($id)
+ * @method static int getAdminRequestId()
  */
 class Access extends Facade
 {

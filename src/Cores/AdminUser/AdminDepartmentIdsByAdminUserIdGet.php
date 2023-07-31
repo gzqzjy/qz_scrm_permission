@@ -1,13 +1,14 @@
 <?php
 
-namespace Qz\Admin\Permission\Cores\Auth;
+namespace Qz\Admin\Permission\Cores\AdminUser;
 
+use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
-use Qz\Admin\Permission\Models\AdminRole;
+use Qz\Admin\Permission\Models\AdminDepartment;
 use Qz\Admin\Permission\Models\AdminUser;
-use Qz\Admin\Permission\Models\AdminUserRole;
+use Qz\Admin\Permission\Models\AdminUserDepartment;
 
-class AdminRoleIdsGet extends Core
+class AdminDepartmentIdsByAdminUserIdGet extends Core
 {
     protected function execute()
     {
@@ -22,7 +23,7 @@ class AdminRoleIdsGet extends Core
         }
         $adminUser->load('administrator');
         if (Arr::get($adminUser, 'administrator.id')) {
-            $ids = AdminRole::query()
+            $ids = AdminDepartment::query()
                 ->where('customer_id', Arr::get($adminUser, 'customer_id'))
                 ->pluck('id')
                 ->toArray();
@@ -31,13 +32,14 @@ class AdminRoleIdsGet extends Core
             }
             return;
         }
-        $ids = AdminUserRole::query()
+        $ids = AdminUserDepartment::query()
             ->where('admin_user_id', $this->getAdminUserId())
-            ->pluck('admin_role_id')
+            ->pluck('admin_department_id')
             ->toArray();
         if (!empty($ids)) {
             $this->ids = array_merge($this->ids, $ids);
         }
+        $this->ids = array_unique($this->ids);
     }
 
     protected $adminUserId;
@@ -52,7 +54,7 @@ class AdminRoleIdsGet extends Core
 
     /**
      * @param mixed $adminUserId
-     * @return AdminRoleIdsGet
+     * @return $this
      */
     public function setAdminUserId($adminUserId)
     {
@@ -72,7 +74,7 @@ class AdminRoleIdsGet extends Core
 
     /**
      * @param array $ids
-     * @return AdminRoleIdsGet
+     * @return $this
      */
     public function setIds($ids)
     {

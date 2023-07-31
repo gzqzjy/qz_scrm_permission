@@ -11,7 +11,6 @@ use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupAdd;
 use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupDelete;
 use Qz\Admin\Permission\Cores\AdminRoleGroup\AdminRoleGroupUpdate;
 use Qz\Admin\Permission\Cores\Common\Filter;
-use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminRole;
 use Qz\Admin\Permission\Models\AdminRoleGroup;
@@ -65,7 +64,6 @@ class AdminRoleGroupController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function store()
     {
@@ -81,7 +79,7 @@ class AdminRoleGroupController extends AdminController
             'admin_role_group_name.unique' => '角色组名称不能重复',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $this->addParam('customer_id', $this->getCustomerId());
         $this->addParam('name', $this->getParam('admin_role_group_name'));
@@ -94,7 +92,6 @@ class AdminRoleGroupController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function update()
     {
@@ -109,7 +106,7 @@ class AdminRoleGroupController extends AdminController
             'admin_role_group_name.unique' => '角色组名称不能重复',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $this->addParam('name', $this->getParam('admin_role_group_name'));
         $id = AdminRoleGroupUpdate::init()
@@ -122,7 +119,6 @@ class AdminRoleGroupController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function destroy()
     {
@@ -134,7 +130,7 @@ class AdminRoleGroupController extends AdminController
             'id.required' => '请选择要删除的角色组',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $id = $this->getParam('id');
         $id = is_array($id) ? $id : [$id];
@@ -142,7 +138,7 @@ class AdminRoleGroupController extends AdminController
             ->whereIn('admin_role_group_id', $id)
             ->exists();
         if ($isExist) {
-            throw new MessageException("角色组下有角色，不可删除！");
+            return $this->error("角色组下有角色，不可删除！");
         }
         foreach ($id as $value) {
             AdminRoleGroupDelete::init()

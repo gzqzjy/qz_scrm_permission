@@ -12,7 +12,6 @@ use Qz\Admin\Permission\Cores\AdminRole\AdminRoleAdd;
 use Qz\Admin\Permission\Cores\AdminRole\AdminRoleDelete;
 use Qz\Admin\Permission\Cores\AdminRole\AdminRoleUpdate;
 use Qz\Admin\Permission\Cores\Common\Filter;
-use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminDepartmentRole;
 use Qz\Admin\Permission\Models\AdminRole;
@@ -35,12 +34,19 @@ class AdminRoleController extends AdminController
             'adminDepartmentRoles',
             'adminUserRoles'
         ]);
+        foreach ($model as $value) {
+            $value->deleteDisabled = false;
+            if (Arr::get($value, 'adminDepartmentRolesCount')) {
+                $value->deleteDisabled = true;
+            } elseif (Arr::get($value, 'adminUserRolesCount')) {
+                $value->deleteDisabled = true;
+            }
+        }
         return $this->success($model->toArray());
     }
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function store()
     {
@@ -64,7 +70,7 @@ class AdminRoleController extends AdminController
             'admin_role_group_id.exists' => '角色组不存在',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $id = AdminRoleAdd::init()
             ->setCustomerId($this->getCustomerId())
@@ -80,7 +86,6 @@ class AdminRoleController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function update()
     {
@@ -113,7 +118,7 @@ class AdminRoleController extends AdminController
             'admin_role_group_id.exists' => '角色组不存在',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $id = AdminRoleUpdate::init()
             ->setId($this->getParam('id'))
@@ -129,7 +134,6 @@ class AdminRoleController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function destroy()
     {
@@ -141,7 +145,7 @@ class AdminRoleController extends AdminController
             'id.required' => '请选择要删除的角色',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $id = $this->getParam('id');
         $id = is_array($id) ? $id : [$id];
@@ -149,13 +153,13 @@ class AdminRoleController extends AdminController
             ->whereIn('admin_role_id', $id)
             ->exists();
         if ($isExist) {
-            throw new MessageException("角色下有员工，不可删除！");
+            return $this->error("角色下有员工，不可删除！");
         }
         $isExist = AdminDepartmentRole::query()
             ->whereIn('admin_role_id', $id)
             ->exists();
         if ($isExist) {
-            throw new MessageException("角色下有部门，不可删除！");
+            return $this->error("角色下有部门，不可删除！");
         }
         foreach ($id as $value) {
             AdminRoleDelete::init()

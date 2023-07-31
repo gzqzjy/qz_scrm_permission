@@ -18,14 +18,20 @@ class AdminRoleMenuSync extends Core
             ->where('admin_role_id', $this->getAdminRoleId())
             ->whereNotIn('admin_menu_id', $this->getAdminMenuIds())
             ->delete();
-        $ids = $this->getAdminMenuIds();
-        if (!empty($ids)) {
-            foreach ($ids as $id) {
-                AdminRoleMenuAdd::init()
-                    ->setAdminRoleId($this->getAdminRoleId())
-                    ->setAdminMenuId($id)
-                    ->run();
-            }
+        AdminRoleMenu::onlyTrashed()
+            ->where('admin_role_id', $this->getAdminRoleId())
+            ->whereIn('admin_menu_id', $this->getAdminMenuIds())
+            ->restore();
+        $oldIds = AdminRoleMenu::query()
+            ->where('admin_role_id', $this->getAdminRoleId())
+            ->pluck('admin_menu_id')
+            ->toArray();
+        $addIds = array_diff($this->getAdminMenuIds(), $oldIds);
+        foreach ($addIds as $addId) {
+            AdminRoleMenu::query()->create([
+                'admin_role_id' => $this->getAdminRoleId(),
+                'admin_menu_id' => $addId,
+            ]);
         }
     }
 

@@ -10,6 +10,9 @@ class AdminRequestAdd extends Core
 {
     protected function execute()
     {
+        if (empty($this->getAdminPageOptionId()) || empty($this->getCode())) {
+            return;
+        }
         $model = AdminRequest::withTrashed()
             ->updateOrCreate(Arr::whereNotNull([
                 'admin_page_option_id' => $this->getAdminPageOptionId(),

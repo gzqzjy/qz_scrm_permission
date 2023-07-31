@@ -11,8 +11,6 @@ use Qz\Admin\Permission\Cores\AdminUser\AdminRequestsByAdminUserIdGet;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserAdd;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserDelete;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserUpdate;
-use Qz\Admin\Permission\Exceptions\MessageException;
-use Qz\Admin\Permission\Facades\Access;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminUser;
 use Illuminate\Http\JsonResponse;
@@ -57,11 +55,10 @@ class AdminUserController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function store()
     {
-        $this->addParam('customer_id', Access::getCustomerId());
+        $this->addParam('customer_id', $this->getCustomerId());
         $validator = Validator::make($this->getParam(), [
             'mobile' => [
                 Rule::unique(AdminUser::class)
@@ -71,7 +68,7 @@ class AdminUserController extends AdminController
             'mobile.unique' => '员工手机号不能重复',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $id = AdminUserAdd::init()
             ->setParam($this->getParam())
@@ -86,7 +83,6 @@ class AdminUserController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function update()
     {
@@ -107,7 +103,7 @@ class AdminUserController extends AdminController
             'mobile.unique' => '员工手机号不能重复',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $id = AdminUserUpdate::init()
             ->setId($this->getParam('id'))

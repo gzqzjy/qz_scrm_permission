@@ -4,6 +4,7 @@ namespace Qz\Admin\Permission\Cores\AdminUser;
 
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
+use Qz\Admin\Permission\Models\AdminMenu;
 use Qz\Admin\Permission\Models\AdminUser;
 use Qz\Admin\Permission\Models\AdminUserMenu;
 
@@ -18,6 +19,17 @@ class AdminMenuIdsByAdminUserIdGet extends Core
             ->select(['id'])
             ->find($this->getAdminUserId());
         if (empty($model)) {
+            return;
+        }
+        $model->load('administrator');
+        if (Arr::get($model, 'administrator.id')) {
+            $ids = AdminMenu::query()
+                ->where('customer_id', Arr::get($model, 'customer_id'))
+                ->pluck('id')
+                ->toArray();
+            if (!empty($ids)) {
+                $this->adminMenuIds = $ids;
+            }
             return;
         }
         $model->load([

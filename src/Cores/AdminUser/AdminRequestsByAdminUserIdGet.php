@@ -38,7 +38,7 @@ class AdminRequestsByAdminUserIdGet extends Core
         }
         $adminUserRequests = Arr::get($model, 'adminUserRequests');
         foreach ($adminUserRequests as $adminUserRequest) {
-            $adminRequestId = Arr::get($adminRoleRequest, 'admin_request_id');
+            $adminRequestId = Arr::get($adminUserRequest, 'admin_request_id');
             $this->adminRequests[$adminRequestId] = [
                 'admin_request_id' => $adminRequestId,
                 'types' => Arr::get($adminUserRequest, 'types'),

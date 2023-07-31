@@ -11,21 +11,27 @@ class AdminRolePageColumnSync extends Core
         if (empty($this->getAdminRoleId())) {
             return;
         }
-        $ids = $this->getAdminPageColumnIds();
-        if (is_null($ids)) {
+        if (is_null($this->getAdminPageColumnIds())) {
             return;
         }
         AdminRolePageColumn::query()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->whereNotIn('admin_page_column_id', $ids)
+            ->whereNotIn('admin_menu_id', $this->getAdminPageColumnIds())
             ->delete();
-        if (!empty($ids)) {
-            foreach ($ids as $id) {
-                AdminRolePageColumnAdd::init()
-                    ->setAdminRoleId($this->getAdminRoleId())
-                    ->setAdminPageColumnId($id)
-                    ->run();
-            }
+        AdminRolePageColumn::onlyTrashed()
+            ->where('admin_role_id', $this->getAdminRoleId())
+            ->whereIn('admin_menu_id', $this->getAdminPageColumnIds())
+            ->restore();
+        $oldIds = AdminRolePageColumn::query()
+            ->where('admin_role_id', $this->getAdminRoleId())
+            ->pluck('admin_menu_id')
+            ->toArray();
+        $addIds = array_diff($this->getAdminPageColumnIds(), $oldIds);
+        foreach ($addIds as $addId) {
+            AdminRolePageColumn::query()->create([
+                'admin_role_id' => $this->getAdminRoleId(),
+                'admin_menu_id' => $addId,
+            ]);
         }
     }
 

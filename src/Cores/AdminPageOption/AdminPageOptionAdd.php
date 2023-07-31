@@ -11,6 +11,9 @@ class AdminPageOptionAdd extends Core
 {
     protected function execute()
     {
+        if (empty($this->getAdminPageId()) || empty($this->getCode())) {
+            return;
+        }
         $model = AdminPageOption::withTrashed()
             ->updateOrCreate(Arr::whereNotNull([
                 'admin_page_id' => $this->getAdminPageId(),

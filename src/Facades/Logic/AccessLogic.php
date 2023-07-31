@@ -61,4 +61,64 @@ class AccessLogic
         $this->adminUserId = $adminUserId;
         return $this;
     }
+
+    protected $adminPageOptionId;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageOptionId()
+    {
+        return $this->adminPageOptionId;
+    }
+
+    /**
+     * @param mixed $adminPageOptionId
+     * @return AccessLogic
+     */
+    public function setAdminPageOptionId($adminPageOptionId)
+    {
+        $this->adminPageOptionId = $adminPageOptionId;
+        return $this;
+    }
+
+    protected $adminPageRequestId;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminPageRequestId()
+    {
+        return $this->adminPageRequestId;
+    }
+
+    /**
+     * @param mixed $adminPageRequestId
+     * @return AccessLogic
+     */
+    public function setAdminPageRequestId($adminPageRequestId)
+    {
+        $this->adminPageRequestId = $adminPageRequestId;
+        return $this;
+    }
+
+    protected $adminRequestId;
+
+    /**
+     * @return mixed
+     */
+    public function getAdminRequestId()
+    {
+        return $this->adminRequestId;
+    }
+
+    /**
+     * @param mixed $adminRequestId
+     * @return AccessLogic
+     */
+    public function setAdminRequestId($adminRequestId)
+    {
+        $this->adminRequestId = $adminRequestId;
+        return $this;
+    }
 }

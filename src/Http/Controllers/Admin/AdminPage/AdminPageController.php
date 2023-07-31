@@ -3,7 +3,6 @@
 namespace Qz\Admin\Permission\Http\Controllers\Admin\AdminPage;
 
 use Qz\Admin\Permission\Cores\AdminPage\AdminPageAdd;
-use Qz\Admin\Permission\Exceptions\MessageException;
 use Qz\Admin\Permission\Http\Controllers\Admin\AdminController;
 use Qz\Admin\Permission\Models\AdminMenu;
 use Illuminate\Http\JsonResponse;
@@ -13,7 +12,6 @@ class AdminPageController extends AdminController
 {
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function store()
     {
@@ -30,7 +28,7 @@ class AdminPageController extends AdminController
             ],
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $id = AdminPageAdd::init()
             ->setParam($this->getParam())

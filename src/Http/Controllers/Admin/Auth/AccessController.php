@@ -24,7 +24,6 @@ use Qz\Admin\Permission\Models\AdminUserPageOption;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Qz\Admin\Permission\Exceptions\MessageException;
 
 class AccessController extends AdminController
 {
@@ -54,13 +53,12 @@ class AccessController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function captcha()
     {
         $mobile = $this->getParam('phone');
         if (empty($mobile)) {
-            throw new MessageException('手机号不能为空');
+            return $this->error('手机号不能为空');
         }
         return $this->success();
     }
@@ -136,7 +134,6 @@ class AccessController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function option()
     {
@@ -160,7 +157,7 @@ class AccessController extends AdminController
             'option_name.required' => '页面操作标识不能为空',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $pageId = AdminPageIdGet::init()
             ->setCode($this->getParam('page_code'))
@@ -193,7 +190,6 @@ class AccessController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function options()
     {
@@ -208,7 +204,7 @@ class AccessController extends AdminController
             'page_code.exists' => '页面标识不存在',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         $pageId = AdminPageIdGet::init()
             ->setCode($this->getParam('page_code'))

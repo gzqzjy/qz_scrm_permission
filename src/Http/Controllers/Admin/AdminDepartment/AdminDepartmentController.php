@@ -32,10 +32,6 @@ class AdminDepartmentController extends AdminController
             });
         }
         $model = $this->filter($model);
-        $filter = [];
-        if ($this->getParam('filter')) {
-            $filter = $this->getChildFilter();
-        }
         $model = $model
             ->whereDoesntHave('parent', function (Builder $builder) {
                 if (!$this->isAdministrator()) {
@@ -109,7 +105,6 @@ class AdminDepartmentController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function store()
     {
@@ -123,7 +118,8 @@ class AdminDepartmentController extends AdminController
             'pid' => [
                 'sometimes',
                 'required',
-                Rule::exists('admin_departments', 'id')
+                Rule::exists(AdminDepartment::class, 'id')
+                    ->where('customer_id', $this->getCustomerId())
                     ->withoutTrashed(),
             ],
             'categoryIds' => ['array'],
@@ -136,7 +132,7 @@ class AdminDepartmentController extends AdminController
             'adminRoleIds.array' => '角色格式有误',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         if ($this->getParam('pid')) {
             $adminDepartment = AdminDepartment::query()
@@ -156,14 +152,14 @@ class AdminDepartmentController extends AdminController
 
     /**
      * @return JsonResponse
-     * @throws MessageException
      */
     public function update()
     {
         $validator = Validator::make($this->getParam(), [
             'id' => [
                 'required',
-                Rule::exists('admin_departments', 'id')
+                Rule::exists(AdminDepartment::class, 'id')
+                    ->where('customer_id', $this->getCustomerId())
                     ->withoutTrashed(),
             ],
             'name' => [
@@ -176,7 +172,8 @@ class AdminDepartmentController extends AdminController
             'pid' => [
                 'sometimes',
                 'required',
-                Rule::exists('admin_departments', 'id')
+                Rule::exists(AdminDepartment::class, 'id')
+                    ->where('customer_id', $this->getCustomerId())
                     ->withoutTrashed(),
             ],
             'categoryIds' => [
@@ -195,7 +192,7 @@ class AdminDepartmentController extends AdminController
             'adminRoleIds.array' => '角色格式有误',
         ]);
         if ($validator->fails()) {
-            throw new MessageException($validator->errors()->first());
+            return $this->error($validator->errors()->first());
         }
         if ($this->getParam('pid')) {
             $adminDepartment = AdminDepartment::query()

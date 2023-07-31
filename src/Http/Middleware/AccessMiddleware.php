@@ -25,32 +25,33 @@ class AccessMiddleware
     public function handle(Request $request, Closure $next)
     {
         $param = $request->all();
-        $pageId = AdminPageIdGet::init()
+        $adminPageId = AdminPageIdGet::init()
             ->setCode(Arr::get($param, 'pageCode'))
             ->run()
             ->getId();
-        $optionId = AdminPageOptionIdGet::init()
-            ->setAdminPageId($pageId)
+        Access::setAdminPageId($adminPageId);
+        $adminPageOptionId = AdminPageOptionIdGet::init()
+            ->setAdminPageId($adminPageId)
             ->setCode(Arr::get($param, 'optionCode'))
             ->run()
             ->getId();
-        if (empty($optionId) && Arr::get($param, 'optionCode') && Arr::get($param, 'optionName')) {
-            $optionId = AdminPageOptionAdd::init()
-                ->setAdminPageId($pageId)
+        if (empty($pageOptionId) && Arr::get($param, 'optionCode') && Arr::get($param, 'optionName')) {
+            $adminPageOptionId = AdminPageOptionAdd::init()
+                ->setAdminPageId($adminPageId)
                 ->setCode(Arr::get($param, 'optionCode'))
                 ->setName(Arr::get($param, 'optionName'))
                 ->setIsShow(Arr::get($param, 'optionCode') != 'list')
                 ->run()
                 ->getId();
         }
-        if ($optionId && Arr::get($param, 'requestCode') && Arr::get($param, 'requestName')) {
-            $requestId = AdminRequestAdd::init()
-                ->setAdminPageOptionId($optionId)
-                ->setCode(Arr::get($param, 'requestCode'))
-                ->setName(Arr::get($param, 'requestName'))
-                ->run()
-                ->getId();
-        }
+        Access::setAdminPageOptionId($adminPageOptionId);
+        $adminRequestId = AdminRequestAdd::init()
+            ->setAdminPageOptionId($adminPageOptionId)
+            ->setCode(Arr::get($param, 'requestCode'))
+            ->setName(Arr::get($param, 'requestName'))
+            ->run()
+            ->getId();
+        Access::setAdminRequestId($adminRequestId);
         $user = Auth::guard('admin')->user();
         if (empty($user) || !$user instanceof AdminUser) {
             return $next($request);
