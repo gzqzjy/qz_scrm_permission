@@ -16,21 +16,21 @@ class AdminRolePageColumnSync extends Core
         }
         AdminRolePageColumn::query()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->whereNotIn('admin_menu_id', $this->getAdminPageColumnIds())
+            ->whereNotIn('admin_page_column_id', $this->getAdminPageColumnIds())
             ->delete();
         AdminRolePageColumn::onlyTrashed()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->whereIn('admin_menu_id', $this->getAdminPageColumnIds())
+            ->whereIn('admin_page_column_id', $this->getAdminPageColumnIds())
             ->restore();
         $oldIds = AdminRolePageColumn::query()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->pluck('admin_menu_id')
+            ->pluck('admin_page_column_id')
             ->toArray();
         $addIds = array_diff($this->getAdminPageColumnIds(), $oldIds);
         foreach ($addIds as $addId) {
             AdminRolePageColumn::query()->create([
                 'admin_role_id' => $this->getAdminRoleId(),
-                'admin_menu_id' => $addId,
+                'admin_page_column_id' => $addId,
             ]);
         }
     }

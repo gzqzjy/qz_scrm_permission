@@ -16,21 +16,21 @@ class AdminRolePageOptionSync extends Core
         }
         AdminRolePageOption::query()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->whereNotIn('admin_menu_id', $this->getAdminPageOptionIds())
+            ->whereNotIn('admin_page_option_id', $this->getAdminPageOptionIds())
             ->delete();
         AdminRolePageOption::onlyTrashed()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->whereIn('admin_menu_id', $this->getAdminPageOptionIds())
+            ->whereIn('admin_page_option_id', $this->getAdminPageOptionIds())
             ->restore();
         $oldIds = AdminRolePageOption::query()
             ->where('admin_role_id', $this->getAdminRoleId())
-            ->pluck('admin_menu_id')
+            ->pluck('admin_page_option_id')
             ->toArray();
         $addIds = array_diff($this->getAdminPageOptionIds(), $oldIds);
         foreach ($addIds as $addId) {
             AdminRolePageOption::query()->create([
                 'admin_role_id' => $this->getAdminRoleId(),
-                'admin_menu_id' => $addId,
+                'admin_page_option_id' => $addId,
             ]);
         }
     }
