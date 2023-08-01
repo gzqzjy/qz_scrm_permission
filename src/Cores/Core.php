@@ -3,7 +3,6 @@
 namespace Qz\Admin\Permission\Cores;
 
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 abstract class Core
@@ -16,9 +15,7 @@ abstract class Core
     final public function run()
     {
         try {
-            DB::transaction(function () {
-                $this->execute();
-            }, 3);
+            $this->execute();
         } catch (Exception $exception) {
             Log::error(get_class($this), [
                 $exception->getMessage(),
