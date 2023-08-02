@@ -173,21 +173,15 @@ class AdminRoleController extends AdminController
     public function all()
     {
         $param = $this->getParam();
-        $model = AdminRoleGroup::query()
-            ->selectRaw('id,name as label')
-            ->whereHas('adminRoles', function (Builder $builder) use ($param) {
-                return Filter::init()
-                    ->setModel($builder)
-                    ->setParam(Arr::get($param, 'filter'))
-                    ->run()
-                    ->getModel();
-            })
+        $model = AdminRoleGroup::query();
+        $model = $this->filter($model);
+        $model = $model->selectRaw('id,name as label')
+            ->whereHas('adminRoles')
             ->get();
         $model->load([
             'adminRoles' => function (HasMany $hasMany) use ($param) {
                 $select = Arr::get($param, 'select', 'id as value, name as label');
                 $hasMany->selectRaw($select . ',admin_role_group_id');
-
                 return Filter::init()
                     ->setModel($hasMany)
                     ->setParam(Arr::get($param, 'filter'))
