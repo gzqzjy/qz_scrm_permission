@@ -18,7 +18,7 @@ class AdminUserDepartmentSync extends Core
         }
         AdminUserDepartment::query()
             ->where('admin_user_id', $this->getAdminUserId())
-            ->whereNotIn('admin_department_id', $this->getAdminUserDepartments())
+            ->whereNotIn('admin_department_id', Arr::pluck($this->getAdminUserDepartments(), 'admin_department_id'))
             ->delete();
         $adminUserDepartments = $this->getAdminUserDepartments();
         if (!empty($adminUserDepartments)) {
