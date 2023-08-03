@@ -34,13 +34,13 @@ class AdminPageColumnIdsByAdminUserIdGet extends Core
             }
             $adminRolePageColumns = Arr::get($adminRole, 'adminRolePageColumns');
             foreach ($adminRolePageColumns as $adminRolePageColumn) {
-                $this->adminPageColumnIds[] = Arr::get($adminRolePageColumn, 'admin_page_column_id');
+                $this->adminPageColumnIds[] = (int) Arr::get($adminRolePageColumn, 'admin_page_column_id');
             }
         }
         $adminUserPageColumns = Arr::get($model, 'adminUserPageColumns');
         foreach ($adminUserPageColumns as $adminUserPageColumn) {
             if (Arr::get($adminUserPageColumn, 'type') != AdminUserPageColumn::TYPE_DELETE) {
-                $this->adminPageColumnIds[] = Arr::get($adminUserPageColumn, 'admin_page_column_id');
+                $this->adminPageColumnIds[] = (int) Arr::get($adminUserPageColumn, 'admin_page_column_id');
             } else {
                 $this->adminPageColumnIds = Arr::where($this->adminPageColumnIds, function ($adminPageColumnId) use ($adminUserPageColumn) {
                     return $adminPageColumnId != Arr::get($adminUserPageColumn, 'admin_page_column_id');

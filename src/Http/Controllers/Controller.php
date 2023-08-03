@@ -22,7 +22,7 @@ class Controller extends BaseController
     public function __construct(Request $request = null)
     {
         if ($request) {
-            $request->offsetSet('page', max(1, (int)$request->input('current')));
+            $request->offsetSet('page', max(1, (int) $request->input('current')));
             $this->setParam($request->all());
         }
     }
@@ -86,11 +86,13 @@ class Controller extends BaseController
         $results = [];
         foreach ($array as $key => $value) {
             $camelKey = Str::camel($key);
-            if ($value instanceof Model) {
+            if ($value instanceof Model || $value instanceof Collection) {
                 $value = $value->toArray();
             }
             if (is_array($value) && !empty($value)) {
                 $results[$camelKey] = $this->camel($value);
+            } else if (is_numeric($value) && $value > 10000000000) {
+                $results[$camelKey] = (string) $value;
             } else {
                 $results[$camelKey] = $value;
             }
