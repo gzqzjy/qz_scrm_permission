@@ -58,12 +58,12 @@ class Controller extends BaseController
 
     final protected function response($data = [])
     {
-        return response()->json($data);
+        return response()->json($this->int2String($data));
     }
 
     final protected function json($data = [])
     {
-        return $this->response($this->camel($data));
+        return $this->response($this->int2String($this->camel($data)));
     }
 
     final protected function success($data = [], $message = 'success')
@@ -79,6 +79,23 @@ class Controller extends BaseController
     {
         $success = false;
         return $this->json(compact('success', 'data', 'message'));
+    }
+
+    final public function int2String($value)
+    {
+        if (is_array($value) && !empty($value)) {
+            $result = [];
+            foreach ($value as $k => $v) {
+                $result[$k] = $this->int2String($v);
+            }
+            return $result;
+        } else if (is_numeric($value) && $value > 10000000000) {
+            if (strpos($value, 'E') !== false) {
+                return sprintf('%.0f', $value);
+            }
+            return (string) $value;
+        }
+        return $value;
     }
 
     final protected function camel($array)
