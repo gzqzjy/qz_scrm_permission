@@ -86,7 +86,7 @@ class Controller extends BaseController
 
     final protected function toArray($value)
     {
-        if ($value instanceof Model || $value instanceof Collection || $value instanceof Pivot) {
+        if ($value instanceof Model || $value instanceof Collection || $value instanceof Pivot || $value instanceof \Illuminate\Support\Collection) {
             return $value->toArray();
         }
         return $value;
