@@ -5,7 +5,6 @@ namespace Qz\Admin\Permission\Http\Controllers\Admin;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Qz\Admin\Permission\Cores\AdminUser\AdminUserIdsByAdminUserIdGet;
 use Qz\Admin\Permission\Cores\AdminUser\CategoryIdsByAdminUserIdGet;
@@ -76,7 +75,7 @@ class AdminController extends Controller
 
     protected function getLoginAdminUserId()
     {
-        return Auth::guard('admin')->id();
+        return Access::getAdminUserId();
     }
 
     protected function getCustomerId()

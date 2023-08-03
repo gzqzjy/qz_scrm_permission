@@ -121,7 +121,7 @@ class AccessController extends AdminController
             ->whereIn('id', $pageColumnIds);
         if (!$this->isAdministrator()) {
             $adminPageColumnIds = AdminPageColumnIdsByAdminUserIdGet::init()
-                ->setAdminUserId($this->getAccessAdminUserIds())
+                ->setAdminUserId($this->getLoginAdminUserId())
                 ->run()
                 ->getAdminPageColumnIds();
             $model->whereIn('id',  (array) $adminPageColumnIds);
