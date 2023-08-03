@@ -11,16 +11,16 @@ class CategoryController extends AdminController
     public function all()
     {
         $model = Category::query();
-//        if (!$this->isAdministrator()) {
-//            $model->whereHas('adminCategoryDepartment', function (Builder $builder) {
-//                $builder->whereHas('adminDepartment', function (Builder $builder) {
-//                    $builder->whereHas('adminUserDepartments', function (Builder $builder) {
-//                        $builder->where('admin_user_id', $this->getLoginAdminUserId());
-//                    });
-//                });
-//            });
-//        }
-//        $model = $this->filter($model);
+        if (!$this->isAdministrator()) {
+            $model->whereHas('adminCategoryDepartment', function (Builder $builder) {
+                $builder->whereHas('adminDepartment', function (Builder $builder) {
+                    $builder->whereHas('adminUserDepartments', function (Builder $builder) {
+                        $builder->where('admin_user_id', $this->getLoginAdminUserId());
+                    });
+                });
+            });
+        }
+        $model = $this->filter($model);
         if ($this->getParam('select')) {
             $model->selectRaw($this->getParam('select'));
         }
@@ -31,7 +31,6 @@ class CategoryController extends AdminController
             });
         }
         $model = $model->get();
-        dd($model->toArray());
         return $this->response($model);
     }
 }
