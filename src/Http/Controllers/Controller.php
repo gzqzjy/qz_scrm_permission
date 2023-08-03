@@ -2,6 +2,7 @@
 
 namespace Qz\Admin\Permission\Http\Controllers;
 
+use App\Models\Pivot;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -58,12 +59,15 @@ class Controller extends BaseController
 
     final protected function response($data = [])
     {
-        return response()->json($this->int2String($data));
+        $data = $this->toArray($data);
+        $data = $this->int2String($data);
+        return response()->json($data);
     }
 
     final protected function json($data = [])
     {
-        return $this->response($this->int2String($this->camel($data)));
+        $data = $this->camel($data);
+        return $this->response($data);
     }
 
     final protected function success($data = [], $message = 'success')
@@ -81,7 +85,15 @@ class Controller extends BaseController
         return $this->json(compact('success', 'data', 'message'));
     }
 
-    final public function int2String($value)
+    final protected function toArray($value)
+    {
+        if ($value instanceof Model || $value instanceof Collection || $value instanceof Pivot) {
+            return $value->toArray();
+        }
+        return $value;
+    }
+
+    final protected function int2String($value)
     {
         if (is_array($value) && !empty($value)) {
             $result = [];
@@ -102,10 +114,8 @@ class Controller extends BaseController
     {
         $results = [];
         foreach ($array as $key => $value) {
+            $value = $this->toArray($value);
             $camelKey = Str::camel($key);
-            if ($value instanceof Model || $value instanceof Collection) {
-                $value = $value->toArray();
-            }
             if (is_array($value) && !empty($value)) {
                 $results[$camelKey] = $this->camel($value);
             } else if (is_numeric($value) && $value > 10000000000) {
