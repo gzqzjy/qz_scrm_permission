@@ -3,7 +3,6 @@
 namespace Qz\Admin\Permission\Cores\AdminUser;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
 use Qz\Admin\Permission\Cores\Core;
 use Qz\Admin\Permission\Models\AdminDepartment;
@@ -57,9 +56,9 @@ class AdminUserIdsByAdminUserIdGet extends Core
         if (!empty($adminRoleRequests) && count($adminRoleRequests)) {
             $types = [];
             foreach ($adminRoleRequests as $adminRoleRequest) {
-                $types = array_merge($types, Arr::get($adminUserRequest, 'types'));
+                $types = array_merge($types, Arr::get($adminRoleRequest, 'types'));
             }
-            $this->getIdsByTypes(Arr::get($adminUserRequest, 'types'));
+            $this->getIdsByTypes($types);
             return;
         }
         $adminUserRequest = AdminUserRequest::query()
@@ -74,6 +73,15 @@ class AdminUserIdsByAdminUserIdGet extends Core
         $adminUserRequest = AdminUserRequest::query()
             ->select(['type'])
             ->where('admin_user_id', 0)
+            ->where('admin_request_id', 0)
+            ->first();
+        if ($adminUserRequest) {
+            $this->getIdsByTypes(Arr::get($adminUserRequest, 'types'));
+            return;
+        }
+        $adminUserRequest = AdminRoleRequest::query()
+            ->select(['type'])
+            ->where('admin_role_id', 0)
             ->where('admin_request_id', 0)
             ->first();
         if ($adminUserRequest) {
