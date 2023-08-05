@@ -81,13 +81,13 @@ class AdminPermissionServiceProvider extends ServiceProvider
                     ->group(function () {
                         Route::post('login/account', 'AccessController@login');
                         Route::post('login/captcha', 'AccessController@captcha');
+                    });
+                Route::namespace('Auth\V1')
+                    ->group(function () {
                         Route::post('access/option', 'AccessController@option');
                         Route::post('access/options', 'AccessController@options');
                         Route::post('access/columns', 'AccessController@columns');
                         Route::post('menu', 'AccessController@menu');
-                    });
-                Route::namespace('Auth\V1')
-                    ->group(function () {
                         Route::post('user', 'AccessController@user');
                         Route::post('logout', 'AccessController@logout');
                     });
