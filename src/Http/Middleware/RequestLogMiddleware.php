@@ -21,6 +21,9 @@ class RequestLogMiddleware
     {
         $requestId = now()->format('YmdHis') . Str::random(18);
         RequestId::set($requestId);
+        Log::withContext([
+            'request-id' => $requestId
+        ]);
         $this->setRequestTime(now());
         $response = $next($request);
         $response->header('requestId', RequestId::get());
